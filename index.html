@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>IT‑Hardware</title>
+  <meta name="description" content="Übersichtsseite zu IT‑Hardware‑Tools & Spielen" />
+  <!-- Hinweis: Diese Datei als /ithw/index.html in deinem GitHub Pages Repo ablegen. -->
+  <style>
+    :root{
+      /* Farben & Tokens – angelehnt an dein Memory v2.5 */
+      --bg:#0f1115; --card:#171a21; --card-front:#1f2430; --accent:#13c2c2; --good:#19be6b; --bad:#ff4d4f; --text:#e8ecf1; --muted:#9aa4b2; --grid-gap:14px; --page-max:min(90vw, 1800px); --card-size:clamp(200px, 18vw, 320px);
+    }
+    *{box-sizing:border-box}
+    html,body{min-height:100%}
+    html{background:
+      radial-gradient(ellipse at 60% 0%, #22334a 0%, #18202b 40%, transparent 80%),
+      linear-gradient(180deg, #0b0d12 0%, #18202b 30%, #17202d 60%, #1b2230 85%, #181c22 100%);
+      /* sanftes Scrollen zu Ankern */
+      scroll-behavior:smooth;
+      /* optional: festpinnen, damit beim Overscroll nichts "wegscrollt" */
+      background-attachment: fixed, fixed;
+    }
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(ellipse at 60% 0%, #22334a 0%, #18202b 40%, transparent 80%),
+        linear-gradient(180deg, #0b0d12 0%, #18202b 30%, #17202d 60%, #1b2230 85%, #181c22 100%);
+    }
+
+    /* Header: sticky & immer sichtbar */
+    header{
+      position: sticky; /* bleibt am oberen Fensterrand kleben */
+      top: 0;
+      z-index: 1000; /* über Karten/Content */
+      border-bottom:1px solid #1b2230;
+      box-shadow: 0 6px 24px -8px #0b0d12cc;
+      /* default: wie ursprünglich – komplett transparent */
+      background: none;
+      background-color: transparent;
+      /* sanfter Übergang, wenn sich der Zustand ändert */
+      transition: background .18s ease, background-color .18s ease, box-shadow .18s ease, border-color .18s ease, backdrop-filter .18s ease, -webkit-backdrop-filter .18s ease;
+    }
+    /* Wenn der Header nicht ganz oben ist (sticky aktiv), sorge für 50% Deckkraft */
+    header.is-scrolled{
+  /* Kein Abdunkeln/Beleuchten mehr – nur Glas (Blur) */
+  background: rgba(16,18,24,.01); /* quasi unsichtbar, nötig damit der Blur überall greift */
+  border-bottom-color: #1b2230; /* ursprüngliche Linie beibehalten */
+  backdrop-filter: saturate(1.05) blur(6px);
+  -webkit-backdrop-filter: saturate(1.05) blur(6px);
+}
+    .header-inner{ max-width:var(--page-max); margin:0 auto; padding:14px 16px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+    h1{ margin:0; font-size:clamp(24px,3.2vw,34px); font-weight:900; line-height:1.1; letter-spacing:.2px; color:var(--text); text-shadow:0 1px 0 rgba(11,13,18,.6); white-space:nowrap; }
+    .brand-title{ display:flex; align-items:baseline; gap:10px; position:relative; padding-bottom:0; }
+    .brand-title::after{ content:none; }
+    .brand-title .accent-dot{ display:none; }
+    .sub{ color:var(--muted); font-size:13px }
+
+    /* Toolbar */
+    .toolbar{ display:flex; gap:10px; align-items:center; color:var(--muted); margin-left:auto; flex:1 1 auto; justify-content:flex-end; flex-wrap:wrap; }
+    .toolbar a{
+      color:var(--muted);
+      text-decoration:none;
+      border:2px solid #3a4a62;
+      padding:8px 10px;
+      border-radius:10px;
+      /* halbtransparenter Hintergrund, Text bleibt 100% deckend */
+      background: rgba(23, 30, 42, .55);
+    }
+    .toolbar a:hover{
+      color:var(--text);
+      border-color:#5b7a9a;
+      background: rgba(23, 30, 42, .75);
+      box-shadow:0 0 0 2px rgba(19,194,194,.18);
+    }
+    .toolbar a:focus-visible{ outline:2px solid transparent; border-color:#13c2c2; box-shadow:0 0 0 3px rgba(19,194,194,.35); background: rgba(23, 30, 42, .85); }
+
+    main{ max-width:var(--page-max); margin:18px auto 40px; padding:0 16px }
+
+    /* Grid */
+    .apps{
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(var(--card-size), var(--card-size)));
+      gap:var(--grid-gap);
+      justify-content:center;
+      align-items:center;
+      max-width:var(--page-max);
+      margin:0 auto;
+    }
+@media (min-width: 1600px) {
+  :root { --page-max: 1400px; --card-size: 240px; }
+}
+@media (min-width: 1920px) {
+  :root { --page-max: 1500px; --card-size: 260px; }
+}
+
+
+    /* Cards */
+    .app-card{ position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; 
+      background:linear-gradient(180deg,#202636,#1a1f2c); border:1px solid #243246; border-radius:16px; text-decoration:none; color:var(--text);
+      box-shadow:0 10px 24px rgba(0,0,0,.35), 0 1px 0 rgba(255,255,255,.04) inset; 
+      aspect-ratio:1/1; padding:18px; transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+      overflow:hidden
+    }
+    .app-card::after{ content:""; position:absolute; inset:0; border-radius:16px; pointer-events:none; box-shadow:0 0 0 0 rgba(19,194,194,.0); transition:box-shadow .18s ease }
+    .app-card:hover{ transform:translateY(-2px); border-color:#2a3a51; box-shadow:0 16px 28px rgba(0,0,0,.42) }
+    .app-card:hover::after{ box-shadow:0 0 0 3px rgba(19,194,194,.22), 0 0 18px rgba(19,194,194,.28) }
+    .app-card:focus-visible{ outline:2px solid transparent; box-shadow:0 0 0 3px rgba(19,194,194,.35) }
+
+    /* Fix: Links nicht blau/lila und ohne Unterstreichung in allen Zuständen */
+    a.app-card, a.app-card:link, a.app-card:visited{ color:var(--text); text-decoration:none }
+    a.app-card:hover, a.app-card:active{ color:var(--text); text-decoration:none }
+    .app-card .label, .app-card .meta, .app-card .icon{ text-decoration:none }
+
+    /* Quiz-Pattern-Hintergrund: transparent mit geneigten '?' in Anthrazit */
+    .app-card[data-kind="quiz"]{
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cg opacity='0.60' transform='rotate(-34 16 16)'%3E%3Ctext x='8' y='22' font-family='Inter,Segoe UI,Arial' font-weight='800' font-size='24' fill='%23282e37'%3E%3F%3C/text%3E%3C/g%3E%3C/svg%3E"),
+        linear-gradient(180deg,#202636,#1a1f2c);
+      background-size: 36px 36px, auto;
+      background-position: 0 0, 0 0;
+    }
+
+    .icon{ font-size:clamp(36px,6vw,54px); filter:drop-shadow(0 2px 0 rgba(0,0,0,.25)) }
+    .label{ font-weight:700; text-align:center; line-height:1.2; font-size:clamp(14px,2.3vw,16px) }
+    .meta{ color:var(--muted); font-size:12px; text-align:center }
+
+    /* Disabled card (Platzhalter) */
+    .app-card.is-disabled{ cursor:not-allowed; opacity:.6; filter:grayscale(8%); }
+
+    /* Grid separator for groups like Quizzes */
+    .grid-sep{ grid-column:1 / -1; display:flex; align-items:center; gap:10px; margin:14px 2px 2px; }
+    .grid-sep .line{ 
+      height:1px; 
+      flex:1; 
+      background:linear-gradient(90deg, transparent, #2a3a51, transparent);
+    }
+    .grid-sep .line.line-quiz {
+      background:linear-gradient(90deg, transparent, #3eeeee 60%, transparent); /* Sichtbarer, heller */
+      opacity:0.85; /* Weniger transparent */
+      box-shadow:0 0 6px #13c2c233; /* Leichter Glow für bessere Sichtbarkeit */
+    }
+    .grid-sep .title{ font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.12em; }
+
+    /* Anker-Ziel nicht hinter Sticky-Header verschwinden lassen */
+    .apps .grid-sep{ scroll-margin-top: 96px; }
+
+    footer{ position:relative; margin:36px 0 0; background:linear-gradient(180deg, rgba(19,194,194,.05), rgba(19,194,194,0) 26px); }
+    footer::before{ content:""; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg, rgba(19,194,194,0), rgba(19,194,194,.35), rgba(19,194,194,0)); }
+    footer .inner{ max-width:var(--page-max); margin:0 auto; padding:14px 16px 28px; color:var(--muted); font-size:12px; display:flex; align-items:center; justify-content:space-between; gap:16px; }
+    footer .brand{ display:flex; align-items:center; gap:10px; font-weight:600; color:var(--text); }
+    footer .brand .accent{ width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 10px rgba(19,194,194,.6); }
+    footer a.pill{ color:var(--text); text-decoration:none; border:1px solid #263243; padding:6px 10px; border-radius:999px; opacity:.9; }
+    footer a.pill:hover{ opacity:1; border-color:#2e3b4f }.apps{ position:relative; z-index:0 }
+    .grid-sep, .app-card{ position:relative; z-index:1 }
+    .row-bg{ grid-column:1 / -1; position:relative; height:0 }
+    
+      /* Einheitlicher Abstand vor allen Sektionen */
+    .apps .grid-sep{ margin:14px 2px 2px; }
+    .apps .grid-sep:first-of-type{ margin-top:14px; }
+      /* Sicherstellen: "Quiz"-Separator hat exakt denselben Abstand wie die anderen */
+    
+    .apps .row-bg.quiz-bg{ display:none !important; }
+      /* H1-Zusatz: 40% transparente Klammer-Ergänzung */
+    h1 .subtitle{ opacity:.45; font-weight:700; font-size:clamp(14px, 2.3vw, 16px); line-height:1; letter-spacing:.01em; margin-left:.5ch; white-space:nowrap; display:inline-block; }
+      /* Nummern-Badges für Lösungs-Karten */
+    .badge{ width:clamp(36px,6vw,54px); height:clamp(36px,6vw,54px); border-radius:999px; display:grid; place-items:center; 
+      font-weight:800; font-size:clamp(16px,2vw,22px); color:#fff; letter-spacing:.02em;
+      border:1px solid rgba(255,255,255,.08); box-shadow:0 6px 14px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06);
+      background:radial-gradient(100% 100% at 30% 30%, var(--b1) 0%, var(--b2) 100%);
+    }
+    .badge--q1{ --b1:#66b3ff; --b2:#2b6bd6; }
+    .badge--q2{ --b1:#ffd27a; --b2:#d68a2b; }
+    .badge--q3{ --b1:#7be495; --b2:#2e8f5a; }
+      /* SVG-Quiz-Icons */
+    .icon .quiz-icon{ width:clamp(36px,6vw,54px); height:auto; }
+    .quiz-icon text{ font-family:inherit; paint-order:stroke fill; stroke:rgba(0,0,0,.25); stroke-width:1.2px; }
+      /* Lösung-Pattern-Hintergrund: transparent mit geneigten ✓ in Anthrazit */
+    .app-card[data-kind="solution"]{
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cg opacity='0.60' transform='rotate(-12 16 16)'%3E%3Ctext x='8' y='22' font-family='Inter,Segoe UI,Arial' font-weight='800' font-size='22' fill='%23282e37'%3E%E2%9C%94%3C/text%3E%3C/g%3E%3C/svg%3E"),
+        linear-gradient(180deg,#202636,#1a1f2c);
+      background-size: 36px 36px, auto;
+      background-position: 0 0, 0 0;
+    }
+      /* Grid-Zeilenumbruch (z. B. nach 3. Quiz-Kachel) */
+    .grid-break{ grid-column:1 / -1; height:0; }
+      /* Body-Hintergrund transparent lassen – Hintergrund liegt auf <html> */
+    body{ background: none; background-color: transparent; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="brand-title">
+        <span class="accent-dot" aria-hidden="true"></span>
+        <!-- Untertitel entfernt -->
+        <h1>IT‑Hardware</h1>
+      </div>
+      <!-- Sprung-Buttons -->
+      <nav class="toolbar" role="navigation" aria-label="Zum Inhalt springen">
+        <a href="#interaktiv">Interaktiv</a>
+        <a href="#praesentation">Präsentation</a>
+        <a href="#quiz">Quiz</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="apps" aria-label="Apps & Spiele">
+
+      <div id="interaktiv" class="grid-sep" role="separator" aria-label="Interaktiv">
+        <span class="line"></span><span class="title">Interaktiv</span><span class="line"></span>
+      </div>
+
+      <!-- IT‑Hardware Memory -->
+      <a class="app-card" href="https://modebrecht.github.io/ithwm/" target="_blank" rel="noopener noreferrer"
+         aria-label="Memory – IT‑Hardware öffnen (neuer Tab)">
+        <div class="icon">🧩</div>
+        <div class="label">Memory – IT‑Hardware</div>
+        <div class="meta">Memory mit Hardware Komponenten</div>
+      </a>
+      
+      <div class="app-card is-disabled" role="button" aria-disabled="true" title="Bald verfügbar">
+        <div class="icon">🧠</div>
+        <div class="label">PC‑Troubleshooter</div>
+        <div class="meta">Szenarien · Fehlersuche · Entscheidungen</div>
+      </div>
+
+      <div class="app-card is-disabled" role="button" aria-disabled="true" title="Bald verfügbar">
+        <div class="icon">🔌</div>
+        <div class="label">Anschlüsse & Kabel Memory</div>
+        <div class="meta">Signalarten · Steckertypen</div>
+      </div>
+
+      <div id="praesentation" class="grid-sep" role="separator" aria-label="Präsentation">
+        <span class="line"></span><span class="title">Präsentation</span><span class="line"></span>
+      </div>
+
+      <!-- Präsentation – IT‑Hardware -->
+      <a class="app-card" href="https://modebrecht.github.io/ithw/praesentation/" target="_blank" rel="noopener noreferrer"
+         aria-label="Präsentation – IT‑Hardware öffnen (neuer Tab)">
+        <div class="icon">🖥️</div>
+        <div class="label">Präsentation Hardware Komponenten</div>
+        <div class="meta">Folien & Überblick</div>
+      </a>
+
+      <!-- Präsentation 2 -->
+      <a class="app-card" href="https://modebrecht.github.io/ithw/more1/" target="_blank" rel="noopener noreferrer"
+         aria-label="Präsentation 2 – IT‑Hardware öffnen (neuer Tab)">
+        <div class="icon">💿</div>
+        <div class="label">Präsentation Speichermedien</div>
+        <div class="meta">Variante leer</div>
+      </a>
+
+      <!-- Präsentation 2 -->
+      <a class="app-card" href="https://modebrecht.github.io/ithw/more2/" target="_blank" rel="noopener noreferrer"
+         aria-label="Präsentation 2 – IT‑Hardware öffnen (neuer Tab)">
+        <div class="icon">📀</div>
+        <div class="label">Präsentation Speichermedien</div>
+        <div class="meta">Variante befüllt</div>
+      </a>
+
+      
+      <div id="quiz" class="grid-sep" role="separator" aria-label="Quiz">
+        <span class="line"></span><span class="title">Quiz</span><span class="line"></span>
+      </div>
+      <div class="row-bg quiz-bg" aria-hidden="true"></div>
+
+      <!-- Quiz 1 – Hardware-Grundlagen -->
+      <a class="app-card" data-kind="quiz" href="https://modebrecht.github.io/ithw/quiz1/" target="_blank" rel="noopener noreferrer"
+         aria-label="Quiz 1 – Hardware-Grundlagen öffnen (neuer Tab)">
+        <div class="icon">
+  <svg class="quiz-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+    <title>Quiz 1</title>
+    <defs>
+      <linearGradient id="qi-q1" x1="30%" y1="30%" x2="100%" y2="100%"> 
+        <stop offset="0%" stop-color="#66b3ff"/>
+        <stop offset="100%" stop-color="#2b6bd6"/>
+      </linearGradient>
+    </defs>
+    <circle cx="32" cy="32" r="28" fill="url(#qi-q1)" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+    <text x="32" y="36" text-anchor="middle" dominant-baseline="middle" font-size="36" font-weight="900" fill="#fff">1</text>
+  </svg>
+</div>
+        <div class="label">Quiz 1 – Hardware‑Grundlagen</div>
+        <div class="meta">Fragenmix</div>
+      </a>
+
+      <!-- Quiz 2 – Speicher & Datensicherung -->
+      <a class="app-card" data-kind="quiz" href="https://modebrecht.github.io/ithw/quiz2/" target="_blank" rel="noopener noreferrer"
+         aria-label="Quiz 2 – Speicher & Datensicherung öffnen (neuer Tab)">
+        <div class="icon">
+  <svg class="quiz-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+    <title>Quiz 2</title>
+    <defs>
+      <linearGradient id="qi-q2" x1="30%" y1="30%" x2="100%" y2="100%"> 
+        <stop offset="0%" stop-color="#ffd27a"/>
+        <stop offset="100%" stop-color="#d68a2b"/>
+      </linearGradient>
+    </defs>
+    <circle cx="32" cy="32" r="28" fill="url(#qi-q2)" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+    <text x="32" y="36" text-anchor="middle" dominant-baseline="middle" font-size="36" font-weight="900" fill="#fff">2</text>
+  </svg>
+</div>
+        <div class="label">Quiz 2 – Speicher & Datensicherung</div>
+        <div class="meta">Fragenmix</div>
+      </a>
+
+      <!-- Quiz 3 – Netzteile & Kompatibilität -->
+      <a class="app-card" data-kind="quiz" href="https://modebrecht.github.io/ithw/quiz3/" target="_blank" rel="noopener noreferrer"
+         aria-label="Quiz 3 – Netzteile & Kompatibilität öffnen (neuer Tab)">
+        <div class="icon">
+  <svg class="quiz-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+    <title>Quiz 3</title>
+    <defs>
+      <linearGradient id="qi-q3" x1="30%" y1="30%" x2="100%" y2="100%"> 
+        <stop offset="0%" stop-color="#7be495"/>
+        <stop offset="100%" stop-color="#2e8f5a"/>
+      </linearGradient>
+    </defs>
+    <circle cx="32" cy="32" r="28" fill="url(#qi-q3)" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+    <text x="32" y="36" text-anchor="middle" dominant-baseline="middle" font-size="36" font-weight="900" fill="#fff">3</text>
+  </svg>
+</div>
+        <div class="label">Quiz 3 – Netzteile & Kompatibilität</div>
+        <div class="meta">Fragenmix</div>
+      </a>
+
+      <!-- erzwungener Zeilenumbruch nach 3. Quiz-Kachel -->
+      <div class="grid-break quiz-break" aria-hidden="true"></div>
+
+      <!-- Lösung zu Quiz 1 -->
+      <div class="app-card is-disabled" data-kind="solution" role="button" aria-disabled="true" title="Lösung zu Quiz 1">
+        <div class="icon">
+  <svg class="quiz-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+    <title>Lösung Quiz 1</title>
+    <defs>
+      <linearGradient id="qi-g1" x1="30%" y1="30%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#66b3ff"/>
+        <stop offset="100%" stop-color="#2b6bd6"/>
+      </linearGradient>
+    </defs>
+    <circle cx="32" cy="32" r="28" fill="url(#qi-g1)" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+    <text x="32" y="34" text-anchor="middle" dominant-baseline="middle" font-size="28" font-weight="800" fill="#fff">1</text>
+  </svg>
+</div>
+        <div class="label">Lösung</div>
+        <div class="meta">Quiz 1</div>
+      </div>
+
+      <!-- Lösung zu Quiz 2 -->
+      <div class="app-card is-disabled" data-kind="solution" role="button" aria-disabled="true" title="Lösung zu Quiz 2">
+        <div class="icon">
+  <svg class="quiz-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+    <title>Lösung Quiz 2</title>
+    <defs>
+      <linearGradient id="qi-g2" x1="30%" y1="30%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#ffd27a"/>
+        <stop offset="100%" stop-color="#d68a2b"/>
+      </linearGradient>
+    </defs>
+    <circle cx="32" cy="32" r="28" fill="url(#qi-g2)" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+    <text x="32" y="34" text-anchor="middle" dominant-baseline="middle" font-size="28" font-weight="800" fill="#fff">2</text>
+  </svg>
+</div>
+        <div class="label">Lösung</div>
+        <div class="meta">Quiz 2</div>
+      </div>
+
+      <!-- Lösung zu Quiz 3 -->
+      <div class="app-card is-disabled" data-kind="solution" role="button" aria-disabled="true" title="Lösung zu Quiz 3">
+        <div class="icon">
+  <svg class="quiz-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+    <title>Lösung Quiz 3</title>
+    <defs>
+      <linearGradient id="qi-g3" x1="30%" y1="30%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#7be495"/>
+        <stop offset="100%" stop-color="#2e8f5a"/>
+      </linearGradient>
+    </defs>
+    <circle cx="32" cy="32" r="28" fill="url(#qi-g3)" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+    <text x="32" y="34" text-anchor="middle" dominant-baseline="middle" font-size="28" font-weight="800" fill="#fff">3</text>
+  </svg>
+</div>
+        <div class="label">Lösung</div>
+        <div class="meta">Quiz 3</div>
+      </div>
+    </section></main>
+  <footer>
+    <div class="inner">
+      <div class="brand"><span class="accent" aria-hidden="true"></span>Gemeinsame Schule Unterleberberg</div>
+      <a class="pill" href="https://www.gsu-so.ch/" target="_blank" rel="noopener noreferrer">GSU Website ↗</a>
+    </div>
+  </footer>
+  <script>
+    (function(){
+      function alignTitle(){
+        var apps = document.querySelector('.apps');
+        var headerInner = document.querySelector('.header-inner');
+        var footerInner = document.querySelector('footer .inner');
+        var brandTitle = document.querySelector('.brand-title');
+        if(!apps || !headerInner || !brandTitle) return;
+
+        var cards = Array.from(apps.querySelectorAll('.app-card'));
+        if(!cards.length) return;
+
+        var headerRect = headerInner.getBoundingClientRect();
+        var minLeft = Infinity, maxRight = -Infinity;
+        for(var i=0;i<cards.length;i++){
+          var r = cards[i].getBoundingClientRect();
+          if(!r.width || !r.height) continue;
+          if(r.left < minLeft) minLeft = r.left;
+          if(r.right > maxRight) maxRight = r.right;
+        }
+        if(!isFinite(minLeft) || !isFinite(maxRight)) return;
+
+        var basePad = 16; // Mindestabstand links & rechts
+        var padStart = Math.max(basePad, Math.round(minLeft - headerRect.left));
+        var padEnd   = Math.max(basePad, Math.round(headerRect.right - maxRight));
+
+        brandTitle.style.marginInlineStart = '0px';
+        headerInner.style.paddingInlineStart = padStart + 'px';
+        headerInner.style.paddingInlineEnd   = padEnd + 'px';
+        if(footerInner){
+          footerInner.style.paddingInlineStart = padStart + 'px';
+          footerInner.style.paddingInlineEnd   = padEnd + 'px';
+        }
+      }
+      window.addEventListener('load', alignTitle);
+      window.addEventListener('resize', alignTitle);
+      // Falls Fonts/Layout nachträglich springen
+      setTimeout(alignTitle, 0);
+      setTimeout(alignTitle, 150);
+      setTimeout(alignTitle, 400);
+    })();
+  </script>
+<script>
+  (function(){
+    function updateHeaderBg(){
+      var hdr = document.querySelector('header');
+      if(!hdr) return;
+      if(window.scrollY > 4){ hdr.classList.add('is-scrolled'); }
+      else { hdr.classList.remove('is-scrolled'); }
+    }
+    window.addEventListener('scroll', updateHeaderBg, { passive: true });
+    window.addEventListener('load', updateHeaderBg);
+  })();
+</script>
+</body>
+</html>
