@@ -306,43 +306,13 @@
     const modalBodyEl = document.getElementById('messageBody');
     const modalOkEl = document.getElementById('messageOk');
     let celebrationEl = null;
-
-    function renderMiniScene({pcOn, monitorOn, signalOk}){
-      const classes = ['scene','mini'];
-      if(pcOn) classes.push('power-on');
-      if(monitorOn && (!pcOn || !signalOk)) classes.push('nosig');
-      if(pcOn && monitorOn && signalOk) classes.push('login');
-      return `
-        <figure class="${classes.join(' ')}" role="img" aria-label="Aktionsergebnis">
-          <svg viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <rect x="20" y="194" width="760" height="8" rx="4" class="mutfill"/>
-            <rect x="20" y="194" width="760" height="8" rx="4" class="mut" fill="none"/>
-            <rect x="70" y="85" width="110" height="110" rx="8" class="mut" fill="none"/>
-            <circle cx="100" cy="105" r="6" class="mut led" fill="none"/>
-            <rect x="240" y="12" width="270" height="160" rx="6" class="mut" fill="none"/>
-            <rect x="240" y="12" width="270" height="160" rx="6" class="mutfill screen"/>
-            <rect x="370" y="173" width="10" height="19" class="mut" fill="none"/>
-            <rect x="335" y="190" width="80" height="6" rx="3" class="mut" fill="none"/>
-            <g class="no-signal" aria-hidden="true">
-              <rect x="240" y="12" width="270" height="160" rx="6" fill="none"/>
-              <text x="375" y="92" font-size="24" text-anchor="middle" style="fill:rgba(229,231,235,.88);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;letter-spacing:2px">NO SIGNAL</text>
-            </g>
-            <g class="login" aria-hidden="true">
-              <rect x="290" y="47" width="170" height="90" rx="8" class="mut" fill="none"/>
-              <text x="375" y="80" font-size="32" text-anchor="middle" style="fill:rgba(229,231,235,.95);font-weight:700">Login</text>
-              <rect x="310" y="96" width="130" height="12" rx="6" class="mut" fill="none"/>
-              <rect x="310" y="118" width="130" height="12" rx="6" class="mut" fill="none"/>
-            </g>
-          </svg>
-        </figure>`;
-    }
-
-    function openModal({title='Hinweis', html='', scene=null}){
+    function openModal({title='Hinweis', html='', okLabel='OK'}){
       if(!modalEl) return;
       modalOpen = true;
       actionsEl.style.display = 'none';
       modalTitleEl.textContent = title;
-      modalBodyEl.innerHTML = html + (scene ? renderMiniScene(scene) : '');
+      modalBodyEl.innerHTML = html;
+      if(modalOkEl) modalOkEl.textContent = okLabel;
       modalEl.classList.add('open');
       modalEl.setAttribute('aria-hidden','false');
       lastFocusEl = document.activeElement;
@@ -391,6 +361,31 @@
       stepLogEl.appendChild(li);
     }
 
+    function runAction(a){
+      if(!a) return;
+      state.prevActionId = state.lastActionId;
+      state.lastActionId = a.id;
+      a.effect.call(a);
+      const solvedCombo = !state.solved &&
+        ((state.prevActionId === 'monitor' && state.lastActionId === 'power-cable') ||
+         (state.prevActionId === 'power-cable' && state.lastActionId === 'monitor')) &&
+        state.pcOn && state.monitorOn && state.signalOk;
+      if(solvedCombo){
+        finish(true, 'Stromversorgung und Monitor aktiviert.');
+        openModal({
+          title: 'Aufgabe abgeschlossen',
+          html: '<p><b>Aufgabe geschafft.</b> PC und Monitor sind bereit.</p>',
+          okLabel: 'Nächste Aufgabe'
+        });
+      } else if (!modalOpen){
+        const html = (feedbackEl && feedbackEl.innerHTML) ? feedbackEl.innerHTML : 'Aktion ausgeführt.';
+        openModal({
+          title: a.label,
+          html
+        });
+      }
+    }
+
     function updateScene(){
       const scene = document.querySelector('.scene');
       if(!scene) return;
@@ -411,18 +406,7 @@
           btn.dataset.key = a.hotkey;
           btn.innerHTML = `<span class="label">${a.label}</span>`;
           btn.setAttribute('aria-label', a.label + ` Taste ${a.hotkey}`);
-          btn.addEventListener('click', () => {
-            const before = { pcOn: state.pcOn, monitorOn: state.monitorOn, signalOk: state.signalOk };
-            a.effect.call(a);
-            if (!modalOpen) {
-              const html = (feedbackEl && feedbackEl.innerHTML) ? feedbackEl.innerHTML : 'Aktion ausgeführt.';
-              openModal({
-                title: a.label,
-                html,
-                scene: { pcOn: state.pcOn, monitorOn: state.monitorOn, signalOk: state.signalOk }
-              });
-            }
-          });
+          btn.addEventListener('click', () => runAction(a));
           actionsEl.appendChild(btn);
         });
     }
@@ -564,8 +548,7 @@ function finish(success, detail){
               say('<span class="warn">Monitor ausgeschaltet.</span> Schalte ihn wieder ein, wenn du bereit bist, und prüfe <b>Quelle/Kabel</b>.');
               openModal({
                 title: 'Monitor ausgeschaltet',
-                html: '<p>Du schaltest den Monitor aus. Das Display bleibt schwarz.</p><p>Schalte ihn wieder ein, um die Anzeige zu prüfen.</p>',
-                scene: { pcOn: state.pcOn, monitorOn: false, signalOk: state.signalOk }
+                html: '<p>Du schaltest den Monitor aus. Das Display bleibt schwarz.</p><p>Schalte ihn wieder ein, um die Anzeige zu prüfen.</p>'
               });
             } else {
               state.monitorOn = true; updateScene();
@@ -575,16 +558,13 @@ function finish(success, detail){
                 say('<span class="good">Monitor eingeschaltet.</span> <b>Login</b> ist sichtbar.');
                 openModal({
                   title: 'Bild vorhanden',
-                  html: '<p>Der Monitor ist an und zeigt <b>Login</b>.</p><p>Gut gemacht!</p>',
-                  scene: { pcOn: true, monitorOn: true, signalOk: true }
+                  html: '<p>Der Monitor ist an und zeigt <b>Login</b>.</p><p>Gut gemacht!</p>'
                 });
-                finish(true, 'Anzeige bereit.');
               } else {
                 say('<span class="warn">Monitor ist an.</span> Anzeige zeigt <b>NO SIGNAL</b>. Prüfe <b>Quelle (HDMI/DP)</b> oder <b>Monitorkabel</b>.');
                 openModal({
                   title: 'Monitor eingeschaltet',
-                  html: '<p>Der Monitor ist an.</p><p>Es wird <b>NO SIGNAL</b> angezeigt – prüfe <b>Quelle/Kabel</b>.</p>',
-                  scene: { pcOn: state.pcOn, monitorOn: true, signalOk: state.signalOk }
+                  html: '<p>Der Monitor ist an.</p><p>Es wird <b>NO SIGNAL</b> angezeigt – prüfe <b>Quelle/Kabel</b>.</p>'
                 });
               }
             }
@@ -636,10 +616,9 @@ function finish(success, detail){
             const html = wasOn
               ? '<p>Du prüfst die Stromkette – sie war bereits <b>in Ordnung</b>. Der PC hat Strom.</p><p>Falls noch kein Bild zu sehen ist: <b>Monitor einschalten</b> oder <b>Signal prüfen</b>.</p>'
               : '<p>Du verfolgst das Netzkabel bis zur Steckdose. Am Netzteil war das Kabel <b>locker</b> – du steckst es fest ein. Die PC‑LED leuchtet jetzt <b>grün</b>.</p><p>Der Monitor bleibt noch schwarz. Überlege: <b>Monitor einschalten</b> oder <b>Signal prüfen</b>?</p>';
-            openModal({ title: 'Stromkette geprüft', html, scene: { pcOn: true, monitorOn: state.monitorOn, signalOk: state.signalOk } });
+            openModal({ title: 'Stromkette geprüft', html });
             if(state.monitorOn && state.signalOk){
               say('<span class="good">Stromversorgung hergestellt.</span> <b>Login</b> ist sichtbar.');
-              finish(true, 'Stromversorgung und Anzeige bereit.');
             } else {
               say('<span class="good">Stromversorgung hergestellt.</span> Prüfe nun die <b>Anzeige/Signal</b> (Monitor einschalten / Quelle wählen).');
             }
@@ -844,17 +823,7 @@ function finish(success, detail){
       if(state.solved && k==='r'){ reset(); return; }
       const action = state.actions.find(a => a.hotkey === e.key);
       if(action){
-        state.prevActionId = state.lastActionId;
-        state.lastActionId = action.id;
-        action.effect();
-        if (!modalOpen) {
-          const html = (feedbackEl && feedbackEl.innerHTML) ? feedbackEl.innerHTML : 'Aktion ausgefǬhrt.';
-          openModal({
-            title: action.label,
-            html,
-            scene: { pcOn: state.pcOn, monitorOn: state.monitorOn, signalOk: state.signalOk }
-          });
-        }
+        runAction(action);
       }
       if(k==='r'){ reset(); }
     });
