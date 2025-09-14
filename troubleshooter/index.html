@@ -151,6 +151,8 @@
     .action-message .mhead h3{margin:0;font-size:18px}
     .action-message .mbody{font-size:14px;color:var(--ink-dim)}
     .action-message .mfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+    .scene.mini svg{max-height:160px}
+    .scene.mini{margin-top:10px}
 
     /* Celebration animation */
     .confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:1000;}
@@ -742,6 +744,29 @@ function finish(success, detail){
 
       // Actions per Level
       state.actions = getActionsForLevel(L.id);
+
+      // Wrap power action to show a dedicated "finished" message when the
+      // sequence is: Button 2 (monitor) then Button 5 (power) and the
+      // scenario becomes solved by turning on power.
+      (function(){
+        const powerAct = state.actions && state.actions.find(x => x.id === 'power-cable');
+        const monitorAct = state.actions && state.actions.find(x => x.id === 'monitor');
+        if(powerAct && typeof powerAct.effect === 'function'){
+          const originalEffect = powerAct.effect;
+          powerAct.effect = function(){
+            const prevWasMonitor = !!(state.log && state.log.length && monitorAct && state.log[state.log.length-1].step === monitorAct.label);
+            const willSolve = !state.pcOn && state.monitorOn && state.signalOk;
+            originalEffect.call(this);
+            if(prevWasMonitor && willSolve){
+              openModal({
+                title: 'Aufgabe abgeschlossen',
+                html: '<p><b>Aufgabe abgeschlossen.</b> PC hat Strom, Monitor ist an, Signal liegt an.</p><p>Das <b>Login</b> ist sichtbar.</p>',
+                scene: { pcOn: true, monitorOn: true, signalOk: true }
+              });
+            }
+          };
+        }
+      })();
 
       renderActions();
 
