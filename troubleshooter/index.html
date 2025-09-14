@@ -144,18 +144,13 @@
     .scene .screen{display:none}
     .scene.nosig .screen, .scene.login .screen{display:block}
 
-    /* Modal */
-    body.no-scroll{overflow:hidden}
-    .modal{position:fixed;inset:0;display:none;z-index:50}
-    .modal.open{display:block}
-    .modal .backdrop{position:absolute;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(2px)}
-    .modal .dialog{position:relative;margin:8vh auto 0 auto;max-width:640px;background:var(--card);border:1px solid rgba(255,255,255,.16);border-radius:16px;box-shadow:var(--shadow);padding:18px}
-    .modal .mhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-    .modal .mhead h3{margin:0;font-size:18px}
-    .modal .mbody{font-size:14px;color:var(--ink-dim)}
-    .modal .mfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
-    .modal .close{appearance:none;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:var(--ink);border-radius:10px;padding:6px 10px;cursor:pointer}
-    .modal .primary{border-color:rgba(34,211,238,.4);background:linear-gradient(180deg,rgba(34,211,238,.18),rgba(34,211,238,.08))}
+    /* Action message */
+    .action-message{display:none;margin-top:12px;background:var(--card);border:1px solid rgba(255,255,255,.16);border-radius:16px;box-shadow:var(--shadow);padding:18px}
+    .action-message.open{display:block}
+    .action-message .mhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .action-message .mhead h3{margin:0;font-size:18px}
+    .action-message .mbody{font-size:14px;color:var(--ink-dim)}
+    .action-message .mfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
     .scene.mini svg{max-height:160px}
     .scene.mini{margin-top:10px}
 
@@ -223,6 +218,15 @@
           </div>
 
           <div class="actions" id="actions" aria-label="Verfügbare Aktionen"></div>
+          <div class="action-message" id="actionMessage" aria-hidden="true">
+            <header class="mhead">
+              <h3 id="messageTitle">Aktion</h3>
+            </header>
+            <div class="mbody" id="messageBody"></div>
+            <div class="mfoot">
+              <button class="btn primary" id="messageOk">OK</button>
+            </div>
+          </div>
           <div class="legend" aria-hidden="true">Tasten: [1–6] Aktionen · [R] Reset</div>
 
           <div class="footer">
@@ -250,21 +254,6 @@
           </div>
         </div>
     </section>
-  </div>
-
-  <!-- Modal for action details -->
-  <div class="modal" id="actionModal" aria-hidden="true">
-    <div class="backdrop" data-close></div>
-    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-      <header class="mhead">
-        <h3 id="modalTitle">Aktion</h3>
-        <button class="close" id="modalClose" aria-label="Schließen">✕</button>
-      </header>
-      <div class="mbody" id="modalBody"></div>
-      <div class="mfoot">
-        <button class="btn primary" id="modalOk">OK</button>
-      </div>
-    </div>
   </div>
 
   <script>
@@ -310,13 +299,12 @@
     const hint2Html = `<ul class="hint"><li><b>Stromversorgung:</b> Steckdosenleiste an? Netzkabel fest am PC und an der Leiste/Steckdose? Netzteil‑Schalter (I/O) auf <b>I</b> (falls vorhanden)?</li><li><b>Anzeige/Signal:</b> Monitor eingeschaltet? Richtigen Eingang (HDMI/DP) gewählt? Kabel steckt fest? Falls möglich, anderen Port/Kabel testen.</li><li>Wenn der PC weiterhin <i>gar nicht</i> reagiert, wären interne Ursachen der nächste Schritt – in diesem Level bleiben wir bei externen Checks.</li></ul>`;
     const goalHtml = `<ul class="hint"><li><b>Du übst:</b> strukturiert Fehler finden (erst extern, dann intern), Entscheidungen begründen und deine Schritte protokollieren.</li><li><b>LP21:</b> MI 3.3 «Fehler systematisch suchen &amp; beheben», MI 2.2 «Geräte zweckmässig einsetzen» — genau das trainierst du hier im Szenario.</li><li><b>Tipps fürs Szenario:</b> formuliere deine Vermutung laut, notiere jeden Schritt (Zeit/Schritte siehst du links) und vergleiche danach mit deiner Bestleistung.</li></ul>`;
 
-    // Modal helpers
+    // Message helpers
     let modalOpen = false, lastFocusEl = null;
-    const modalEl = document.getElementById('actionModal');
-    const modalTitleEl = document.getElementById('modalTitle');
-    const modalBodyEl = document.getElementById('modalBody');
-    const modalOkEl = document.getElementById('modalOk');
-    const modalCloseEl = document.getElementById('modalClose');
+    const modalEl = document.getElementById('actionMessage');
+    const modalTitleEl = document.getElementById('messageTitle');
+    const modalBodyEl = document.getElementById('messageBody');
+    const modalOkEl = document.getElementById('messageOk');
     let celebrationEl = null;
 
     function renderMiniScene({pcOn, monitorOn, signalOk}){
@@ -352,21 +340,21 @@
     function openModal({title='Hinweis', html='', scene=null}){
       if(!modalEl) return;
       modalOpen = true;
-      document.body.classList.add('no-scroll');
+      actionsEl.style.display = 'none';
       modalTitleEl.textContent = title;
       modalBodyEl.innerHTML = html + (scene ? renderMiniScene(scene) : '');
       modalEl.classList.add('open');
       modalEl.setAttribute('aria-hidden','false');
       lastFocusEl = document.activeElement;
-      if(modalCloseEl) modalCloseEl.focus();
+      if(modalOkEl) modalOkEl.focus();
       if(title === 'Aufgabe abgeschlossen') showCelebration();
     }
     function closeModal(){
       if(!modalEl) return;
       modalOpen = false;
-      document.body.classList.remove('no-scroll');
       modalEl.classList.remove('open');
       modalEl.setAttribute('aria-hidden','true');
+      actionsEl.style.display = '';
       if(lastFocusEl) lastFocusEl.focus();
       hideCelebration();
     }
@@ -392,8 +380,6 @@
       }
     }
     if(modalOkEl) modalOkEl.addEventListener('click', closeModal);
-    if(modalCloseEl) modalCloseEl.addEventListener('click', closeModal);
-    if(modalEl) modalEl.addEventListener('click', (e)=>{ if(e.target && (e.target === modalEl || e.target.hasAttribute('data-close'))) closeModal(); });
 
     function setStatus(txt){ statusEl.textContent = txt; renderMeters(); }
     function renderMeters(){ timeEl.textContent = state.time; triesEl.textContent = state.tries; }
@@ -780,7 +766,7 @@ function finish(success, detail){
       // Actions per Level
       state.actions = getActionsForLevel(L.id);
 
-      // Wrap power action to show a dedicated "finished" modal when the
+      // Wrap power action to show a dedicated "finished" message when the
       // sequence is: Button 2 (monitor) then Button 5 (power) and the
       // scenario becomes solved by turning on power.
       (function(){
