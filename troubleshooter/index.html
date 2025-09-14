@@ -46,13 +46,15 @@
     /* Level navigation group as button group (no gaps) */
     .level-nav{display:flex;align-items:stretch;gap:0}
     .level-nav .btn{width:var(--ctrl-size);height:var(--ctrl-size);padding:0}
+    /* Ensure nav buttons match badge height exactly */
+    .level-nav .btn, #levelTag.badge{height:var(--ctrl-size);box-sizing:border-box}
     /* Merge borders between neighbors */
     .level-nav > *:not(:first-child){ margin-left:-1px }
     /* Rounded outside corners only */
     #levelTag{margin-left:0}
     #levelTag.badge{height:var(--ctrl-size);padding:0 12px;font-size:14px;display:flex;align-items:center;border-radius:0}
-    #levelPrev{border-top-right-radius:0;border-bottom-right-radius:0}
-    #levelNext{border-top-left-radius:0;border-bottom-left-radius:0}
+    #levelPrev{border-top-right-radius:0;border-bottom-right-radius:0;font-size:22px}
+    #levelNext{border-top-left-radius:0;border-bottom-left-radius:0;font-size:22px}
     header .controls{display:flex;gap:8px;align-items:center}
     .title{font-weight:800;font-size:clamp(22px,4vw,34px);letter-spacing:.2px}
     .badge{border:1px solid rgba(255,255,255,.12);padding:6px 10px;border-radius:999px;font-size:12px;color:var(--ink-dim)}
@@ -114,11 +116,14 @@
     .btn.primary{border-color:rgba(34,211,238,.4);background:linear-gradient(180deg,rgba(34,211,238,.18),rgba(34,211,238,.08))}
     /* Bigger Schliessen button in modal */
     .action-message .mfoot{display:flex;justify-content:stretch;align-items:stretch;margin-top:0;grid-column:2;grid-row:1 / span 2}
-    #messageOk{font-size:16px;padding:0 22px;height:100%;width:100%;min-height:80px}
+    #messageOk, #messageOkTop{font-size:16px;padding:0 22px;height:100%;width:100%;min-height:80px}
+    /* Extra spacing below the top Score modal when visible */
+    #actionMessageTop{margin-bottom:8px}
+    #actionMessageTop.open{margin-bottom:24px}
     @media (max-width:560px){
       .action-message.open{grid-template-columns:1fr;grid-template-rows:auto 1fr auto}
       .action-message .mfoot{grid-column:1;grid-row:3;margin-top:12px}
-      #messageOk{height:auto;min-height:80px}
+      #messageOk, #messageOkTop{height:auto;min-height:80px}
     }
 
     .score{display:flex;gap:12px;align-items:center}
@@ -197,6 +202,17 @@
       <div class="title">PC-Troubleshooter <span class="badge" id="verTag">v2.3</span></div>
       <div class="badge" id="levelTag" aria-live="polite">Fall 1/1 • Schwierigkeitsgrad: <b>Einfach</b></div>
           <button class="btn" id="scoreBtn" title="Score anzeigen" aria-label="Score anzeigen">🏆 Score</button></header>
+
+    <!-- Modal/Message area shown above the story -->
+    <div class="action-message" id="actionMessageTop" aria-hidden="true">
+      <header class="mhead">
+        <h3 id="messageTitleTop">Aktion</h3>
+      </header>
+      <div class="mbody" id="messageBodyTop"></div>
+      <div class="mfoot">
+        <button class="btn primary" id="messageOkTop">Schliessen</button>
+      </div>
+    </div>
 
     <!-- Single card: story, actions & info -->
     <section class="card story" aria-labelledby="storyTitle">
@@ -326,10 +342,16 @@
 
     // Message helpers
     let modalOpen = false, lastFocusEl = null;
+    // Default in-card modal for actions/hints
     const modalEl = document.getElementById('actionMessage');
     const modalTitleEl = document.getElementById('messageTitle');
     const modalBodyEl = document.getElementById('messageBody');
     const modalOkEl = document.getElementById('messageOk');
+    // Top score modal elements (only used for Score)
+    const topModalEl = document.getElementById('actionMessageTop');
+    const topModalTitleEl = document.getElementById('messageTitleTop');
+    const topModalBodyEl = document.getElementById('messageBodyTop');
+    const topModalOkEl = document.getElementById('messageOkTop');
     let celebrationEl = null;
     let celebrationTimer = null;
     // Track which hotkey opened the modal (if any)
@@ -352,6 +374,20 @@
       lastHotkey = null;
       if(title === 'Aufgabe abgeschlossen') showCelebration();
     }
+    function openTopModal({title='Score', html='', okLabel='Schliessen'}){
+      if(!topModalEl) return;
+      modalOpen = true;
+      actionsEl.style.display = 'none';
+      if(topModalTitleEl) topModalTitleEl.textContent = title;
+      if(topModalBodyEl) topModalBodyEl.innerHTML = html;
+      if(topModalOkEl) topModalOkEl.textContent = okLabel;
+      topModalEl.classList.add('open');
+      topModalEl.setAttribute('aria-hidden','false');
+      lastFocusEl = document.activeElement;
+      if(topModalOkEl) topModalOkEl.focus();
+      modalOpenKey = lastHotkey;
+      lastHotkey = null;
+    }
     function closeModal(){
       if(!modalEl) return;
       modalOpen = false;
@@ -360,6 +396,15 @@
       actionsEl.style.display = '';
       if(lastFocusEl) lastFocusEl.focus();
       hideCelebration();
+      modalOpenKey = null;
+    }
+    function closeTopModal(){
+      if(!topModalEl) return;
+      modalOpen = false;
+      topModalEl.classList.remove('open');
+      topModalEl.setAttribute('aria-hidden','true');
+      actionsEl.style.display = '';
+      if(lastFocusEl) lastFocusEl.focus();
       modalOpenKey = null;
     }
     function showCelebration(){
@@ -398,6 +443,7 @@
         closeModal();
       }
     });
+    if(topModalOkEl) topModalOkEl.addEventListener('click', () => { closeTopModal(); });
 
     function setStatus(txt){ statusEl.textContent = txt; renderMeters(); }
     function renderMeters(){ timeEl.textContent = state.time; triesEl.textContent = state.tries; }
@@ -889,7 +935,7 @@ function finish(success, detail){
         return `<li><b>Fall ${idx+1}:</b> ${L.name} - Zeit: <b>${s.time} Min</b>, Schritte: <b>${s.tries}</b>, Rang: <b style="color:${color}">${s.rank}</b>, Punkte: <b>${s.score}</b></li>`;
       }).join('');
       const html = `<p class="hint">Deine besten Ergebnisse pro Szenario:</p><ul class="hint">${items}</ul>`;
-      openModal({ title: 'Score', html });
+      openTopModal({ title: 'Score', html });
     });
     // Reveal hint
     
@@ -904,8 +950,14 @@ function finish(success, detail){
       // While a modal is open, allow ESC or same opener key to close, unless solved
       if(modalOpen){
         if(!state.solved){
-          if(k==='escape'){ closeModal(); return; }
-          if(modalOpenKey && e.key === modalOpenKey){ closeModal(); return; }
+          if(k==='escape'){
+            if(topModalEl && topModalEl.classList.contains('open')) closeTopModal(); else closeModal();
+            return;
+          }
+          if(modalOpenKey && e.key === modalOpenKey){
+            if(topModalEl && topModalEl.classList.contains('open')) closeTopModal(); else closeModal();
+            return;
+          }
         }
         return;
       }
@@ -925,10 +977,3 @@ function finish(success, detail){
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
