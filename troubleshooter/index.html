@@ -904,7 +904,29 @@ function finish(success, detail){
             const prevWasMonitor = !!(state.log && state.log.length && monitorAct && state.log[state.log.length-1].step === monitorAct.label);
             const willSolve = !state.pcOn && state.monitorOn && state.signalOk;
             originalEffect.call(this);
-            if(prevWasMonitor && willSolve){
+            if(willSolve){
+              finish(true, 'Stromversorgung und Monitor aktiviert.');
+              openModal({
+                title: 'Aufgabe abgeschlossen',
+                html: completionIntroHtml(),
+                okLabel: 'Nächste Aufgabe',
+                scene: { pcOn: true, monitorOn: true, signalOk: true }
+              });
+            }
+          };
+        }
+      })();
+
+      // Also wrap monitor action: if power is already on and signal is OK,
+      // turning the monitor on should complete the scenario as well.
+      (function(){
+        const monitorAct = state.actions && state.actions.find(x => x.id === 'monitor');
+        if(monitorAct && typeof monitorAct.effect === 'function'){
+          const originalEffect = monitorAct.effect;
+          monitorAct.effect = function(){
+            const willSolve = !state.monitorOn && state.pcOn && state.signalOk;
+            originalEffect.call(this);
+            if(willSolve){
               finish(true, 'Stromversorgung und Monitor aktiviert.');
               openModal({
                 title: 'Aufgabe abgeschlossen',
