@@ -319,7 +319,7 @@
     }
 
     // --- State ---
-    const state = { levelIdx: 0, actions: [], prevActionId: null, lastActionId: null };
+    const state = { levelIdx: 0, actions: [], performed: {} };
 
     // --- DOM helpers ---
     const $ = sel => document.querySelector(sel);
@@ -468,9 +468,8 @@
 
     function runAction(a){
       if(!a) return;
-      state.prevActionId = state.lastActionId;
-      state.lastActionId = a.id;
       a.effect.call(a);
+      if(a.id){ state.performed[a.id] = true; }
       // If the action itself solved the scenario (e.g., Scenario 2),
       // immediately show the completion modal like Scenario 1.
       if(state.solved && !modalOpen){
@@ -481,10 +480,11 @@
         });
         return;
       }
-      const solvedCombo = !state.solved &&
-        ((state.prevActionId === 'monitor' && state.lastActionId === 'power-cable') ||
-         (state.prevActionId === 'power-cable' && state.lastActionId === 'monitor')) &&
-        state.pcOn && state.monitorOn && state.signalOk;
+      if(checkSolvedPerScenario && checkSolvedPerScenario()) return;
+      const solvedCombo = false; // old combo check disabled
+        // old condition removed
+        // old condition removed
+        // old condition removed
       if(solvedCombo){
         finish(true, 'Stromversorgung und Monitor aktiviert.');
         openModal({
@@ -499,6 +499,26 @@
           html
         });
       }
+    }
+
+    function checkSolvedPerScenario(){
+      const L = levels && levels[state.levelIdx];
+      if(!L) return false;
+      switch(L.id){
+        case 'L0': {
+          const hasMonitor = !!state.performed['monitor'];
+          const hasPower = !!state.performed['power-cable'];
+          if(!state.solved && hasMonitor && hasPower && state.monitorOn){
+            finish(true, 'Stromversorgung und Monitor aktiviert.');
+            openModal({ title: 'Aufgabe abgeschlossen', html: completionIntroHtml(), okLabel: 'N��chste Aufgabe' });
+            return true;
+          }
+          break;
+        }
+        default:
+          break;
+      }
+      return false;
     }
 
     function updateScene(){
@@ -883,6 +903,7 @@ function finish(success, detail){
       state.levelIdx = idx;
       // Reset core state
       state.time = 0; state.tries = 0; state.solved = false; state.log = [];
+      state.performed = {};
       // Apply start flags
       const L = levels[idx];
       state.pcOn = L.start.pcOn;
@@ -902,7 +923,7 @@ function finish(success, detail){
           const originalEffect = powerAct.effect;
           powerAct.effect = function(){
             const prevWasMonitor = !!(state.log && state.log.length && monitorAct && state.log[state.log.length-1].step === monitorAct.label);
-            const willSolve = !state.pcOn && state.monitorOn && state.signalOk;
+            const willSolve = false; // old per-action wrapper check disabled
             originalEffect.call(this);
             if(willSolve){
               finish(true, 'Stromversorgung und Monitor aktiviert.');
@@ -924,7 +945,7 @@ function finish(success, detail){
         if(monitorAct && typeof monitorAct.effect === 'function'){
           const originalEffect = monitorAct.effect;
           monitorAct.effect = function(){
-            const willSolve = !state.monitorOn && state.pcOn && state.signalOk;
+            const willSolve = false; // old per-action wrapper check disabled
             originalEffect.call(this);
             if(willSolve){
               finish(true, 'Stromversorgung und Monitor aktiviert.');
