@@ -365,7 +365,14 @@
       modalOpen = true;
       actionsEl.style.display = 'none';
       modalTitleEl.textContent = title;
-      modalBodyEl.innerHTML = html;
+      // Inject Auswertung into the completion modal
+      if(title === 'Aufgabe abgeschlossen'){
+        try{ if(!state.solved) finish(true, ''); }catch(e){}
+        const evalHtml = typeof buildEvaluationHtml === 'function' ? buildEvaluationHtml() : '';
+        modalBodyEl.innerHTML = html + evalHtml;
+      } else {
+        modalBodyEl.innerHTML = html;
+      }
       if(modalOkEl) modalOkEl.textContent = okLabel;
       if(title === 'Aufgabe abgeschlossen' && modalOkEl){ modalOkEl.textContent = 'Nächste Aufgabe'; }
       modalEl.classList.add('open');
@@ -518,6 +525,24 @@
   var score = medal === 'Gold' ? 100 : (medal === 'Silber' ? 70 : 40);
   return { medal: medal, long: long, color: color, score: score };
 }
+function buildEvaluationHtml(){
+      const t = state.time;
+      const n = state.tries;
+      const ev = evalRankAndScore(t, n);
+      const best = loadBest();
+      const bestHtml = best ? `<div class="hint" style="margin-top:8px">Bestleistung: <b>${best.time} Min / ${best.tries} Schritte</b></div>` : '';
+      const dotStyle = `background: linear-gradient(180deg, ${ev.color}, ${ev.color})`;
+      return `
+        <hr class="divider" aria-hidden="true" />
+        <h3>AUSWERTUNG</h3>
+        <p class="hint">Zeit: <b>${t} Min</b> - Schritte: <b>${n}</b> - Punkte: <b>${ev.score}</b></p>
+        <div class="score">
+          <span class="dot" style="${dotStyle}" aria-hidden="true"></span>
+          <span>Bewertung: ${ev.long}</span>
+        </div>
+        ${bestHtml}
+      `;
+}
 function finish(success, detail){
       state.solved = true;
       showCelebration();
@@ -527,7 +552,6 @@ function finish(success, detail){
       // Bewertung
       const t = state.time;
       const n = state.tries;
-      summary.classList.add('active');
       const ev = evalRankAndScore(t, n);
       resultText.innerHTML = 'Zeit: <b>' + t + ' Min</b> - Schritte: <b>' + n + '</b> - Punkte: <b>' + ev.score + '</b>'; 
       rankText.textContent = 'Bewertung: ' + ev.long; 
