@@ -144,20 +144,13 @@
     .scene .screen{display:none}
     .scene.nosig .screen, .scene.login .screen{display:block}
 
-    /* Modal */
-    body.no-scroll{overflow:hidden}
-    .modal{position:fixed;inset:0;display:none;z-index:50}
-    .modal.open{display:block}
-    .modal .backdrop{position:absolute;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(2px)}
-    .modal .dialog{position:relative;margin:8vh auto 0 auto;max-width:640px;background:var(--card);border:1px solid rgba(255,255,255,.16);border-radius:16px;box-shadow:var(--shadow);padding:18px}
-    .modal .mhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-    .modal .mhead h3{margin:0;font-size:18px}
-    .modal .mbody{font-size:14px;color:var(--ink-dim)}
-    .modal .mfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
-    .modal .close{appearance:none;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:var(--ink);border-radius:10px;padding:6px 10px;cursor:pointer}
-    .modal .primary{border-color:rgba(34,211,238,.4);background:linear-gradient(180deg,rgba(34,211,238,.18),rgba(34,211,238,.08))}
-    .scene.mini svg{max-height:160px}
-    .scene.mini{margin-top:10px}
+    /* Action message */
+    .action-message{display:none;margin-top:12px;background:var(--card);border:1px solid rgba(255,255,255,.16);border-radius:16px;box-shadow:var(--shadow);padding:18px}
+    .action-message.open{display:block}
+    .action-message .mhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .action-message .mhead h3{margin:0;font-size:18px}
+    .action-message .mbody{font-size:14px;color:var(--ink-dim)}
+    .action-message .mfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
 
     /* Celebration animation */
     .confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:1000;}
@@ -223,6 +216,15 @@
           </div>
 
           <div class="actions" id="actions" aria-label="Verfügbare Aktionen"></div>
+          <div class="action-message" id="actionMessage" aria-hidden="true">
+            <header class="mhead">
+              <h3 id="messageTitle">Aktion</h3>
+            </header>
+            <div class="mbody" id="messageBody"></div>
+            <div class="mfoot">
+              <button class="btn primary" id="messageOk">OK</button>
+            </div>
+          </div>
           <div class="legend" aria-hidden="true">Tasten: [1–6] Aktionen · [R] Reset</div>
 
           <div class="footer">
@@ -250,21 +252,6 @@
           </div>
         </div>
     </section>
-  </div>
-
-  <!-- Modal for action details -->
-  <div class="modal" id="actionModal" aria-hidden="true">
-    <div class="backdrop" data-close></div>
-    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-      <header class="mhead">
-        <h3 id="modalTitle">Aktion</h3>
-        <button class="close" id="modalClose" aria-label="Schließen">✕</button>
-      </header>
-      <div class="mbody" id="modalBody"></div>
-      <div class="mfoot">
-        <button class="btn primary" id="modalOk">OK</button>
-      </div>
-    </div>
   </div>
 
   <script>
@@ -310,63 +297,31 @@
     const hint2Html = `<ul class="hint"><li><b>Stromversorgung:</b> Steckdosenleiste an? Netzkabel fest am PC und an der Leiste/Steckdose? Netzteil‑Schalter (I/O) auf <b>I</b> (falls vorhanden)?</li><li><b>Anzeige/Signal:</b> Monitor eingeschaltet? Richtigen Eingang (HDMI/DP) gewählt? Kabel steckt fest? Falls möglich, anderen Port/Kabel testen.</li><li>Wenn der PC weiterhin <i>gar nicht</i> reagiert, wären interne Ursachen der nächste Schritt – in diesem Level bleiben wir bei externen Checks.</li></ul>`;
     const goalHtml = `<ul class="hint"><li><b>Du übst:</b> strukturiert Fehler finden (erst extern, dann intern), Entscheidungen begründen und deine Schritte protokollieren.</li><li><b>LP21:</b> MI 3.3 «Fehler systematisch suchen &amp; beheben», MI 2.2 «Geräte zweckmässig einsetzen» — genau das trainierst du hier im Szenario.</li><li><b>Tipps fürs Szenario:</b> formuliere deine Vermutung laut, notiere jeden Schritt (Zeit/Schritte siehst du links) und vergleiche danach mit deiner Bestleistung.</li></ul>`;
 
-    // Modal helpers
+    // Message helpers
     let modalOpen = false, lastFocusEl = null;
-    const modalEl = document.getElementById('actionModal');
-    const modalTitleEl = document.getElementById('modalTitle');
-    const modalBodyEl = document.getElementById('modalBody');
-    const modalOkEl = document.getElementById('modalOk');
-    const modalCloseEl = document.getElementById('modalClose');
+    const modalEl = document.getElementById('actionMessage');
+    const modalTitleEl = document.getElementById('messageTitle');
+    const modalBodyEl = document.getElementById('messageBody');
+    const modalOkEl = document.getElementById('messageOk');
     let celebrationEl = null;
-
-    function renderMiniScene({pcOn, monitorOn, signalOk}){
-      const classes = ['scene','mini'];
-      if(pcOn) classes.push('power-on');
-      if(monitorOn && (!pcOn || !signalOk)) classes.push('nosig');
-      if(pcOn && monitorOn && signalOk) classes.push('login');
-      return `
-        <figure class="${classes.join(' ')}" role="img" aria-label="Aktionsergebnis">
-          <svg viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <rect x="20" y="194" width="760" height="8" rx="4" class="mutfill"/>
-            <rect x="20" y="194" width="760" height="8" rx="4" class="mut" fill="none"/>
-            <rect x="70" y="85" width="110" height="110" rx="8" class="mut" fill="none"/>
-            <circle cx="100" cy="105" r="6" class="mut led" fill="none"/>
-            <rect x="240" y="12" width="270" height="160" rx="6" class="mut" fill="none"/>
-            <rect x="240" y="12" width="270" height="160" rx="6" class="mutfill screen"/>
-            <rect x="370" y="173" width="10" height="19" class="mut" fill="none"/>
-            <rect x="335" y="190" width="80" height="6" rx="3" class="mut" fill="none"/>
-            <g class="no-signal" aria-hidden="true">
-              <rect x="240" y="12" width="270" height="160" rx="6" fill="none"/>
-              <text x="375" y="92" font-size="24" text-anchor="middle" style="fill:rgba(229,231,235,.88);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;letter-spacing:2px">NO SIGNAL</text>
-            </g>
-            <g class="login" aria-hidden="true">
-              <rect x="290" y="47" width="170" height="90" rx="8" class="mut" fill="none"/>
-              <text x="375" y="80" font-size="32" text-anchor="middle" style="fill:rgba(229,231,235,.95);font-weight:700">Login</text>
-              <rect x="310" y="96" width="130" height="12" rx="6" class="mut" fill="none"/>
-              <rect x="310" y="118" width="130" height="12" rx="6" class="mut" fill="none"/>
-            </g>
-          </svg>
-        </figure>`;
-    }
-
-    function openModal({title='Hinweis', html='', scene=null}){
+    function openModal({title='Hinweis', html=''}){
       if(!modalEl) return;
       modalOpen = true;
-      document.body.classList.add('no-scroll');
+      actionsEl.style.display = 'none';
       modalTitleEl.textContent = title;
-      modalBodyEl.innerHTML = html + (scene ? renderMiniScene(scene) : '');
+      modalBodyEl.innerHTML = html;
       modalEl.classList.add('open');
       modalEl.setAttribute('aria-hidden','false');
       lastFocusEl = document.activeElement;
-      if(modalCloseEl) modalCloseEl.focus();
+      if(modalOkEl) modalOkEl.focus();
       if(title === 'Aufgabe abgeschlossen') showCelebration();
     }
     function closeModal(){
       if(!modalEl) return;
       modalOpen = false;
-      document.body.classList.remove('no-scroll');
       modalEl.classList.remove('open');
       modalEl.setAttribute('aria-hidden','true');
+      actionsEl.style.display = '';
       if(lastFocusEl) lastFocusEl.focus();
       hideCelebration();
     }
@@ -392,8 +347,6 @@
       }
     }
     if(modalOkEl) modalOkEl.addEventListener('click', closeModal);
-    if(modalCloseEl) modalCloseEl.addEventListener('click', closeModal);
-    if(modalEl) modalEl.addEventListener('click', (e)=>{ if(e.target && (e.target === modalEl || e.target.hasAttribute('data-close'))) closeModal(); });
 
     function setStatus(txt){ statusEl.textContent = txt; renderMeters(); }
     function renderMeters(){ timeEl.textContent = state.time; triesEl.textContent = state.tries; }
@@ -426,14 +379,12 @@
           btn.innerHTML = `<span class="label">${a.label}</span>`;
           btn.setAttribute('aria-label', a.label + ` Taste ${a.hotkey}`);
           btn.addEventListener('click', () => {
-            const before = { pcOn: state.pcOn, monitorOn: state.monitorOn, signalOk: state.signalOk };
             a.effect.call(a);
             if (!modalOpen) {
               const html = (feedbackEl && feedbackEl.innerHTML) ? feedbackEl.innerHTML : 'Aktion ausgeführt.';
               openModal({
                 title: a.label,
-                html,
-                scene: { pcOn: state.pcOn, monitorOn: state.monitorOn, signalOk: state.signalOk }
+                html
               });
             }
           });
@@ -578,8 +529,7 @@ function finish(success, detail){
               say('<span class="warn">Monitor ausgeschaltet.</span> Schalte ihn wieder ein, wenn du bereit bist, und prüfe <b>Quelle/Kabel</b>.');
               openModal({
                 title: 'Monitor ausgeschaltet',
-                html: '<p>Du schaltest den Monitor aus. Das Display bleibt schwarz.</p><p>Schalte ihn wieder ein, um die Anzeige zu prüfen.</p>',
-                scene: { pcOn: state.pcOn, monitorOn: false, signalOk: state.signalOk }
+                html: '<p>Du schaltest den Monitor aus. Das Display bleibt schwarz.</p><p>Schalte ihn wieder ein, um die Anzeige zu prüfen.</p>'
               });
             } else {
               state.monitorOn = true; updateScene();
@@ -589,16 +539,14 @@ function finish(success, detail){
                 say('<span class="good">Monitor eingeschaltet.</span> <b>Login</b> ist sichtbar.');
                 openModal({
                   title: 'Bild vorhanden',
-                  html: '<p>Der Monitor ist an und zeigt <b>Login</b>.</p><p>Gut gemacht!</p>',
-                  scene: { pcOn: true, monitorOn: true, signalOk: true }
+                  html: '<p>Der Monitor ist an und zeigt <b>Login</b>.</p><p>Gut gemacht!</p>'
                 });
                 finish(true, 'Anzeige bereit.');
               } else {
                 say('<span class="warn">Monitor ist an.</span> Anzeige zeigt <b>NO SIGNAL</b>. Prüfe <b>Quelle (HDMI/DP)</b> oder <b>Monitorkabel</b>.');
                 openModal({
                   title: 'Monitor eingeschaltet',
-                  html: '<p>Der Monitor ist an.</p><p>Es wird <b>NO SIGNAL</b> angezeigt – prüfe <b>Quelle/Kabel</b>.</p>',
-                  scene: { pcOn: state.pcOn, monitorOn: true, signalOk: state.signalOk }
+                  html: '<p>Der Monitor ist an.</p><p>Es wird <b>NO SIGNAL</b> angezeigt – prüfe <b>Quelle/Kabel</b>.</p>'
                 });
               }
             }
@@ -650,7 +598,7 @@ function finish(success, detail){
             const html = wasOn
               ? '<p>Du prüfst die Stromkette – sie war bereits <b>in Ordnung</b>. Der PC hat Strom.</p><p>Falls noch kein Bild zu sehen ist: <b>Monitor einschalten</b> oder <b>Signal prüfen</b>.</p>'
               : '<p>Du verfolgst das Netzkabel bis zur Steckdose. Am Netzteil war das Kabel <b>locker</b> – du steckst es fest ein. Die PC‑LED leuchtet jetzt <b>grün</b>.</p><p>Der Monitor bleibt noch schwarz. Überlege: <b>Monitor einschalten</b> oder <b>Signal prüfen</b>?</p>';
-            openModal({ title: 'Stromkette geprüft', html, scene: { pcOn: true, monitorOn: state.monitorOn, signalOk: state.signalOk } });
+            openModal({ title: 'Stromkette geprüft', html });
             if(state.monitorOn && state.signalOk){
               say('<span class="good">Stromversorgung hergestellt.</span> <b>Login</b> ist sichtbar.');
               finish(true, 'Stromversorgung und Anzeige bereit.');
@@ -780,7 +728,7 @@ function finish(success, detail){
       // Actions per Level
       state.actions = getActionsForLevel(L.id);
 
-      // Wrap power action to show a dedicated "finished" modal when the
+      // Wrap power action to show a dedicated "finished" message when the
       // sequence is: Button 2 (monitor) then Button 5 (power) and the
       // scenario becomes solved by turning on power.
       (function(){
@@ -795,8 +743,7 @@ function finish(success, detail){
             if(prevWasMonitor && willSolve){
               openModal({
                 title: 'Aufgabe abgeschlossen',
-                html: '<p><b>Aufgabe abgeschlossen.</b> PC hat Strom, Monitor ist an, Signal liegt an.</p><p>Das <b>Login</b> ist sichtbar.</p>',
-                scene: { pcOn: true, monitorOn: true, signalOk: true }
+                html: '<p><b>Aufgabe abgeschlossen.</b> PC hat Strom, Monitor ist an, Signal liegt an.</p><p>Das <b>Login</b> ist sichtbar.</p>'
               });
             }
           };
@@ -865,8 +812,7 @@ function finish(success, detail){
           const html = (feedbackEl && feedbackEl.innerHTML) ? feedbackEl.innerHTML : 'Aktion ausgefǬhrt.';
           openModal({
             title: action.label,
-            html,
-            scene: { pcOn: state.pcOn, monitorOn: state.monitorOn, signalOk: state.signalOk }
+            html
           });
         }
       }
