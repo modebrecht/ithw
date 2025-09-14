@@ -905,6 +905,7 @@ function finish(success, detail){
             const willSolve = !state.pcOn && state.monitorOn && state.signalOk;
             originalEffect.call(this);
             if(prevWasMonitor && willSolve){
+              finish(true, 'Stromversorgung und Monitor aktiviert.');
               openModal({
                 title: 'Aufgabe abgeschlossen',
                 html: completionIntroHtml(),
