@@ -369,7 +369,8 @@
       if(title === 'Aufgabe abgeschlossen'){
         try{ if(!state.solved) finish(true, ''); }catch(e){}
         const evalHtml = typeof buildEvaluationHtml === 'function' ? buildEvaluationHtml() : '';
-        modalBodyEl.innerHTML = html + evalHtml;
+        const intro = (typeof completionIntroHtml === 'function') ? completionIntroHtml() : html;
+        modalBodyEl.innerHTML = intro + evalHtml;
       } else {
         modalBodyEl.innerHTML = html;
       }
@@ -470,6 +471,16 @@
       state.prevActionId = state.lastActionId;
       state.lastActionId = a.id;
       a.effect.call(a);
+      // If the action itself solved the scenario (e.g., Scenario 2),
+      // immediately show the completion modal like Scenario 1.
+      if(state.solved && !modalOpen){
+        openModal({
+          title: 'Aufgabe abgeschlossen',
+          html: completionIntroHtml(),
+          okLabel: 'Nächste Aufgabe'
+        });
+        return;
+      }
       const solvedCombo = !state.solved &&
         ((state.prevActionId === 'monitor' && state.lastActionId === 'power-cable') ||
          (state.prevActionId === 'power-cable' && state.lastActionId === 'monitor')) &&
@@ -478,7 +489,7 @@
         finish(true, 'Stromversorgung und Monitor aktiviert.');
         openModal({
           title: 'Aufgabe abgeschlossen',
-          html: '<p><b>Aufgabe geschafft.</b> PC und Monitor sind bereit.</p>',
+          html: completionIntroHtml(),
           okLabel: 'Nächste Aufgabe'
         });
       } else if (!modalOpen){
@@ -542,6 +553,20 @@ function buildEvaluationHtml(){
         </div>
         ${bestHtml}
       `;
+}
+function completionIntroHtml(){
+  const L = levels && levels[state.levelIdx];
+  if(!L) return '<p><b>Aufgabe geschafft.</b> PC und Monitor sind bereit.</p><p>Das <b>Login</b> ist sichtbar.</p>';
+  switch(L.id){
+    case 'L0':
+      return '<p><b>Aufgabe abgeschlossen.</b> PC hat Strom, Monitor ist an, Signal liegt an.</p><p>Das <b>Login</b> ist sichtbar.</p>';
+    case 'E1':
+      return '<p><b>Aufgabe abgeschlossen.</b> Quelle korrekt, Signal wiederhergestellt.</p><p>Das <b>Login</b> ist sichtbar.</p>';
+    case 'M3':
+      return '<p><b>Aufgabe abgeschlossen.</b> POST erfolgreich, Anzeige aktiv.</p><p>Das <b>Login</b> ist sichtbar.</p>';
+    default:
+      return '<p><b>Aufgabe geschafft.</b> PC und Monitor sind bereit.</p><p>Das <b>Login</b> ist sichtbar.</p>';
+  }
 }
 function finish(success, detail){
       state.solved = true;
@@ -882,7 +907,8 @@ function finish(success, detail){
             if(prevWasMonitor && willSolve){
               openModal({
                 title: 'Aufgabe abgeschlossen',
-                html: '<p><b>Aufgabe abgeschlossen.</b> PC hat Strom, Monitor ist an, Signal liegt an.</p><p>Das <b>Login</b> ist sichtbar.</p>',
+                html: completionIntroHtml(),
+                okLabel: 'Nächste Aufgabe',
                 scene: { pcOn: true, monitorOn: true, signalOk: true }
               });
             }
