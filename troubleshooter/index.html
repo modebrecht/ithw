@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PC-Troubleshooter v2.1</title>
+  <style>
+    :root{
+      --bg:#0f172a;           /* slate-900 */
+      --card:#0b1223;         /* darker card */
+      --ink:#e5e7eb;          /* gray-200 */
+      --ink-dim:#b6c1d4;
+      --accent:#60a5fa;       /* blue-400 */
+      --accent-2:#22d3ee;     /* cyan-400 */
+      --good:#22c55e;         /* green-500 */
+      --warn:#f59e0b;         /* amber-500 */
+      --bad:#ef4444;          /* red-500 */
+      --muted:#94a3b8;        /* slate-400 */
+      --shadow:0 18px 40px -18px rgba(0,0,0,.55);
+      --radius:16px;
+      --gold:#fbbf24;         /* amber-400 */
+      --silver:#cbd5e1;       /* slate-300 */
+      --bronze:#d97706;       /* orange-600 */
+    }
+
+    html,body{min-height:100%}
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,"Helvetica Neue",Arial,"Noto Sans","Apple Color Emoji","Segoe UI Emoji";
+      color:var(--ink);
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(96,165,250,.15), transparent 50%),
+        radial-gradient(1200px 600px at 90% 0%, rgba(34,211,238,.12), transparent 50%),
+        var(--bg);
+      background-repeat: no-repeat, no-repeat, no-repeat;
+      background-attachment: fixed, fixed, fixed;
+    }
+
+    .wrap{max-width:1000px;margin:clamp(16px,3vw,40px) auto;padding:0 16px}
+    header{display:flex;gap:16px;align-items:center;justify-content:space-between;margin-bottom:20px}
+    #levelTag{margin-left:auto}
+    header .controls{display:flex;gap:8px;align-items:center}
+    .title{font-weight:800;font-size:clamp(22px,4vw,34px);letter-spacing:.2px}
+    .badge{border:1px solid rgba(255,255,255,.12);padding:6px 10px;border-radius:999px;font-size:12px;color:var(--ink-dim)}
+
+    .grid{display:grid;grid-template-columns:minmax(320px,1fr) minmax(300px,1fr);gap:18px}
+    @media (max-width:700px){.grid{grid-template-columns:1fr}}
+
+    .card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);box-shadow:var(--shadow);}
+    .right.card{box-shadow:0 12px 28px -16px rgba(0,0,0,.6);}
+    .card .inner{padding:clamp(16px,2.6vw,24px)}
+
+    .story h2{margin:0 0 8px 0;font-size:clamp(18px,2.6vw,22px)}
+    .story p{margin:.35rem 0;color:var(--ink-dim);line-height:1.5}
+
+    .statusbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+    .chip{background-color:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);padding:8px 10px;border-radius:10px;font-size:13px;color:var(--ink-dim)}
+    .chip strong{color:var(--ink)}
+
+    .actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+    @media (max-width:640px){.actions{grid-template-columns:1fr}}
+    button.action{
+      appearance:none; border:none; cursor:pointer; padding:16px 18px; border-radius:12px; text-align:left; color:var(--ink);
+      background:linear-gradient(180deg,rgba(96,165,250,.16),rgba(34,211,238,.10));
+      border:1px solid rgba(96,165,250,.35);
+      transition: transform .06s ease, box-shadow .15s ease, border-color .2s ease;
+      box-shadow:0 10px 25px rgba(34,211,238,.08);
+      position:relative; display:flex; align-items:center; gap:10px; overflow:hidden;
+      min-height:64px;
+    }
+    button.action .label{position:relative; z-index:1; font-weight:600}
+    button.action::after{
+      content: attr(data-key);
+      position:absolute; right:14px; top:50%; transform:translateY(-50%);
+      font-weight:800; font-size:clamp(34px,6vw,56px); line-height:1;
+      color:var(--ink-dim); opacity:.12; pointer-events:none; user-select:none;
+    }
+    button.action:hover{transform: translateY(-1px); box-shadow:0 14px 30px rgba(34,211,238,.14)}
+    button.action:active{transform: translateY(0)}
+    /* old .k marker removed in favor of big number badge */
+    .legend{margin-top:8px;font-size:12px;color:var(--muted)}
+
+    .legend{margin-top:8px;font-size:12px;color:var(--muted)}
+
+    .feedback{min-height:72px;margin-top:10px;border-top:1px dashed rgba(255,255,255,.1);padding-top:12px}
+    .feedback .msg{margin:0;line-height:1.55}
+    .feedback .good{color:var(--good)}
+    .feedback .warn{color:var(--warn)}
+    .feedback .bad{color:var(--bad)}
+
+    .right h3{margin:0 0 10px 0}
+    .hint{font-size:14px;color:var(--ink-dim);line-height:1.6}
+    .hint b{color:var(--ink)}
+
+    /* Bessere Abstände in Aufzählungen (Hinweis 2 & LP21) */
+    ul.hint{margin:0; padding-left:1.2rem}
+    ul.hint li{margin:6px 0}
+    @media (min-width:900px){ ul.hint li{margin:8px 0} }
+
+    .footer{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .btn{appearance:none;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.03);color:var(--ink);padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600}
+    .btn.primary{border-color:rgba(34,211,238,.4);background:linear-gradient(180deg,rgba(34,211,238,.18),rgba(34,211,238,.08))}
+
+    .score{display:flex;gap:12px;align-items:center}
+    .score .dot{width:10px;height:10px;border-radius:999px;background:var(--good);box-shadow:0 0 0 4px rgba(34,197,94,.15)}
+
+    .summary{display:none}
+    .summary.active{display:block}
+
+    .step-log{margin-top:8px;padding-left:18px;color:var(--ink-dim)}
+    .step-log li{margin:.25rem 0}
+
+    details.didaktik{margin-top:14px}
+
+    details.hintbox{margin:0 0 10px 0}
+    details.hintbox summary{cursor:pointer}
+    details.hintbox[open] summary, details.didaktik[open] summary{margin-bottom:6px}
+
+    /* Grössere, schöne Aufklapp‑Symbole (Chevron SVG) */
+    details summary{list-style:none}
+    details summary::-webkit-details-marker{display:none}
+    details.hintbox summary::before, details.didaktik summary::before{
+      content:""; display:inline-block; width:24px; height:24px; margin-right:10px;
+      background-color: var(--ink-dim);
+      -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M9 6l6 6-6 6"/></svg>') no-repeat center / 100% 100%;
+              mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M9 6l6 6-6 6"/></svg>') no-repeat center / 100% 100%;
+      transition: transform .2s ease, background-color .2s ease;
+      vertical-align:-4px;
+    }
+    details[open].hintbox summary::before, details[open].didaktik summary::before{
+      transform: rotate(90deg);
+      background-color: var(--ink);
+    }
+
+    /* Dünner Trenner zwischen LP21 und Auswertung */
+    .divider{border:0;border-top:1px dashed rgba(255,255,255,.14);margin:10px 0 12px 0}
+
+    /* Szene: Illustration */
+    .scene{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px;margin:10px 0 6px}
+    .scene svg{width:100%;height:auto;display:block}
+    .scene .mut{stroke:rgba(229,231,235,.45)}
+    .scene .mutfill{fill:rgba(255,255,255,.04)}
+    .scene .no-signal{display:none}
+    .scene.nosig .no-signal{display:block}
+    .scene .login{display:none}
+    .scene.login .login{display:block}
+    .scene.power-on .led{stroke: var(--good); fill: var(--good)}
+    /* Screen nur sichtbar, wenn Monitor "an" (No‑Signal oder Login) */
+    .scene .screen{display:none}
+    .scene.nosig .screen, .scene.login .screen{display:block}
+
+    /* Modal */
+    body.no-scroll{overflow:hidden}
+    .modal{position:fixed;inset:0;display:none;z-index:50}
+    .modal.open{display:block}
+    .modal .backdrop{position:absolute;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(2px)}
+    .modal .dialog{position:relative;margin:8vh auto 0 auto;max-width:640px;background:var(--card);border:1px solid rgba(255,255,255,.16);border-radius:16px;box-shadow:var(--shadow);padding:18px}
+    .modal .mhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .modal .mhead h3{margin:0;font-size:18px}
+    .modal .mbody{font-size:14px;color:var(--ink-dim)}
+    .modal .mfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+    .modal .close{appearance:none;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:var(--ink);border-radius:10px;padding:6px 10px;cursor:pointer}
+    .modal .primary{border-color:rgba(34,211,238,.4);background:linear-gradient(180deg,rgba(34,211,238,.18),rgba(34,211,238,.08))}
+    .scene.mini svg{max-height:160px}
+    .scene.mini{margin-top:10px}
+
+    /* Accessibility helpers */
+    [aria-live]{outline:none}
+    @media (prefers-reduced-motion: reduce){
+      *{transition:none !important;animation:none !important}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">PC-Troubleshooter <span class="badge" id="verTag">v2.1</span></div>
+      <div class="badge" id="levelTag" aria-live="polite">Fall 1/1 • Schwierigkeitsgrad: <b>Einfach</b></div>
+          <button class="btn" id="scoreBtn" title="Score anzeigen" aria-label="Score anzeigen">Score anzeigen</button></header>
+
+    <div class="grid">
+      <!-- Left: story & actions -->
+      <section class="card story" aria-labelledby="storyTitle">
+        <div class="inner">
+          <h2 id="storyTitle">Szenario: Der PC, der nicht starten will</h2>
+          <p id="storyText">
+            Du sitzt im Informatikraum und dein PC reagiert nicht: Du drückst den Power‑Knopf, aber es passiert nichts.
+            Dein Ziel: In möglichst <b>wenigen Schritten</b> die Ursache finden.
+          </p>
+
+          <figure class="scene" role="img" aria-label="PC-Tower und Monitor auf einem Schreibtisch (neutrale Ausgangslage)">
+            <svg viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <!-- Tischlinie -->
+              <rect x="20" y="194" width="760" height="8" rx="4" class="mutfill"/>
+              <rect x="20" y="194" width="760" height="8" rx="4" class="mut" fill="none"/>
+
+              <rect x="70" y="85" width="110" height="110" rx="8" class="mut" fill="none"/>
+              <circle cx="100" cy="105" r="6" class="mut led" fill="none"/>
+
+              <!-- Monitor -->
+              <rect x="240" y="12" width="270" height="160" rx="6" class="mut" fill="none"/>
+              <rect x="240" y="12" width="270" height="160" rx="6" class="mutfill screen"/>
+              <rect x="370" y="173" width="10" height="19" class="mut" fill="none"/>
+              <rect x="335" y="190" width="80" height="6" rx="3" class="mut" fill="none"/>
+              <g class="no-signal" aria-hidden="true">
+                <rect x="240" y="12" width="270" height="160" rx="6" fill="none"/>
+                <text x="375" y="92" font-size="24" text-anchor="middle" style="fill:rgba(229,231,235,.88);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;letter-spacing:2px">NO SIGNAL</text>
+              </g>
+              <g class="login" aria-hidden="true">
+                <!-- Größeres, gut lesbares Login-Overlay, mittig im Monitor (270×160) -->
+                <rect x="290" y="47" width="170" height="90" rx="8" class="mut" fill="none"/>
+                <text x="375" y="80" font-size="32" text-anchor="middle" style="fill:rgba(229,231,235,.95);font-weight:700">Login</text>
+                <rect x="310" y="96" width="130" height="12" rx="6" class="mut" fill="none"/>
+                <rect x="310" y="118" width="130" height="12" rx="6" class="mut" fill="none"/>
+              </g>
+            </svg>
+          </figure>
+
+          <div class="statusbar" aria-live="polite">
+            <div class="chip">Zeit: <strong id="time">0</strong> Min</div>
+            <div class="chip">Schritte: <strong id="tries">0</strong></div>
+            <div class="chip">Status: <strong id="status">Unbekannt</strong></div>
+            
+          </div>
+
+          <div class="actions" id="actions" aria-label="Verfügbare Aktionen"></div>
+          <div class="legend" aria-hidden="true">Tasten: [1–6] Aktionen · [R] Reset</div>
+
+          
+
+          <div class="footer">
+            <button class="btn" id="resetBtn" title="Szenario zurücksetzen (R)" aria-keyshortcuts="R">Neu starten ↺</button>
+            
+          </div>
+        </div>
+      </section>
+
+      <!-- Right: knowledge & summary -->
+      <aside class="card right" aria-labelledby="refTitle">
+        <div class="inner">
+          <details id="hint1" class="hintbox"><summary>Hinweis 1</summary><p class="hint" id="hintText1">Was kannst du prüfen, <b>ohne den PC zu öffnen</b>?</p></details>
+
+          <details id="hint2" class="hintbox"><summary>Hinweis 2</summary>
+            <ul class="hint" id="hintText2">
+              <li><b>Stromversorgung:</b> Steckdosenleiste an? Netzkabel fest am PC und an der Leiste/Steckdose? Netzteil‑Schalter (I/O) auf <b>I</b> (falls vorhanden)?</li>
+              <li><b>Anzeige/Signal:</b> Monitor eingeschaltet? Richtigen Eingang (HDMI/DP) gewählt? Kabel steckt fest? Falls möglich, anderen Port/Kabel testen.</li>
+              <li>Wenn der PC weiterhin <i>gar nicht</i> reagiert, wären interne Ursachen der nächste Schritt – in diesem Level bleiben wir bei externen Checks.</li>
+            </ul>
+          </details>
+
+          <details class="didaktik">
+            <summary>Ziele &amp; LP21‑Bezug</summary>
+            <ul class="hint">
+              <li><b>Du übst:</b> strukturiert Fehler finden (erst extern, dann intern), Entscheidungen begründen und deine Schritte protokollieren.</li>
+              <li><b>LP21:</b> MI 3.3 «Fehler systematisch suchen &amp; beheben», MI 2.2 «Geräte zweckmässig einsetzen» — genau das trainierst du hier im Szenario.</li>
+              <li><b>Tipps fürs Szenario:</b> formuliere deine Vermutung laut, notiere jeden Schritt (Zeit/Schritte siehst du links) und vergleiche danach mit deiner Bestleistung.</li>
+            </ul>
+          </details>
+
+          <div class="feedback" aria-live="polite">
+            <p class="msg" id="feedbackMsg">Wähle deinen ersten Schritt.</p>
+            <ol class="step-log" id="stepLog" aria-label="Protokoll deiner Schritte"></ol>
+          </div>
+
+          <hr class="divider" aria-hidden="true" />
+
+          <div class="summary" id="summary">
+            <h3>Auswertung</h3>
+            <p class="hint" id="resultText"></p>
+            <div class="score">
+              <span class="dot" id="rankDot" aria-hidden="true"></span>
+              <span id="rankText">Bewertung: —</span>
+            </div>
+            <div class="hint" id="bestRow" style="display:none;margin-top:8px">Bestleistung: <b id="bestText">—</b></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- Modal for action details -->
+  <div class="modal" id="actionModal" aria-hidden="true">
+    <div class="backdrop" data-close></div>
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <header class="mhead">
+        <h3 id="modalTitle">Aktion</h3>
+        <button class="close" id="modalClose" aria-label="Schließen">✕</button>
+            <button class="btn" id="scoreBtn" title="Score anzeigen" aria-label="Score anzeigen">Score anzeigen</button></header>
+      <div class="mbody" id="modalBody"></div>
+      <div class="mfoot">
+        <button class="btn primary" id="modalOk">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Persistence ---
+    const STORAGE_KEY = 'pctrouble_best_v2';
+    const SCORES_KEY = 'pctrouble_scores_v2';
+    function loadBest(){
+      try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); }catch{ return null; }
+    }
+    function saveBest(best){
+      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(best)); }catch{}
+    }
+    function loadScores(){
+      try{ return JSON.parse(localStorage.getItem(SCORES_KEY) || '{}'); }catch{ return {}; }
+    }
+    function saveScores(scores){
+      try{ localStorage.setItem(SCORES_KEY, JSON.stringify(scores)); }catch{}
+    }
+
+    // --- State ---
+    const state = { levelIdx: 0, actions: [], prevActionId: null, lastActionId: null };
+
+    // --- DOM helpers ---
+    const $ = sel => document.querySelector(sel);
+    const timeEl = $('#time');
+    const triesEl = $('#tries');
+    const statusEl = $('#status');
+    const actionsEl = $('#actions');
+    const feedbackEl = $('#feedbackMsg');
+    const stepLogEl = $('#stepLog');
+    const summary = $('#summary');
+    const resultText = $('#resultText');
+    const rankText = $('#rankText');
+    const rankDot = $('#rankDot');
+    const bestRow = $('#bestRow');
+    const bestText = $('#bestText');
+    const scoreBtn = document.getElementById('scoreBtn');
+
+    // Modal helpers
+    let modalOpen = false, lastFocusEl = null;
+    const modalEl = document.getElementById('actionModal');
+    const modalTitleEl = document.getElementById('modalTitle');
+    const modalBodyEl = document.getElementById('modalBody');
+    const modalOkEl = document.getElementById('modalOk');
+    const modalCloseEl = document.getElementById('modalClose');
+
+    function renderMiniScene({pcOn, monitorOn, signalOk}){
+      const classes = ['scene','mini'];
+      if(pcOn) classes.push('power-on');
+      if(monitorOn && (!pcOn || !signalOk)) classes.push('nosig');
+      if(pcOn && monitorOn && signalOk) classes.push('login');
+      return `
+        <figure class="${classes.join(' ')}" role="img" aria-label="Aktionsergebnis">
+          <svg viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect x="20" y="194" width="760" height="8" rx="4" class="mutfill"/>
+            <rect x="20" y="194" width="760" height="8" rx="4" class="mut" fill="none"/>
+            <rect x="70" y="85" width="110" height="110" rx="8" class="mut" fill="none"/>
+            <circle cx="100" cy="105" r="6" class="mut led" fill="none"/>
+            <rect x="240" y="12" width="270" height="160" rx="6" class="mut" fill="none"/>
+            <rect x="240" y="12" width="270" height="160" rx="6" class="mutfill screen"/>
+            <rect x="370" y="173" width="10" height="19" class="mut" fill="none"/>
+            <rect x="335" y="190" width="80" height="6" rx="3" class="mut" fill="none"/>
+            <g class="no-signal" aria-hidden="true">
+              <rect x="240" y="12" width="270" height="160" rx="6" fill="none"/>
+              <text x="375" y="92" font-size="24" text-anchor="middle" style="fill:rgba(229,231,235,.88);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;letter-spacing:2px">NO SIGNAL</text>
+            </g>
+            <g class="login" aria-hidden="true">
+              <rect x="290" y="47" width="170" height="90" rx="8" class="mut" fill="none"/>
+              <text x="375" y="80" font-size="32" text-anchor="middle" style="fill:rgba(229,231,235,.95);font-weight:700">Login</text>
+              <rect x="310" y="96" width="130" height="12" rx="6" class="mut" fill="none"/>
+              <rect x="310" y="118" width="130" height="12" rx="6" class="mut" fill="none"/>
+            </g>
+          </svg>
+        </figure>`;
+    }
+
+    function openModal({title='Hinweis', html='', scene=null}){
+      if(!modalEl) return;
+      modalOpen = true;
+      document.body.classList.add('no-scroll');
+      modalTitleEl.textContent = title;
+      modalBodyEl.innerHTML = html + (scene ? renderMiniScene(scene) : '');
+      modalEl.classList.add('open');
+      modalEl.setAttribute('aria-hidden','false');
+      lastFocusEl = document.activeElement;
+      if(modalCloseEl) modalCloseEl.focus();
+    }
+    function closeModal(){
+      if(!modalEl) return;
+      modalOpen = false;
+      document.body.classList.remove('no-scroll');
+      modalEl.classList.remove('open');
+      modalEl.setAttribute('aria-hidden','true');
+      if(lastFocusEl) lastFocusEl.focus();
+    }
+    if(modalOkEl) modalOkEl.addEventListener('click', closeModal);
+    if(modalCloseEl) modalCloseEl.addEventListener('click', closeModal);
+    if(modalEl) modalEl.addEventListener('click', (e)=>{ if(e.target && (e.target === modalEl || e.target.hasAttribute('data-close'))) closeModal(); });
+
+    function setStatus(txt){ statusEl.textContent = txt; renderMeters(); }
+    function renderMeters(){ timeEl.textContent = state.time; triesEl.textContent = state.tries; }
+    function say(html){ feedbackEl.innerHTML = html; }
+    function pushLog(step, note=''){
+      state.log.push({step, note});
+      const li = document.createElement('li');
+      li.textContent = note ? `${step} (${note})` : step;
+      stepLogEl.appendChild(li);
+    }
+
+    function updateScene(){
+      const scene = document.querySelector('.scene');
+      if(!scene) return;
+      scene.classList.remove('nosig','power-on','login');
+      if(state.pcOn) scene.classList.add('power-on');
+      if(state.monitorOn && (!state.pcOn || !state.signalOk)) scene.classList.add('nosig');
+      if(state.pcOn && state.monitorOn && state.signalOk) scene.classList.add('login');
+    }
+
+    function renderActions(){
+      actionsEl.innerHTML = '';
+      [...state.actions]
+        .sort((a,b)=>parseInt(a.hotkey)-parseInt(b.hotkey))
+        .forEach(a=>{
+          const btn = document.createElement('button');
+          btn.className = 'action';
+          btn.type = 'button';
+          btn.dataset.key = a.hotkey;
+          btn.innerHTML = `<span class="label">${a.label}</span>`;
+          btn.setAttribute('aria-label', a.label + ` Taste ${a.hotkey}`);
+          btn.addEventListener('click', () => {
+            const before = { pcOn: state.pcOn, monitorOn: state.monitorOn, signalOk: state.signalOk };
+            a.effect.call(a);
+            if (!modalOpen) {
+              const html = (feedbackEl && feedbackEl.innerHTML) ? feedbackEl.innerHTML : 'Aktion ausgeführt.';
+              openModal({
+                title: a.label,
+                html,
+                scene: { pcOn: state.pcOn, monitorOn: state.monitorOn, signalOk: state.signalOk }
+              });
+            }
+          });
+          actionsEl.appendChild(btn);
+        });
+    }
+
+    
+    function evalRankAndScore(t, n){
+  var medal = 'Bronze';
+  var long = 'Bronze - geloest, aber umstaendlich';
+  var color = 'var(--bronze)';
+  if (t <= 3 && n <= 2){ medal = 'Gold'; long = 'Gold - exzellent (praezise & schnell)'; color = 'var(--gold)'; }
+  else if (t <= 6 && n <= 3){ medal = 'Silber'; long = 'Silber - gut & systematisch'; color = 'var(--silver)'; }
+  var score = medal === 'Gold' ? 100 : (medal === 'Silber' ? 70 : 40);
+  return { medal: medal, long: long, color: color, score: score };
+}
+function finish(success, detail){
+      state.solved = true;
+      setStatus('Geloest');
+      say(`<span class="good">Problem behoben.</span> ${detail} Der PC startet, du kannst weiterarbeiten.`);
+
+      // Bewertung
+      const t = state.time;
+      const n = state.tries;
+      summary.classList.add('active');
+      const ev = evalRankAndScore(t, n);
+      resultText.innerHTML = 'Zeit: <b>' + t + ' Min</b> - Schritte: <b>' + n + '</b> - Punkte: <b>' + ev.score + '</b>'; 
+      rankText.textContent = 'Bewertung: ' + ev.long; 
+      rankDot.style.background = 'linear-gradient(180deg, ' + ev.color + ', ' + ev.color + ')'; 
+
+      // Bestleistung speichern/anzeigen (besser = weniger Zeit, bei Gleichstand weniger Schritte)
+      const prev = loadBest();
+      const current = {time:t, tries:n};
+      const better = !prev || current.time < prev.time || (current.time === prev.time && current.tries < prev.tries);
+      if (better){ saveBest(current); }
+      showBest();
+      // Pro-Szenario-Score speichern
+      const L = levels[state.levelIdx];
+      const scores = loadScores();
+      const prevS = scores[L.id];
+      const shouldUpdate = !prevS || (ev.score > prevS.score) || (ev.score === prevS.score && (t < prevS.time || (t === prevS.time && n < prevS.tries)));
+      if (shouldUpdate){
+        scores[L.id] = { time: t, tries: n, rank: ev.medal, score: ev.score, updatedAt: new Date().toISOString() };
+        saveScores(scores);
+      }
+    }
+
+    function reset(){
+      loadLevel(state.levelIdx);
+    }
+
+    function showBest(){
+      const best = loadBest();
+      if(best){
+        if(bestText) bestText.textContent = `${best.time} Min / ${best.tries} Schritte`;
+        if(bestRow) bestRow.style.display = '';
+      } else {
+        if(bestRow) bestRow.style.display = 'none';
+      }
+    }
+
+    // Level definitions & loader
+    const levels = [
+      {
+        id: 'L0',
+        name: 'Der PC startet nicht',
+        storyTitle: 'Szenario: Der PC, der nicht starten will',
+        storyText: 'Du sitzt im Informatikraum und dein PC reagiert nicht: Du drückst den Power‑Knopf, aber es passiert nichts. Dein Ziel: In möglichst <b>wenigen Schritten</b> die Ursache finden.',
+        hints: {
+          h1: 'Was kannst du prüfen, <b>ohne den PC zu öffnen</b>?',
+          h2: '<ul class="hint"><li><b>Stromversorgung:</b> Kabel/Leiste/Netzschalter prüfen.</li><li><b>Anzeige:</b> Monitor einschalten / richtigen Eingang wählen.</li></ul>'
+        },
+        start: { pcOn: false, monitorOn: false, signalOk: true }
+      },
+      {
+        id: 'E1',
+        name: 'No Signal (falsche Quelle)',
+        storyTitle: 'Szenario: PC läuft, kein Bild',
+        storyText: 'Der PC läuft (Lüfter/LED), aber wir haben kein Bild. <b>Was überprüfst du als Erstes?</b>',
+        hints: {
+          h1: 'Was beeinflusst das <b>Bild</b>, ohne den PC zu öffnen?',
+          h2: '<ul class="hint"><li><b>Anzeige:</b> Monitor einschalten.</li><li><b>Quelle/Kabel:</b> HDMI/DP richtig wählen oder Kabel fest einstecken.</li></ul>'
+        },
+        start: { pcOn: true, monitorOn: false, signalOk: false }
+      },
+      {
+        id: 'M3',
+        name: 'Kein Bild trotz Start (POST)',
+        storyTitle: 'Szenario: Kein Bild trotz Start',
+        storyText: 'Der PC läuft (Lüfter/LED), der Monitor ist an – doch es erscheint <i>kein Bild</i> (No Signal). <b>Was prüfst du als Nächstes?</b>',
+        hints: {
+          h1: 'Vor dem Bild passiert der <b>POST</b>. Was verraten <b>Pieptöne/LEDs</b>?',
+          h2: '<ul class="hint"><li><b>POST-Hinweise lesen:</b> DRAM-LED an? Beepcode für Speicher?</li><li><b>RAM prüfen:</b> Riegel korrekt eindrücken/einzeln testen.</li><li><b>Anzeige nur sekundär:</b> Monitor kann an sein, aber ohne POST gibt es kein Signal.</li></ul>'
+        },
+        start: { pcOn: true, monitorOn: true, signalOk: false }
+      }
+    ];
+
+    function makeActions(){
+      return {
+        // L0-only
+        ram: {
+          id: 'ram',
+          label: '📏 Arbeitsspeicher überprüfen',
+          hotkey: '1',
+          delta: 6,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            setStatus('Intern - nicht zielfuehrend');
+            pushLog(this.label, `+${this.delta} Min`);
+            say('<span class="bad">Overkill / nicht symptombezogen.</span> Bei "geht nicht an" zuerst externe Checks (Strom, Monitor).');
+          }
+        },
+        network: {
+          id: 'network',
+          label: '🌐 Netzwerkkabel prüfen',
+          hotkey: '6',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            setStatus('Nicht relevant');
+            pushLog(this.label, '+1 Min');
+            say('<span class="warn">Kein Einfluss aufs Einschalten.</span> Nützlich bei Internet-/Anmeldeproblemen. Hier zuerst <b>Strom</b> und <b>Monitor</b> klären.');
+          }
+        },
+        // Shared
+        monitorToggle: {
+          id: 'monitor',
+          label: '🖥️ Monitor ein/aus',
+          hotkey: '2',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            if(state.monitorOn){
+              state.monitorOn = false; updateScene();
+              setStatus('Monitor aus');
+              pushLog(this.label, '+1 Min');
+              say('<span class="warn">Monitor ausgeschaltet.</span> Schalte ihn wieder ein, wenn du bereit bist, und prüfe <b>Quelle/Kabel</b>.');
+              openModal({
+                title: 'Monitor ausgeschaltet',
+                html: '<p>Du schaltest den Monitor aus. Das Display bleibt schwarz.</p><p>Schalte ihn wieder ein, um die Anzeige zu prüfen.</p>',
+                scene: { pcOn: state.pcOn, monitorOn: false, signalOk: state.signalOk }
+              });
+            } else {
+              state.monitorOn = true; updateScene();
+              setStatus('Monitor an');
+              pushLog(this.label, '+1 Min');
+              if(state.pcOn && state.signalOk){
+                say('<span class="good">Monitor eingeschaltet.</span> <b>Login</b> ist sichtbar.');
+                openModal({
+                  title: 'Bild vorhanden',
+                  html: '<p>Der Monitor ist an und zeigt <b>Login</b>.</p><p>Gut gemacht!</p>',
+                  scene: { pcOn: true, monitorOn: true, signalOk: true }
+                });
+                finish(true, 'Anzeige bereit.');
+              } else {
+                say('<span class="warn">Monitor ist an.</span> Anzeige zeigt <b>NO SIGNAL</b>. Prüfe <b>Quelle (HDMI/DP)</b> oder <b>Monitorkabel</b>.');
+                openModal({
+                  title: 'Monitor eingeschaltet',
+                  html: '<p>Der Monitor ist an.</p><p>Es wird <b>NO SIGNAL</b> angezeigt – prüfe <b>Quelle/Kabel</b>.</p>',
+                  scene: { pcOn: state.pcOn, monitorOn: true, signalOk: state.signalOk }
+                });
+              }
+            }
+          }
+        },
+        bios: {
+          id: 'bios',
+          label: '⚙️ Direkt ins BIOS starten',
+          hotkey: '3',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            setStatus('Nicht zielfuehrend');
+            pushLog(this.label, '+1 Min');
+            if(!state.pcOn){
+              say(`<span class="bad">Das geht (noch) nicht.</span> Solange der PC <i>gar nicht</i> startet, kommst du nicht ins BIOS. Erst muss <b>Strom</b> anliegen.`);
+            } else {
+              say(`<span class="warn">Nicht zielführend.</span> Das Problem betrifft <b>Anzeige/Signal</b>, nicht das BIOS. Prüfe Monitor <b>ein/aus</b>, <b>Quelle</b> oder <b>Kabel</b>.`);
+            }
+          }
+        },
+        cpu: {
+          id: 'cpu',
+          label: '🧰 Prozessor ausbauen & neu einsetzen',
+          hotkey: '4',
+          delta: 8,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            setStatus('Risiko hoch');
+            pushLog(this.label, '+8 Min');
+            say(`<span class="bad">Overkill!</span> Das ist ein tiefer Eingriff mit Risiko. Zuerst immer die <b>einfachen</b> Dinge prüfen: Strom, Kabel, Schalter.`);
+          }
+        },
+        power: {
+          id: 'power-cable',
+          label: '🔌 Stromkabel & Steckdose prüfen',
+          hotkey: '5',
+          delta: 2,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            const wasOn = state.pcOn;
+            setStatus('Strom ok');
+            pushLog(this.label, `+${this.delta} Min`);
+            state.pcOn = true;
+            updateScene();
+            const html = wasOn
+              ? '<p>Du prüfst die Stromkette – sie war bereits <b>in Ordnung</b>. Der PC hat Strom.</p><p>Falls noch kein Bild zu sehen ist: <b>Monitor einschalten</b> oder <b>Signal prüfen</b>.</p>'
+              : '<p>Du verfolgst das Netzkabel bis zur Steckdose. Am Netzteil war das Kabel <b>locker</b> – du steckst es fest ein. Die PC‑LED leuchtet jetzt <b>grün</b>.</p><p>Der Monitor bleibt noch schwarz. Überlege: <b>Monitor einschalten</b> oder <b>Signal prüfen</b>?</p>';
+            openModal({ title: 'Stromkette geprüft', html, scene: { pcOn: true, monitorOn: state.monitorOn, signalOk: state.signalOk } });
+            if(state.monitorOn && state.signalOk){
+              say('<span class="good">Stromversorgung hergestellt.</span> <b>Login</b> ist sichtbar.');
+              finish(true, 'Stromversorgung und Anzeige bereit.');
+            } else {
+              say('<span class="good">Stromversorgung hergestellt.</span> Prüfe nun die <b>Anzeige/Signal</b> (Monitor einschalten / Quelle wählen).');
+            }
+          }
+        },
+        monitorCable: {
+          id: 'monitor-cable',
+          label: '🔌 Monitorkabel prüfen',
+          hotkey: '1',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            setStatus('Signal pruefen');
+            pushLog(this.label, '+1 Min');
+            state.signalOk = true; updateScene();
+            if(state.pcOn && state.monitorOn){
+              say('<span class="good">Kabel sitzt fest.</span> <b>Login</b> ist sichtbar.');
+              finish(true, 'Signal wiederhergestellt.');
+            } else if(!state.monitorOn){
+              say('<span class="warn">Kabel sitzt fest.</span> Schalte jetzt den <b>Monitor</b> ein.');
+            } else {
+              say('<span class="warn">Kabel sitzt fest.</span> Prüfe noch die <b>Stromversorgung</b> des PCs.');
+            }
+          }
+        },
+        source: {
+          id: 'source',
+          label: '🔀 Monitorquelle umschalten (HDMI/DP)',
+          hotkey: '6',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            setStatus('Signal pruefen');
+            pushLog(this.label, '+1 Min');
+            // Wenn der Monitor AUS ist, kann die Quelle nicht umgeschaltet werden → erst einschalten
+            if(!state.monitorOn){
+              say('<span class="warn">Monitor ist aus.</span> Schalte zuerst den <b>Monitor</b> ein, dann die <b>Quelle</b> wählen.');
+              return;
+            }
+            // Quelle korrekt → Signal ok (nur wenn Monitor an)
+            state.signalOk = true; updateScene();
+            if(state.pcOn){
+              say('<span class="good">Quelle korrekt.</span> <b>Login</b> ist sichtbar.');
+              finish(true, 'Signal wiederhergestellt.');
+            } else {
+              say('<span class="warn">Quelle korrekt.</span> Prüfe noch die <b>Stromversorgung</b> des PCs.');
+            }
+          }
+        },
+        ramFix: {
+          id: 'ram-fix',
+          label: '📏 Arbeitsspeicher (RAM) überprüfen',
+          hotkey: '4',
+          delta: 4,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            setStatus('POST ok');
+            pushLog(this.label, '+4 Min');
+            state.signalOk = true; updateScene();
+            if(state.pcOn && state.monitorOn){
+              say('<span class="good">Arbeitsspeicher sitzt korrekt.</span> <b>Login</b> ist sichtbar.');
+              finish(true, 'POST erfolgreich, Anzeige aktiv.');
+            } else if(!state.monitorOn){
+              say('<span class="warn">Arbeitsspeicher sitzt korrekt.</span> Schalte jetzt den <b>Monitor</b> ein.');
+            } else {
+              say('<span class="warn">Arbeitsspeicher sitzt korrekt.</span> Prüfe noch die <b>Stromversorgung</b>.');
+            }
+          }
+        },
+        postCheck: {
+          id: 'post-check',
+          label: '🔔 Pieptöne / POST‑LED prüfen',
+          hotkey: '1',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            setStatus('Diagnose');
+            pushLog(this.label, '+1 Min');
+            say('<span class="good">Hinweis:</span> Die <b>DRAM‑LED</b> leuchtet / Beepcode für Speicher. <b>Arbeitsspeicher (RAM) prüfen<\/b> (korrekt einsetzen).');
+          }
+        },
+        cmosReset: {
+          id: 'cmos-reset',
+          label: '🪛 CMOS‑Reset (kurz)',
+          hotkey: '6',
+          delta: 2,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            setStatus('Nicht zielfuehrend');
+            pushLog(this.label, '+2 Min');
+            say('<span class="warn">Hier unwahrscheinlich.</span> CMOS‑Reset hilft bei BIOS‑Fehlkonfig. Der Hinweis zeigt eher auf <b>RAM</b> (POST).');
+          }
+        }
+      };
+    }
+    function getActionsForLevel(levelId){
+      const A = makeActions();
+      if(levelId === 'L0'){
+        return [A.ram, A.monitorToggle, A.bios, A.cpu, A.power, A.network];
+      } else if(levelId === 'E1'){
+        return [A.monitorCable, A.monitorToggle, A.bios, A.cpu, A.power, A.source];
+      } else if(levelId === 'M3'){
+        return [A.postCheck, A.monitorToggle, A.bios, A.ramFix, A.power, A.cmosReset];
+      } else {
+        return [A.monitorToggle, A.bios, A.power, A.network, A.cpu, A.source];
+      }
+    }
+
+    function loadLevel(idx){
+      state.levelIdx = idx;
+      // Reset core state
+      state.time = 0; state.tries = 0; state.solved = false; state.log = [];
+      // Apply start flags
+      const L = levels[idx];
+      state.pcOn = L.start.pcOn;
+      state.monitorOn = L.start.monitorOn;
+      state.signalOk = L.start.signalOk;
+
+      // Actions per Level
+      state.actions = getActionsForLevel(L.id);
+
+      // Wrap power action to show a dedicated "finished" modal when the
+      // sequence is: Button 2 (monitor) then Button 5 (power) and the
+      // scenario becomes solved by turning on power.
+      (function(){
+        const powerAct = state.actions && state.actions.find(x => x.id === 'power-cable');
+        const monitorAct = state.actions && state.actions.find(x => x.id === 'monitor');
+        if(powerAct && typeof powerAct.effect === 'function'){
+          const originalEffect = powerAct.effect;
+          powerAct.effect = function(){
+            const prevWasMonitor = !!(state.log && state.log.length && monitorAct && state.log[state.log.length-1].step === monitorAct.label);
+            const willSolve = !state.pcOn && state.monitorOn && state.signalOk;
+            originalEffect.call(this);
+            if(prevWasMonitor && willSolve){
+              openModal({
+                title: 'Aufgabe abgeschlossen',
+                html: '<p><b>Aufgabe abgeschlossen.</b> PC hat Strom, Monitor ist an, Signal liegt an.</p><p>Das <b>Login</b> ist sichtbar.</p>',
+                scene: { pcOn: true, monitorOn: true, signalOk: true }
+              });
+            }
+          };
+        }
+      })();
+
+      renderActions();
+
+      // UI text
+      document.getElementById('storyTitle').textContent = L.storyTitle;
+      document.getElementById('storyText').innerHTML = L.storyText;
+      const h1 = document.getElementById('hintText1'); if(h1) h1.innerHTML = L.hints.h1;
+      const h2 = document.getElementById('hintText2'); if(h2) h2.innerHTML = L.hints.h2;
+
+      // Status
+      setStatus('Unbekannt'); renderMeters();
+      feedbackEl.innerHTML = 'Wähle deinen ersten Schritt.'; stepLogEl.innerHTML = '';
+      summary.classList.remove('active');
+
+      // Visuals
+      updateScene();
+
+      // Badge text
+      const tag = document.getElementById('levelTag');
+      if(tag){ tag.innerHTML = `Fall ${idx+1}/${levels.length} - Schwierigkeitsgrad: <b>Einfach</b>`; }
+    }
+
+    // Clicking the badge cycles levels
+    document.getElementById('levelTag').addEventListener('click', ()=>{
+      const next = (state.levelIdx + 1) % levels.length;
+      loadLevel(next);
+    });
+
+    // Score-Modal oeffnen
+    if (document.getElementById('scoreBtn')) document.getElementById('scoreBtn').addEventListener('click', ()=>{
+      const scores = loadScores();
+      const items = levels.map((L, idx)=>{
+        const s = scores[L.id];
+        if(!s){
+          return `<li><b>Fall ${idx+1}:</b> ${L.name} - <i>noch kein Ergebnis</i></li>`;
+        }
+        const color = s.rank === 'Gold' ? 'var(--gold)' : (s.rank === 'Silber' ? 'var(--silver)' : 'var(--bronze)');
+        return `<li><b>Fall ${idx+1}:</b> ${L.name} - Zeit: <b>${s.time} Min</b>, Schritte: <b>${s.tries}</b>, Rang: <b style="color:${color}">${s.rank}</b>, Punkte: <b>${s.score}</b></li>`;
+      }).join('');
+      const html = `<p class="hint">Deine besten Ergebnisse pro Szenario:</p><ul class="hint">${items}</ul>`;
+      openModal({ title: 'Score', html });
+    });
+    // Reveal hint
+    
+    document.getElementById('resetBtn').addEventListener('click', reset);
+
+    // Hotkeys 1–6 + R
+    window.addEventListener('keydown', (e)=>{
+      const k = e.key.toLowerCase();
+      if(modalOpen){ if(k==='escape'){ closeModal(); } return; }
+      if(state.solved && k==='r'){ reset(); return; }
+      const action = state.actions.find(a => a.hotkey === e.key);
+      if(action){
+        state.prevActionId = state.lastActionId;
+        state.lastActionId = action.id;
+        action.effect();
+        if (!modalOpen) {
+          const html = (feedbackEl && feedbackEl.innerHTML) ? feedbackEl.innerHTML : 'Aktion ausgefǬhrt.';
+          openModal({
+            title: action.label,
+            html,
+            scene: { pcOn: state.pcOn, monitorOn: state.monitorOn, signalOk: state.signalOk }
+          });
+        }
+      }
+      if(k==='r'){ reset(); }
+    });
+
+        // Init
+    loadLevel(0);
+    showBest();
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
