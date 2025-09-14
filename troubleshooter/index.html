@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>PC-Troubleshooter v2.2</title>
+  <title>PC-Troubleshooter v2.3</title>
   <style>
     :root{
       --bg:#0f172a;           /* slate-900 */
@@ -38,9 +38,26 @@
     .wrap{max-width:1000px;margin:clamp(16px,3vw,40px) auto;padding:0 16px}
     header{display:flex;gap:16px;align-items:center;justify-content:space-between;margin-bottom:20px}
     #levelTag{margin-left:auto}
+    /* Header controls: icon-only circles and compact nav */
+    :root{ --ctrl-size: 44px; }
+    header .btn{border-radius:999px;width:var(--ctrl-size);height:var(--ctrl-size);padding:0;display:inline-grid;place-items:center}
+    /* Allow score button to expand for label */
+    #scoreBtn{width:auto;padding:0 14px}
+    /* Level navigation group as button group (no gaps) */
+    .level-nav{display:flex;align-items:stretch;gap:0}
+    .level-nav .btn{width:var(--ctrl-size);height:var(--ctrl-size);padding:0}
+    /* Merge borders between neighbors */
+    .level-nav > *:not(:first-child){ margin-left:-1px }
+    /* Rounded outside corners only */
+    #levelTag{margin-left:0}
+    #levelTag.badge{height:var(--ctrl-size);padding:0 12px;font-size:14px;display:flex;align-items:center;border-radius:0}
+    #levelPrev{border-top-right-radius:0;border-bottom-right-radius:0}
+    #levelNext{border-top-left-radius:0;border-bottom-left-radius:0}
     header .controls{display:flex;gap:8px;align-items:center}
     .title{font-weight:800;font-size:clamp(22px,4vw,34px);letter-spacing:.2px}
     .badge{border:1px solid rgba(255,255,255,.12);padding:6px 10px;border-radius:999px;font-size:12px;color:var(--ink-dim)}
+    /* Make level tag match nav button height */
+    #levelTag.badge{height:var(--ctrl-size);padding:0 12px;font-size:14px;display:flex;align-items:center}
 
     .card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);box-shadow:var(--shadow);}
     .card .inner{padding:clamp(16px,2.6vw,24px)}
@@ -95,6 +112,14 @@
     .footer{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
     .btn{appearance:none;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.03);color:var(--ink);padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600}
     .btn.primary{border-color:rgba(34,211,238,.4);background:linear-gradient(180deg,rgba(34,211,238,.18),rgba(34,211,238,.08))}
+    /* Bigger Schliessen button in modal */
+    .action-message .mfoot{display:flex;justify-content:stretch;align-items:stretch;margin-top:0;grid-column:2;grid-row:1 / span 2}
+    #messageOk{font-size:16px;padding:0 22px;height:100%;width:100%;min-height:80px}
+    @media (max-width:560px){
+      .action-message.open{grid-template-columns:1fr;grid-template-rows:auto 1fr auto}
+      .action-message .mfoot{grid-column:1;grid-row:3;margin-top:12px}
+      #messageOk{height:auto;min-height:80px}
+    }
 
     .score{display:flex;gap:12px;align-items:center}
     .score .dot{width:10px;height:10px;border-radius:999px;background:var(--good);box-shadow:0 0 0 4px rgba(34,197,94,.15)}
@@ -146,10 +171,10 @@
 
     /* Action message */
     .action-message{display:none;margin-top:12px;background:var(--card);border:1px solid rgba(255,255,255,.16);border-radius:16px;box-shadow:var(--shadow);padding:18px}
-    .action-message.open{display:block}
-    .action-message .mhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .action-message.open{display:grid;grid-template-columns:1fr 130px;grid-template-rows:auto 1fr;gap:12px;align-items:stretch}
+    .action-message .mhead{display:flex;align-items:center;justify-content:space-between;margin:0}
     .action-message .mhead h3{margin:0;font-size:18px}
-    .action-message .mbody{font-size:14px;color:var(--ink-dim)}
+    .action-message .mbody{font-size:14px;color:var(--ink-dim);grid-column:1;grid-row:2}
     .action-message .mfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
     .scene.mini svg{max-height:160px}
     .scene.mini{margin-top:10px}
@@ -169,9 +194,9 @@
 <body>
   <div class="wrap">
     <header>
-      <div class="title">PC-Troubleshooter <span class="badge" id="verTag">v2.2</span></div>
+      <div class="title">PC-Troubleshooter <span class="badge" id="verTag">v2.3</span></div>
       <div class="badge" id="levelTag" aria-live="polite">Fall 1/1 • Schwierigkeitsgrad: <b>Einfach</b></div>
-          <button class="btn" id="scoreBtn" title="Score anzeigen" aria-label="Score anzeigen">Score anzeigen</button></header>
+          <button class="btn" id="scoreBtn" title="Score anzeigen" aria-label="Score anzeigen">🏆 Score</button></header>
 
     <!-- Single card: story, actions & info -->
     <section class="card story" aria-labelledby="storyTitle">
@@ -224,7 +249,7 @@
             </header>
             <div class="mbody" id="messageBody"></div>
             <div class="mfoot">
-              <button class="btn primary" id="messageOk">OK</button>
+              <button class="btn primary" id="messageOk">Schliessen</button>
             </div>
           </div>
           <div class="legend" aria-hidden="true">Tasten: [1–6] Aktionen · [R] Reset</div>
@@ -306,17 +331,25 @@
     const modalBodyEl = document.getElementById('messageBody');
     const modalOkEl = document.getElementById('messageOk');
     let celebrationEl = null;
-    function openModal({title='Hinweis', html='', okLabel='OK'}){
+    let celebrationTimer = null;
+    // Track which hotkey opened the modal (if any)
+    let lastHotkey = null;
+    let modalOpenKey = null;
+    function openModal({title='Hinweis', html='', okLabel='Schliessen'}){
       if(!modalEl) return;
       modalOpen = true;
       actionsEl.style.display = 'none';
       modalTitleEl.textContent = title;
       modalBodyEl.innerHTML = html;
       if(modalOkEl) modalOkEl.textContent = okLabel;
+      if(title === 'Aufgabe abgeschlossen' && modalOkEl){ modalOkEl.textContent = 'Nächste Aufgabe'; }
       modalEl.classList.add('open');
       modalEl.setAttribute('aria-hidden','false');
       lastFocusEl = document.activeElement;
       if(modalOkEl) modalOkEl.focus();
+      // remember the key that opened this modal and reset the pending one
+      modalOpenKey = lastHotkey;
+      lastHotkey = null;
       if(title === 'Aufgabe abgeschlossen') showCelebration();
     }
     function closeModal(){
@@ -327,29 +360,44 @@
       actionsEl.style.display = '';
       if(lastFocusEl) lastFocusEl.focus();
       hideCelebration();
+      modalOpenKey = null;
     }
     function showCelebration(){
       if(celebrationEl) return;
+      if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){ return; }
       celebrationEl = document.createElement('div');
       celebrationEl.className = 'confetti';
       const colors = ['#fbbf24','#60a5fa','#22c55e','#ef4444'];
-      for(let i=0;i<60;i++){
-        const p = document.createElement('span');
-        p.className = 'confetti-piece';
-        p.style.left = Math.random()*100 + '%';
-        p.style.backgroundColor = colors[i % colors.length];
-        p.style.animationDelay = (Math.random()*2) + 's';
-        celebrationEl.appendChild(p);
+      function spawn(n=12){
+        for(let i=0;i<n;i++){
+          const p = document.createElement('span');
+          p.className = 'confetti-piece';
+          p.style.left = Math.random()*100 + '%';
+          p.style.backgroundColor = colors[i % colors.length];
+          p.style.animationDelay = (Math.random()*0.8) + 's';
+          p.style.animationDuration = (2 + Math.random()*2) + 's';
+          p.addEventListener('animationend', ()=> p.remove());
+          celebrationEl.appendChild(p);
+        }
       }
+      spawn(24);
       document.body.appendChild(celebrationEl);
+      celebrationTimer = setInterval(()=> spawn(10), 600);
     }
     function hideCelebration(){
-      if(celebrationEl){
-        celebrationEl.remove();
-        celebrationEl = null;
-      }
+      if(celebrationTimer){ clearInterval(celebrationTimer); celebrationTimer = null; }
+      if(celebrationEl){ celebrationEl.remove(); celebrationEl = null; }
     }
-    if(modalOkEl) modalOkEl.addEventListener('click', closeModal);
+    if(modalOkEl) modalOkEl.addEventListener('click', () => {
+      // If success modal, advance to next scenario; keep celebration until click
+      if(modalTitleEl && modalTitleEl.textContent === 'Aufgabe abgeschlossen'){
+        const next = (state.levelIdx + 1) % levels.length;
+        closeModal();
+        loadLevel(next);
+      } else {
+        closeModal();
+      }
+    });
 
     function setStatus(txt){ statusEl.textContent = txt; renderMeters(); }
     function renderMeters(){ timeEl.textContent = state.time; triesEl.textContent = state.tries; }
@@ -406,7 +454,7 @@
           btn.dataset.key = a.hotkey;
           btn.innerHTML = `<span class="label">${a.label}</span>`;
           btn.setAttribute('aria-label', a.label + ` Taste ${a.hotkey}`);
-          btn.addEventListener('click', () => runAction(a));
+          btn.addEventListener('click', () => { lastHotkey = a.hotkey; runAction(a); });
           actionsEl.appendChild(btn);
         });
     }
@@ -423,6 +471,7 @@
 }
 function finish(success, detail){
       state.solved = true;
+      showCelebration();
       setStatus('Geloest');
       say(`<span class="good">Problem behoben.</span> ${detail} Der PC startet, du kannst weiterarbeiten.`);
 
@@ -786,14 +835,47 @@ function finish(success, detail){
 
       // Badge text
       const tag = document.getElementById('levelTag');
-      if(tag){ tag.innerHTML = `Fall ${idx+1}/${levels.length} - Schwierigkeitsgrad: <b>Einfach</b>`; }
+      if(tag){ tag.innerHTML = `Fall ${idx+1}/${levels.length} - <b>Einfach</b>`; }
     }
 
-    // Clicking the badge cycles levels
-    document.getElementById('levelTag').addEventListener('click', ()=>{
-      const next = (state.levelIdx + 1) % levels.length;
-      loadLevel(next);
-    });
+    // Clicking the badge: no-op (navigation via prev/next buttons)
+    document.getElementById('levelTag').addEventListener('click', ()=>{});
+    // Inject previous/next buttons around the level tag and group closely
+    (function(){
+      const levelTagEl = document.getElementById('levelTag');
+      if(!levelTagEl || !levelTagEl.parentNode) return;
+      // Wrap in a compact nav container
+      const wrap = document.createElement('div');
+      wrap.className = 'level-nav';
+      levelTagEl.parentNode.insertBefore(wrap, levelTagEl);
+      wrap.appendChild(levelTagEl);
+      // Prev
+      const prevBtn = document.createElement('button');
+      prevBtn.className = 'btn';
+      prevBtn.id = 'levelPrev';
+      prevBtn.title = 'Vorheriger Fall';
+      prevBtn.setAttribute('aria-label','Vorheriger Fall');
+      prevBtn.textContent = '<';
+      wrap.insertBefore(prevBtn, levelTagEl);
+      prevBtn.addEventListener('click', ()=>{
+        closeModal(); hideCelebration();
+        const prev = (state.levelIdx - 1 + levels.length) % levels.length;
+        loadLevel(prev);
+      });
+      // Next
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'btn';
+      nextBtn.id = 'levelNext';
+      nextBtn.title = 'Nächster Fall';
+      nextBtn.setAttribute('aria-label','Nächster Fall');
+      nextBtn.textContent = '>';
+      wrap.appendChild(nextBtn);
+      nextBtn.addEventListener('click', ()=>{
+        closeModal(); hideCelebration();
+        const next = (state.levelIdx + 1) % levels.length;
+        loadLevel(next);
+      });
+    })();
 
     // Score-Modal oeffnen
     if (document.getElementById('scoreBtn')) document.getElementById('scoreBtn').addEventListener('click', ()=>{
@@ -819,10 +901,19 @@ function finish(success, detail){
     // Hotkeys 1–6 + R
     window.addEventListener('keydown', (e)=>{
       const k = e.key.toLowerCase();
-      if(modalOpen){ if(k==='escape'){ closeModal(); } return; }
+      // While a modal is open, allow ESC or same opener key to close, unless solved
+      if(modalOpen){
+        if(!state.solved){
+          if(k==='escape'){ closeModal(); return; }
+          if(modalOpenKey && e.key === modalOpenKey){ closeModal(); return; }
+        }
+        return;
+      }
       if(state.solved && k==='r'){ reset(); return; }
       const action = state.actions.find(a => a.hotkey === e.key);
       if(action){
+        // remember which key triggered the upcoming modal (if any)
+        lastHotkey = e.key;
         runAction(action);
       }
       if(k==='r'){ reset(); }
