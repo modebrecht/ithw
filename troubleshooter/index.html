@@ -67,7 +67,9 @@
     .story h2{margin:0 0 8px 0;font-size:clamp(18px,2.6vw,22px)}
     .story p{margin:.35rem 0;color:var(--ink-dim);line-height:1.5}
 
-    .statusbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+    .statusbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;align-items:center}
+    .status-actions{margin-left:auto;display:flex;gap:10px;align-items:center}
+    .status-actions .btn{padding:8px 12px}
     .chip{background-color:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);padding:8px 10px;border-radius:10px;font-size:13px;color:var(--ink-dim)}
     .chip strong{color:var(--ink)}
 
@@ -128,6 +130,9 @@
 
     .score{display:flex;gap:12px;align-items:center}
     .score .dot{width:10px;height:10px;border-radius:999px;background:var(--good);box-shadow:0 0 0 4px rgba(34,197,94,.15)}
+    /* Inline reveal for extra hints inside modal */
+    .more-hints{display:none;margin-top:10px}
+    .more-hints.open{display:block}
 
     .summary{display:none}
     .summary.active{display:block}
@@ -272,9 +277,8 @@
 
           <div class="footer">
             <button class="btn" id="resetBtn" title="Szenario zurücksetzen (R)" aria-keyshortcuts="R">Neu starten ↺</button>
-            <button class="btn" id="hint1Btn">Hinweis 1</button>
-            <button class="btn" id="hint2Btn">Hinweis 2</button>
-            <button class="btn" id="goalBtn">Ziele &amp; LP21‑Bezug</button>
+            <button class="btn" id="hint1Btn">Hinweis</button>
+            <button class="btn" id="goalBtn">Ziel</button>
           </div>
 
           <div class="feedback" aria-live="polite">
@@ -333,7 +337,6 @@
     const bestText = $('#bestText');
     const scoreBtn = document.getElementById('scoreBtn');
     const hint1Btn = document.getElementById('hint1Btn');
-    const hint2Btn = document.getElementById('hint2Btn');
     const goalBtn = document.getElementById('goalBtn');
 
     const hint1Html = 'Was kannst du prüfen, <b>ohne den PC zu öffnen</b>?';
@@ -937,12 +940,27 @@ function finish(success, detail){
       const html = `<p class="hint">Deine besten Ergebnisse pro Szenario:</p><ul class="hint">${items}</ul>`;
       openTopModal({ title: 'Score', html });
     });
+    // Move footer buttons into the statusbar (right side)
+    (function(){
+      const statusBar = document.querySelector('.statusbar');
+      const footer = document.querySelector('.footer');
+      if(statusBar && footer){
+        const actions = document.createElement('div');
+        actions.className = 'status-actions';
+        while(footer.firstChild){ actions.appendChild(footer.firstChild); }
+        statusBar.appendChild(actions);
+        footer.remove();
+      }
+    })();
     // Reveal hint
-    
     document.getElementById('resetBtn').addEventListener('click', reset);
-    hint1Btn.addEventListener('click', () => openModal({title:'Hinweis 1', html: hint1Html}));
-    hint2Btn.addEventListener('click', () => openModal({title:'Hinweis 2', html: hint2Html}));
-    goalBtn.addEventListener('click', () => openModal({title:'Ziele & LP21‑Bezug', html: goalHtml}));
+    if(hint1Btn){
+      hint1Btn.addEventListener('click', () => {
+        const bothHints = `${hint1Html}<div class="more-hints open" id="moreHints"><hr class="divider" aria-hidden="true" /><div class="hint">${hint2Html}</div></div>`;
+        openModal({title:'Hinweise', html: bothHints});
+      });
+    }
+    if(goalBtn){ goalBtn.addEventListener('click', () => openModal({title:'Ziele & LP21-Bezug', html: goalHtml})); }
 
     // Hotkeys 1–6 + R
     window.addEventListener('keydown', (e)=>{
