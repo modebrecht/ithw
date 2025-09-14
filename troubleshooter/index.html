@@ -304,12 +304,13 @@
     const modalBodyEl = document.getElementById('messageBody');
     const modalOkEl = document.getElementById('messageOk');
     let celebrationEl = null;
-    function openModal({title='Hinweis', html=''}){
+    function openModal({title='Hinweis', html='', okLabel='OK'}){
       if(!modalEl) return;
       modalOpen = true;
       actionsEl.style.display = 'none';
       modalTitleEl.textContent = title;
       modalBodyEl.innerHTML = html;
+      if(modalOkEl) modalOkEl.textContent = okLabel;
       modalEl.classList.add('open');
       modalEl.setAttribute('aria-hidden','false');
       lastFocusEl = document.activeElement;
@@ -358,6 +359,31 @@
       stepLogEl.appendChild(li);
     }
 
+    function runAction(a){
+      if(!a) return;
+      state.prevActionId = state.lastActionId;
+      state.lastActionId = a.id;
+      a.effect.call(a);
+      const solvedCombo = !state.solved &&
+        ((state.prevActionId === 'monitor' && state.lastActionId === 'power-cable') ||
+         (state.prevActionId === 'power-cable' && state.lastActionId === 'monitor')) &&
+        state.pcOn && state.monitorOn && state.signalOk;
+      if(solvedCombo){
+        finish(true, 'Stromversorgung und Monitor aktiviert.');
+        openModal({
+          title: 'Aufgabe abgeschlossen',
+          html: '<p><b>Aufgabe geschafft.</b> PC und Monitor sind bereit.</p>',
+          okLabel: 'Nächste Aufgabe'
+        });
+      } else if (!modalOpen){
+        const html = (feedbackEl && feedbackEl.innerHTML) ? feedbackEl.innerHTML : 'Aktion ausgeführt.';
+        openModal({
+          title: a.label,
+          html
+        });
+      }
+    }
+
     function updateScene(){
       const scene = document.querySelector('.scene');
       if(!scene) return;
@@ -378,16 +404,7 @@
           btn.dataset.key = a.hotkey;
           btn.innerHTML = `<span class="label">${a.label}</span>`;
           btn.setAttribute('aria-label', a.label + ` Taste ${a.hotkey}`);
-          btn.addEventListener('click', () => {
-            a.effect.call(a);
-            if (!modalOpen) {
-              const html = (feedbackEl && feedbackEl.innerHTML) ? feedbackEl.innerHTML : 'Aktion ausgeführt.';
-              openModal({
-                title: a.label,
-                html
-              });
-            }
-          });
+          btn.addEventListener('click', () => runAction(a));
           actionsEl.appendChild(btn);
         });
     }
@@ -541,7 +558,6 @@ function finish(success, detail){
                   title: 'Bild vorhanden',
                   html: '<p>Der Monitor ist an und zeigt <b>Login</b>.</p><p>Gut gemacht!</p>'
                 });
-                finish(true, 'Anzeige bereit.');
               } else {
                 say('<span class="warn">Monitor ist an.</span> Anzeige zeigt <b>NO SIGNAL</b>. Prüfe <b>Quelle (HDMI/DP)</b> oder <b>Monitorkabel</b>.');
                 openModal({
@@ -601,7 +617,6 @@ function finish(success, detail){
             openModal({ title: 'Stromkette geprüft', html });
             if(state.monitorOn && state.signalOk){
               say('<span class="good">Stromversorgung hergestellt.</span> <b>Login</b> ist sichtbar.');
-              finish(true, 'Stromversorgung und Anzeige bereit.');
             } else {
               say('<span class="good">Stromversorgung hergestellt.</span> Prüfe nun die <b>Anzeige/Signal</b> (Monitor einschalten / Quelle wählen).');
             }
@@ -728,28 +743,6 @@ function finish(success, detail){
       // Actions per Level
       state.actions = getActionsForLevel(L.id);
 
-      // Wrap power action to show a dedicated "finished" message when the
-      // sequence is: Button 2 (monitor) then Button 5 (power) and the
-      // scenario becomes solved by turning on power.
-      (function(){
-        const powerAct = state.actions && state.actions.find(x => x.id === 'power-cable');
-        const monitorAct = state.actions && state.actions.find(x => x.id === 'monitor');
-        if(powerAct && typeof powerAct.effect === 'function'){
-          const originalEffect = powerAct.effect;
-          powerAct.effect = function(){
-            const prevWasMonitor = !!(state.log && state.log.length && monitorAct && state.log[state.log.length-1].step === monitorAct.label);
-            const willSolve = !state.pcOn && state.monitorOn && state.signalOk;
-            originalEffect.call(this);
-            if(prevWasMonitor && willSolve){
-              openModal({
-                title: 'Aufgabe abgeschlossen',
-                html: '<p><b>Aufgabe abgeschlossen.</b> PC hat Strom, Monitor ist an, Signal liegt an.</p><p>Das <b>Login</b> ist sichtbar.</p>'
-              });
-            }
-          };
-        }
-      })();
-
       renderActions();
 
       // UI text
@@ -805,16 +798,7 @@ function finish(success, detail){
       if(state.solved && k==='r'){ reset(); return; }
       const action = state.actions.find(a => a.hotkey === e.key);
       if(action){
-        state.prevActionId = state.lastActionId;
-        state.lastActionId = action.id;
-        action.effect();
-        if (!modalOpen) {
-          const html = (feedbackEl && feedbackEl.innerHTML) ? feedbackEl.innerHTML : 'Aktion ausgefǬhrt.';
-          openModal({
-            title: action.label,
-            html
-          });
-        }
+        runAction(action);
       }
       if(k==='r'){ reset(); }
     });
