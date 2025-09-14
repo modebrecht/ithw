@@ -42,11 +42,7 @@
     .title{font-weight:800;font-size:clamp(22px,4vw,34px);letter-spacing:.2px}
     .badge{border:1px solid rgba(255,255,255,.12);padding:6px 10px;border-radius:999px;font-size:12px;color:var(--ink-dim)}
 
-    .grid{display:grid;grid-template-columns:minmax(320px,1fr) minmax(300px,1fr);gap:18px}
-    @media (max-width:700px){.grid{grid-template-columns:1fr}}
-
     .card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);box-shadow:var(--shadow);}
-    .right.card{box-shadow:0 12px 28px -16px rgba(0,0,0,.6);}
     .card .inner{padding:clamp(16px,2.6vw,24px)}
 
     .story h2{margin:0 0 8px 0;font-size:clamp(18px,2.6vw,22px)}
@@ -182,10 +178,9 @@
       <div class="badge" id="levelTag" aria-live="polite">Fall 1/1 • Schwierigkeitsgrad: <b>Einfach</b></div>
           <button class="btn" id="scoreBtn" title="Score anzeigen" aria-label="Score anzeigen">Score anzeigen</button></header>
 
-    <div class="grid">
-      <!-- Left: story & actions -->
-      <section class="card story" aria-labelledby="storyTitle">
-        <div class="inner">
+    <!-- Single card: story, actions & info -->
+    <section class="card story" aria-labelledby="storyTitle">
+      <div class="inner">
           <h2 id="storyTitle">Szenario: Der PC, der nicht starten will</h2>
           <p id="storyText">
             Du sitzt im Informatikraum und dein PC reagiert nicht: Du drückst den Power‑Knopf, aber es passiert nichts.
@@ -230,36 +225,12 @@
           <div class="actions" id="actions" aria-label="Verfügbare Aktionen"></div>
           <div class="legend" aria-hidden="true">Tasten: [1–6] Aktionen · [R] Reset</div>
 
-          
-
           <div class="footer">
             <button class="btn" id="resetBtn" title="Szenario zurücksetzen (R)" aria-keyshortcuts="R">Neu starten ↺</button>
-            
+            <button class="btn" id="hint1Btn">Hinweis 1</button>
+            <button class="btn" id="hint2Btn">Hinweis 2</button>
+            <button class="btn" id="goalBtn">Ziele &amp; LP21‑Bezug</button>
           </div>
-        </div>
-      </section>
-
-      <!-- Right: knowledge & summary -->
-      <aside class="card right" aria-labelledby="refTitle">
-        <div class="inner">
-          <details id="hint1" class="hintbox"><summary>Hinweis 1</summary><p class="hint" id="hintText1">Was kannst du prüfen, <b>ohne den PC zu öffnen</b>?</p></details>
-
-          <details id="hint2" class="hintbox"><summary>Hinweis 2</summary>
-            <ul class="hint" id="hintText2">
-              <li><b>Stromversorgung:</b> Steckdosenleiste an? Netzkabel fest am PC und an der Leiste/Steckdose? Netzteil‑Schalter (I/O) auf <b>I</b> (falls vorhanden)?</li>
-              <li><b>Anzeige/Signal:</b> Monitor eingeschaltet? Richtigen Eingang (HDMI/DP) gewählt? Kabel steckt fest? Falls möglich, anderen Port/Kabel testen.</li>
-              <li>Wenn der PC weiterhin <i>gar nicht</i> reagiert, wären interne Ursachen der nächste Schritt – in diesem Level bleiben wir bei externen Checks.</li>
-            </ul>
-          </details>
-
-          <details class="didaktik">
-            <summary>Ziele &amp; LP21‑Bezug</summary>
-            <ul class="hint">
-              <li><b>Du übst:</b> strukturiert Fehler finden (erst extern, dann intern), Entscheidungen begründen und deine Schritte protokollieren.</li>
-              <li><b>LP21:</b> MI 3.3 «Fehler systematisch suchen &amp; beheben», MI 2.2 «Geräte zweckmässig einsetzen» — genau das trainierst du hier im Szenario.</li>
-              <li><b>Tipps fürs Szenario:</b> formuliere deine Vermutung laut, notiere jeden Schritt (Zeit/Schritte siehst du links) und vergleiche danach mit deiner Bestleistung.</li>
-            </ul>
-          </details>
 
           <div class="feedback" aria-live="polite">
             <p class="msg" id="feedbackMsg">Wähle deinen ersten Schritt.</p>
@@ -278,8 +249,7 @@
             <div class="hint" id="bestRow" style="display:none;margin-top:8px">Bestleistung: <b id="bestText">—</b></div>
           </div>
         </div>
-      </aside>
-    </div>
+    </section>
   </div>
 
   <!-- Modal for action details -->
@@ -332,6 +302,13 @@
     const bestRow = $('#bestRow');
     const bestText = $('#bestText');
     const scoreBtn = document.getElementById('scoreBtn');
+    const hint1Btn = document.getElementById('hint1Btn');
+    const hint2Btn = document.getElementById('hint2Btn');
+    const goalBtn = document.getElementById('goalBtn');
+
+    const hint1Html = 'Was kannst du prüfen, <b>ohne den PC zu öffnen</b>?';
+    const hint2Html = `<ul class="hint"><li><b>Stromversorgung:</b> Steckdosenleiste an? Netzkabel fest am PC und an der Leiste/Steckdose? Netzteil‑Schalter (I/O) auf <b>I</b> (falls vorhanden)?</li><li><b>Anzeige/Signal:</b> Monitor eingeschaltet? Richtigen Eingang (HDMI/DP) gewählt? Kabel steckt fest? Falls möglich, anderen Port/Kabel testen.</li><li>Wenn der PC weiterhin <i>gar nicht</i> reagiert, wären interne Ursachen der nächste Schritt – in diesem Level bleiben wir bei externen Checks.</li></ul>`;
+    const goalHtml = `<ul class="hint"><li><b>Du übst:</b> strukturiert Fehler finden (erst extern, dann intern), Entscheidungen begründen und deine Schritte protokollieren.</li><li><b>LP21:</b> MI 3.3 «Fehler systematisch suchen &amp; beheben», MI 2.2 «Geräte zweckmässig einsetzen» — genau das trainierst du hier im Szenario.</li><li><b>Tipps fürs Szenario:</b> formuliere deine Vermutung laut, notiere jeden Schritt (Zeit/Schritte siehst du links) und vergleiche danach mit deiner Bestleistung.</li></ul>`;
 
     // Modal helpers
     let modalOpen = false, lastFocusEl = null;
@@ -870,6 +847,9 @@ function finish(success, detail){
     // Reveal hint
     
     document.getElementById('resetBtn').addEventListener('click', reset);
+    hint1Btn.addEventListener('click', () => openModal({title:'Hinweis 1', html: hint1Html}));
+    hint2Btn.addEventListener('click', () => openModal({title:'Hinweis 2', html: hint2Html}));
+    goalBtn.addEventListener('click', () => openModal({title:'Ziele & LP21‑Bezug', html: goalHtml}));
 
     // Hotkeys 1–6 + R
     window.addEventListener('keydown', (e)=>{
