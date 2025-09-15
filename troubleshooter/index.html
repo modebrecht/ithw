@@ -194,6 +194,13 @@
     .confetti-piece{position:absolute;width:8px;height:8px;background:var(--accent);animation:drop 3s linear forwards;}
     @keyframes drop{to{transform:translateY(100vh) rotate(720deg);opacity:0;}}
 
+    /* Card transition animations */
+    @keyframes slideOutLeft{from{transform:translateX(0);opacity:1} to{transform:translateX(-360px);opacity:0}}
+    @keyframes slideInRight{from{transform:translateX(60px);opacity:0} to{transform:translateX(0);opacity:1}}
+    .card.transition-out{animation:slideOutLeft .28s ease both}
+    .card.transition-in{animation:slideInRight .32s ease both}
+    .card.transitioning{pointer-events:none}
+
     /* Accessibility helpers */
     [aria-live]{outline:none}
     @media (prefers-reduced-motion: reduce){
@@ -444,12 +451,38 @@
       if(celebrationTimer){ clearInterval(celebrationTimer); celebrationTimer = null; }
       if(celebrationEl){ celebrationEl.remove(); celebrationEl = null; }
     }
+    // Transition helper: animate card out/in when switching levels
+    function animateToLevel(idx){
+      const card = document.querySelector('section.card.story');
+      if(!card){ loadLevel(idx); return; }
+      // If already animating, skip to direct load
+      if(card.classList.contains('transition-out') || card.classList.contains('transition-in')){
+        loadLevel(idx); return;
+      }
+      card.classList.add('transitioning','transition-out');
+      const onOutEnd = ()=>{
+        card.removeEventListener('animationend', onOutEnd);
+        loadLevel(idx);
+        // Next tick to ensure DOM updates before animating in
+        requestAnimationFrame(()=>{
+          card.classList.remove('transition-out');
+          card.classList.add('transition-in');
+          const onInEnd = ()=>{
+            card.removeEventListener('animationend', onInEnd);
+            card.classList.remove('transition-in','transitioning');
+          };
+          card.addEventListener('animationend', onInEnd, { once:true });
+        });
+      };
+      card.addEventListener('animationend', onOutEnd, { once:true });
+    }
+
     if(modalOkEl) modalOkEl.addEventListener('click', () => {
-      // If success modal, advance to next scenario; keep celebration until click
+      // If success modal, advance to next scenario with animation
       if(modalTitleEl && modalTitleEl.textContent === 'Aufgabe abgeschlossen'){
         const next = (state.levelIdx + 1) % levels.length;
-        closeModal();
-        loadLevel(next);
+        closeModal(); hideCelebration();
+        animateToLevel(next);
       } else {
         closeModal();
       }
@@ -1041,7 +1074,7 @@ function finish(success, detail){
       prevBtn.addEventListener('click', ()=>{
         closeModal(); hideCelebration();
         const prev = (state.levelIdx - 1 + levels.length) % levels.length;
-        loadLevel(prev);
+        animateToLevel(prev);
       });
       // Next
       const nextBtn = document.createElement('button');
@@ -1054,7 +1087,7 @@ function finish(success, detail){
       nextBtn.addEventListener('click', ()=>{
         closeModal(); hideCelebration();
         const next = (state.levelIdx + 1) % levels.length;
-        loadLevel(next);
+        animateToLevel(next);
       });
     })();
 
