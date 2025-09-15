@@ -106,7 +106,10 @@
     </section>
   </div>
 
-  <script>
+  <script type="module">
+    import scenario1 from './scenario1.js';
+    import scenario2 from './scenario2.js';
+    import scenario3 from './scenario3.js';
     // --- Persistence ---
     const STORAGE_KEY = 'pctrouble_best_v2';
     const SCORES_KEY = 'pctrouble_scores_v2';
@@ -521,41 +524,7 @@ function finish(success, detail){
     }
 
     // Level definitions & loader
-    const levels = [
-      {
-        id: 'L0',
-        name: 'Der PC startet nicht',
-        storyTitle: 'Szenario: Der PC, der nicht starten will',
-        storyText: 'Du sitzt im Informatikraum und dein PC reagiert nicht: Du drückst den Power‑Knopf, aber es passiert nichts. Dein Ziel: In möglichst <b>wenigen Schritten</b> die Ursache finden.',
-        hints: {
-          h1: 'Was kannst du prüfen, <b>ohne den PC zu öffnen</b>?',
-          h2: '<ul class="hint"><li><b>Stromversorgung:</b> Kabel/Leiste/Netzschalter prüfen.</li><li><b>Anzeige:</b> Monitor einschalten / richtigen Eingang wählen.</li></ul>'
-        },
-        start: { pcOn: false, monitorOn: false, signalOk: true }
-      },
-      {
-        id: 'E1',
-        name: 'No Signal (falsche Quelle)',
-        storyTitle: 'Szenario: PC läuft, kein Bild',
-        storyText: 'Der PC läuft (Lüfter/LED), aber wir haben kein Bild. <b>Was überprüfst du als Erstes?</b>',
-        hints: {
-          h1: 'Was beeinflusst das <b>Bild</b>, ohne den PC zu öffnen?',
-          h2: '<ul class="hint"><li><b>Anzeige:</b> Monitor einschalten.</li><li><b>Quelle/Kabel:</b> HDMI/DP richtig wählen oder Kabel fest einstecken.</li></ul>'
-        },
-        start: { pcOn: true, monitorOn: false, signalOk: false }
-      },
-      {
-        id: 'M3',
-        name: 'Kein Bild trotz Start (POST)',
-        storyTitle: 'Szenario: Kein Bild trotz Start',
-        storyText: 'Der PC läuft (Lüfter/LED), der Monitor ist an – doch es erscheint <i>kein Bild</i> (No Signal). <b>Was prüfst du als Nächstes?</b>',
-        hints: {
-          h1: 'Vor dem Bild passiert der <b>POST</b>. Was verraten <b>Pieptöne/LEDs</b>?',
-          h2: '<ul class="hint"><li><b>POST-Hinweise lesen:</b> DRAM-LED an? Beepcode für Speicher?</li><li><b>RAM prüfen:</b> Riegel korrekt eindrücken/einzeln testen.</li><li><b>Anzeige nur sekundär:</b> Monitor kann an sein, aber ohne POST gibt es kein Signal.</li></ul>'
-        },
-        start: { pcOn: true, monitorOn: true, signalOk: false }
-      }
-    ];
+    const levels = [scenario1, scenario2, scenario3];
 
     function makeActions(){
       return {
