@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="utf-8" />
@@ -273,10 +273,10 @@
               <button class="btn primary" id="messageOk">Schliessen</button>
             </div>
           </div>
-          <div class="legend" aria-hidden="true">Tasten: [1–6] Aktionen · [R] Reset</div>
+          <div class="legend" aria-hidden="true">Tasten: [1–6] Aktionen · [R] Neustart</div>
 
           <div class="footer">
-            <button class="btn" id="resetBtn" title="Szenario zurücksetzen (R)" aria-keyshortcuts="R">Neu starten ↺</button>
+            <button class="btn" id="resetBtn" title="Szenario zurücksetzen (R)" aria-keyshortcuts="R">Neustart</button>
             <button class="btn" id="hint1Btn">Hinweis</button>
             <button class="btn" id="goalBtn">Ziel</button>
           </div>
@@ -616,6 +616,7 @@ function finish(success, detail){
       showCelebration();
       setStatus('Geloest');
       say(`<span class="good">Problem behoben.</span> ${detail} Der PC startet, du kannst weiterarbeiten.`);
+      // Hinweis: Reset bleibt jederzeit möglich
 
       // Bewertung
       const t = state.time;
@@ -643,6 +644,10 @@ function finish(success, detail){
     }
 
     function reset(){
+      // Modal/Feier schließen und Fall neu laden (immer erlaubt)
+      try{ if(topModalEl && topModalEl.classList.contains('open')) closeTopModal(); }catch(e){}
+      try{ if(modalOpen) closeModal(); }catch(e){}
+      try{ hideCelebration(); }catch(e){}
       loadLevel(state.levelIdx);
     }
 
@@ -1089,9 +1094,11 @@ function finish(success, detail){
     }
     if(goalBtn){ goalBtn.addEventListener('click', () => openModal({title:'Ziele & LP21-Bezug', html: goalHtml})); }
 
-    // Hotkeys 1–6 + R
+    // Hotkeys 1-6 + R
     window.addEventListener('keydown', (e)=>{
       const k = e.key.toLowerCase();
+      // Neustart (R) ist immer erlaubt, selbst wenn ein Modal offen ist
+      if(k==='r'){ reset(); return; }
       // While a modal is open, allow ESC or same opener key to close, unless solved
       if(modalOpen){
         if(!state.solved){
@@ -1106,14 +1113,12 @@ function finish(success, detail){
         }
         return;
       }
-      if(state.solved && k==='r'){ reset(); return; }
       const action = state.actions.find(a => a.hotkey === e.key);
       if(action){
         // remember which key triggered the upcoming modal (if any)
         lastHotkey = e.key;
         runAction(action);
       }
-      if(k==='r'){ reset(); }
     });
 
         // Init
