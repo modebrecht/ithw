@@ -67,6 +67,7 @@ header .controls{display:flex;gap:8px;align-items:center}
 .chip strong{color:var(--ink)}
 
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.action-set-label{grid-column:1/-1;font-size:.85rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:rgba(226,232,240,.82);margin-bottom:4px}
 @media (max-width:640px){.actions{grid-template-columns:1fr}}
 button.action{
   appearance:none; border:none; cursor:pointer; padding:16px 18px; border-radius:12px; text-align:left; color:var(--ink);
@@ -188,12 +189,16 @@ details[open].hintbox summary::before, details[open].didaktik summary::before{
 .scene .mutfill{fill:rgba(255,255,255,.04)}
 .scene .no-signal{display:none}
 .scene.nosig .no-signal{display:block}
+.scene .booterr,.scene .bootmenu{display:none}
+.scene.booterr .booterr{display:block}
+.scene.bootmenu .bootmenu{display:block}
 .scene .login{display:none}
 .scene.login .login{display:block}
 .scene.power-on .led{stroke: var(--good); fill: var(--good)}
 /* Screen nur sichtbar, wenn Monitor "an" (No-Signal oder Login) */
 .scene .screen{display:none}
-.scene.nosig .screen, .scene.login .screen{display:block}
+.scene.nosig .screen, .scene.login .screen, .scene.booterr .screen, .scene.bootmenu .screen{display:block}
+.scene.bootmenu .bootmenu-bg{fill:rgba(15,23,42,.94);stroke:rgba(148,163,184,.45);stroke-width:1}
 
 /* Action message */
 .action-message{display:none;margin-top:12px;background:var(--card);border:1px solid rgba(255,255,255,.16);border-radius:16px;box-shadow:var(--shadow);padding:18px}
