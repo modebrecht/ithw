@@ -3,227 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>PC-Troubleshooter v2.3</title>
-  <style>
-    :root{
-      --bg:#0f172a;           /* slate-900 */
-      --card:#0b1223;         /* darker card */
-      --ink:#e5e7eb;          /* gray-200 */
-      --ink-dim:#b6c1d4;
-      --accent:#60a5fa;       /* blue-400 */
-      --accent-2:#22d3ee;     /* cyan-400 */
-      --good:#22c55e;         /* green-500 */
-      --warn:#f59e0b;         /* amber-500 */
-      --bad:#ef4444;          /* red-500 */
-      --muted:#94a3b8;        /* slate-400 */
-      --shadow:0 18px 40px -18px rgba(0,0,0,.55);
-      --radius:16px;
-      --gold:#fbbf24;         /* amber-400 */
-      --silver:#cbd5e1;       /* slate-300 */
-      --bronze:#d97706;       /* orange-600 */
-    }
-
-    html,body{min-height:100%}
-    body{
-      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,"Helvetica Neue",Arial,"Noto Sans","Apple Color Emoji","Segoe UI Emoji";
-      color:var(--ink);
-      background:
-        radial-gradient(1200px 600px at 10% -10%, rgba(96,165,250,.15), transparent 50%),
-        radial-gradient(1200px 600px at 90% 0%, rgba(34,211,238,.12), transparent 50%),
-        var(--bg);
-      background-repeat: no-repeat, no-repeat, no-repeat;
-      background-attachment: fixed, fixed, fixed;
-    }
-
-    .wrap{max-width:1000px;margin:clamp(16px,3vw,40px) auto;padding:0 16px}
-    header{display:flex;gap:16px;align-items:center;justify-content:space-between;margin-bottom:20px}
-    #levelTag{margin-left:auto}
-    /* Header controls: icon-only circles and compact nav */
-    :root{ --ctrl-size: 44px; }
-    header .btn{border-radius:999px;width:var(--ctrl-size);height:var(--ctrl-size);padding:0;display:inline-grid;place-items:center}
-    /* Allow score button to expand for label */
-    #scoreBtn{width:auto;padding:0 14px}
-    /* Level navigation group as button group (no gaps) */
-    .level-nav{display:flex;align-items:stretch;gap:0}
-    .level-nav .btn{width:var(--ctrl-size);height:var(--ctrl-size);padding:0}
-    /* Ensure nav buttons match badge height exactly */
-    .level-nav .btn, #levelTag.badge{height:var(--ctrl-size);box-sizing:border-box}
-    /* Merge borders between neighbors */
-    .level-nav > *:not(:first-child){ margin-left:-1px }
-    /* Rounded outside corners only */
-    #levelTag{margin-left:0}
-    #levelTag.badge{height:var(--ctrl-size);padding:0 12px;font-size:14px;display:flex;align-items:center;border-radius:0}
-    #levelPrev{border-top-right-radius:0;border-bottom-right-radius:0;font-size:22px}
-    #levelNext{border-top-left-radius:0;border-bottom-left-radius:0;font-size:22px}
-    header .controls{display:flex;gap:8px;align-items:center}
-    .title{font-weight:800;font-size:clamp(22px,4vw,34px);letter-spacing:.2px}
-    .badge{border:1px solid rgba(255,255,255,.12);padding:6px 10px;border-radius:999px;font-size:12px;color:var(--ink-dim)}
-    /* Make level tag match nav button height */
-    #levelTag.badge{height:var(--ctrl-size);padding:0 12px;font-size:14px;display:flex;align-items:center}
-
-    .card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);box-shadow:var(--shadow);}
-    .card .inner{padding:clamp(16px,2.6vw,24px)}
-
-    .story h2{margin:0 0 8px 0;font-size:clamp(18px,2.6vw,22px)}
-    .story p{margin:.35rem 0;color:var(--ink-dim);line-height:1.5}
-
-    .statusbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;align-items:center}
-    .status-actions{margin-left:auto;display:flex;gap:10px;align-items:center}
-    .status-actions .btn{padding:8px 12px}
-    .chip{background-color:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);padding:8px 10px;border-radius:10px;font-size:13px;color:var(--ink-dim)}
-    .chip strong{color:var(--ink)}
-
-    .actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
-    @media (max-width:640px){.actions{grid-template-columns:1fr}}
-    button.action{
-      appearance:none; border:none; cursor:pointer; padding:16px 18px; border-radius:12px; text-align:left; color:var(--ink);
-      background:linear-gradient(180deg,rgba(96,165,250,.16),rgba(34,211,238,.10));
-      border:1px solid rgba(96,165,250,.35);
-      transition: transform .06s ease, box-shadow .15s ease, border-color .2s ease;
-      box-shadow:0 10px 25px rgba(34,211,238,.08);
-      position:relative; display:flex; align-items:center; gap:10px; overflow:hidden;
-      min-height:64px;
-    }
-    button.action .label{position:relative; z-index:1; font-weight:600}
-    button.action::after{
-      content: attr(data-key);
-      position:absolute; right:14px; top:50%; transform:translateY(-50%);
-      font-weight:800; font-size:clamp(34px,6vw,56px); line-height:1;
-      color:var(--ink-dim); opacity:.12; pointer-events:none; user-select:none;
-    }
-    button.action:hover{transform: translateY(-1px); box-shadow:0 14px 30px rgba(34,211,238,.14)}
-    button.action:active{transform: translateY(0)}
-    /* old .k marker removed in favor of big number badge */
-    .legend{margin-top:8px;font-size:12px;color:var(--muted)}
-
-    .legend{margin-top:8px;font-size:12px;color:var(--muted)}
-
-    .feedback{min-height:72px;margin-top:10px;border-top:1px dashed rgba(255,255,255,.1);padding-top:12px}
-    .feedback .msg{margin:0;line-height:1.55}
-    .feedback .good{color:var(--good)}
-    .feedback .warn{color:var(--warn)}
-    .feedback .bad{color:var(--bad)}
-
-    .right h3{margin:0 0 10px 0}
-    .hint{font-size:14px;color:var(--ink-dim);line-height:1.6}
-    .hint b{color:var(--ink)}
-
-    /* Bessere Abstände in Aufzählungen (Hinweis 2 & LP21) */
-    ul.hint{margin:0; padding-left:1.2rem}
-    ul.hint li{margin:6px 0}
-    @media (min-width:900px){ ul.hint li{margin:8px 0} }
-
-    .footer{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
-    .btn{appearance:none;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.03);color:var(--ink);padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600}
-    .btn.primary{border-color:rgba(34,211,238,.4);background:linear-gradient(180deg,rgba(34,211,238,.18),rgba(34,211,238,.08))}
-    /* Bigger Schliessen button in modal */
-    .action-message .mfoot{display:flex;justify-content:stretch;align-items:stretch;margin-top:0;grid-column:2;grid-row:1 / span 2}
-    #messageOk, #messageOkTop{font-size:16px;padding:0 22px;height:100%;width:100%;min-height:80px}
-    /* Extra spacing below the top Score modal when visible */
-    #actionMessageTop{margin-bottom:8px}
-    #actionMessageTop.open{margin-bottom:24px}
-    @media (max-width:560px){
-      .action-message.open{grid-template-columns:1fr;grid-template-rows:auto 1fr auto}
-      .action-message .mfoot{grid-column:1;grid-row:3;margin-top:12px}
-      #messageOk, #messageOkTop{height:auto;min-height:80px}
-    }
-
-    .score{display:flex;gap:12px;align-items:center}
-    .score .dot{width:10px;height:10px;border-radius:999px;background:var(--good);box-shadow:0 0 0 4px rgba(34,197,94,.15)}
-    /* Inline reveal for extra hints inside modal */
-    .more-hints{display:none;margin-top:10px}
-    .more-hints.open{display:block}
-
-    .summary{display:none}
-    .summary.active{display:block}
-
-    .step-log{margin-top:8px;padding-left:18px;color:var(--ink-dim)}
-    .step-log li{margin:.25rem 0}
-
-    details.didaktik{margin-top:14px}
-
-    details.hintbox{margin:0 0 10px 0}
-    details.hintbox summary{cursor:pointer}
-    details.hintbox[open] summary, details.didaktik[open] summary{margin-bottom:6px}
-
-    /* Grössere, schöne Aufklapp‑Symbole (Chevron SVG) */
-    details summary{list-style:none}
-    details summary::-webkit-details-marker{display:none}
-    details.hintbox summary::before, details.didaktik summary::before{
-      content:""; display:inline-block; width:24px; height:24px; margin-right:10px;
-      background-color: var(--ink-dim);
-      -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M9 6l6 6-6 6"/></svg>') no-repeat center / 100% 100%;
-              mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M9 6l6 6-6 6"/></svg>') no-repeat center / 100% 100%;
-      transition: transform .2s ease, background-color .2s ease;
-      vertical-align:-4px;
-    }
-    details[open].hintbox summary::before, details[open].didaktik summary::before{
-      transform: rotate(90deg);
-      background-color: var(--ink);
-    }
-
-    /* Dünner Trenner zwischen LP21 und Auswertung */
-    .divider{border:0;border-top:1px dashed rgba(255,255,255,.14);margin:10px 0 12px 0}
-
-    /* Szene: Illustration */
-    .scene{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px;margin:10px 0 6px}
-    .scene svg{width:100%;height:auto;display:block}
-    .scene .mut{stroke:rgba(229,231,235,.45)}
-    .scene .mutfill{fill:rgba(255,255,255,.04)}
-    .scene .no-signal{display:none}
-    .scene.nosig .no-signal{display:block}
-    .scene .login{display:none}
-    .scene.login .login{display:block}
-    .scene.power-on .led{stroke: var(--good); fill: var(--good)}
-    /* Screen nur sichtbar, wenn Monitor "an" (No‑Signal oder Login) */
-    .scene .screen{display:none}
-    .scene.nosig .screen, .scene.login .screen{display:block}
-
-    /* Action message */
-    .action-message{display:none;margin-top:12px;background:var(--card);border:1px solid rgba(255,255,255,.16);border-radius:16px;box-shadow:var(--shadow);padding:18px}
-    .action-message.open{display:grid;grid-template-columns:1fr 130px;grid-template-rows:auto 1fr;gap:12px;align-items:stretch}
-    .action-message .mhead{display:flex;align-items:center;justify-content:space-between;margin:0}
-    .action-message .mhead h3{margin:0;font-size:18px}
-    .action-message .mbody{font-size:14px;color:var(--ink-dim);grid-column:1;grid-row:2}
-    .action-message .mfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
-    .scene.mini svg{max-height:160px}
-    .scene.mini{margin-top:10px}
-
-    /* Celebration animation */
-    .confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:1000;}
-    .confetti-piece{position:absolute;width:8px;height:8px;background:var(--accent);animation:drop 3s linear forwards;}
-    @keyframes drop{to{transform:translateY(100vh) rotate(720deg);opacity:0;}}
-
-    /* Card transition animations */
-    @keyframes slideOutLeft{from{transform:translateX(0);opacity:1} to{transform:translateX(-360px);opacity:0}}
-    @keyframes slideInRight{from{transform:translateX(60px);opacity:0} to{transform:translateX(0);opacity:1}}
-    .card.transition-out{animation:slideOutLeft .28s ease both}
-    .card.transition-in{animation:slideInRight .32s ease both}
-    .card.transitioning{pointer-events:none}
-
-    /* Restart cue: quick shrink/fade out then pop in + optional overlay */
-    @keyframes restartOut{from{transform:scale(1);opacity:1;filter:none}to{transform:scale(.98);opacity:0;filter:blur(2px)}}
-    @keyframes restartIn{from{transform:scale(1.02);opacity:0}to{transform:scale(1);opacity:1}}
-    .card.restart-out{animation:restartOut .22s ease both}
-    .card.restart-in{animation:restartIn .26s ease both}
-    .restart-overlay{position:fixed;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.35);backdrop-filter:blur(2px);z-index:900;pointer-events:none;opacity:0;animation:overlayFade .38s ease forwards}
-    .restart-indicator{display:inline-flex;gap:10px;align-items:center;padding:10px 14px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);box-shadow:var(--shadow);font-weight:700;color:var(--ink)}
-    .restart-indicator .icon{display:inline-block;transform-origin:50% 50%;animation:spin .6s ease 1}
-    @keyframes overlayFade{from{opacity:0}to{opacity:1}}
-    @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-
-    /* Accessibility helpers */
-    [aria-live]{outline:none}
-    @media (prefers-reduced-motion: reduce){
-      *{transition:none !important;animation:none !important}
-    }
-  </style>
+  <title>PC-Troubleshooter v2.4</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="title">PC-Troubleshooter <span class="badge" id="verTag">v2.3</span></div>
-      <div class="badge" id="levelTag" aria-live="polite">Fall 1/1 • Schwierigkeitsgrad: <b>Einfach</b></div>
+      <div class="title">PC-Troubleshooter <span class="badge" id="verTag">v2.4</span></div>
+      <div class="badge" id="levelTag" aria-live="polite">Fall 1/1 • <b>Einfach</b></div>
           <button class="btn" id="scoreBtn" title="Score anzeigen" aria-label="Score anzeigen">🏆 Score</button></header>
 
     <!-- Modal/Message area shown above the story -->
@@ -385,12 +172,14 @@
       modalTitleEl.textContent = title;
       // Inject Auswertung into the completion modal
       if(title === 'Aufgabe abgeschlossen'){
+        modalEl.classList.add('completion');
         // Show evaluation; completion must be triggered explicitly elsewhere
         const evalHtml = typeof buildEvaluationHtml === 'function' ? buildEvaluationHtml() : '';
         const intro = (typeof completionIntroHtml === 'function') ? completionIntroHtml() : html;
         modalBodyEl.innerHTML = intro + evalHtml;
       } else {
         modalBodyEl.innerHTML = html;
+        modalEl.classList.remove('completion');
       }
       if(modalOkEl) modalOkEl.textContent = okLabel;
       if(title === 'Aufgabe abgeschlossen' && modalOkEl){ modalOkEl.textContent = 'Nächste Aufgabe'; }
@@ -421,6 +210,7 @@
       if(!modalEl) return;
       modalOpen = false;
       modalEl.classList.remove('open');
+      modalEl.classList.remove('completion');
       modalEl.setAttribute('aria-hidden','true');
       actionsEl.style.display = '';
       if(lastFocusEl) lastFocusEl.focus();
@@ -1196,3 +986,4 @@ function finish(success, detail){
   </script>
 </body>
 </html>
+
