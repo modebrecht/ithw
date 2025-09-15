@@ -319,7 +319,7 @@
     }
 
     // --- State ---
-    const state = { levelIdx: 0, actions: [], performed: {} };
+    const state = { levelIdx: 0, actions: [], performed: {}, currentActionId: null };
 
     // --- DOM helpers ---
     const $ = sel => document.querySelector(sel);
@@ -367,7 +367,7 @@
       modalTitleEl.textContent = title;
       // Inject Auswertung into the completion modal
       if(title === 'Aufgabe abgeschlossen'){
-        try{ if(!state.solved) finish(true, ''); }catch(e){}
+        // Show evaluation; completion must be triggered explicitly elsewhere
         const evalHtml = typeof buildEvaluationHtml === 'function' ? buildEvaluationHtml() : '';
         const intro = (typeof completionIntroHtml === 'function') ? completionIntroHtml() : html;
         modalBodyEl.innerHTML = intro + evalHtml;
@@ -468,6 +468,7 @@
 
     function runAction(a){
       if(!a) return;
+      state.currentActionId = a.id || null;
       a.effect.call(a);
       if(a.id){ state.performed[a.id] = true; }
       // If the action itself solved the scenario (e.g., Scenario 2),
@@ -485,7 +486,7 @@
         // old condition removed
         // old condition removed
         // old condition removed
-      if(solvedCombo){
+      if(false){ // old combo check disabled
         finish(true, 'Stromversorgung und Monitor aktiviert.');
         openModal({
           title: 'Aufgabe abgeschlossen',
@@ -510,6 +511,17 @@
           const hasPower = !!state.performed['power-cable'];
           if(!state.solved && hasMonitor && hasPower && state.monitorOn){
             finish(true, 'Stromversorgung und Monitor aktiviert.');
+            openModal({ title: 'Aufgabe abgeschlossen', html: completionIntroHtml(), okLabel: 'N��chste Aufgabe' });
+            return true;
+          }
+          break;
+        }
+        case 'E1': {
+          // Require order: first [2] monitor on, then [6] source
+          const didMonitor = !!state.performed['monitor'];
+          const isSourceNow = state.currentActionId === 'source';
+          if(!state.solved && didMonitor && isSourceNow && state.monitorOn){
+            finish(true, 'Quelle korrekt, Signal wiederhergestellt.');
             openModal({ title: 'Aufgabe abgeschlossen', html: completionIntroHtml(), okLabel: 'N��chste Aufgabe' });
             return true;
           }
@@ -589,6 +601,17 @@ function completionIntroHtml(){
   }
 }
 function finish(success, detail){
+      // Scenario-specific guard: E1 requires order 2 then 6
+      try{
+        const L = levels && levels[state.levelIdx];
+        if(L && L.id === 'E1'){
+          const isSourceNow = state.currentActionId === 'source';
+          const didMonitor = !!(state.performed && state.performed['monitor']);
+          if(!(isSourceNow && didMonitor && state.monitorOn)){
+            return; // block auto-finish if order not satisfied
+          }
+        }
+      }catch(e){}
       state.solved = true;
       showCelebration();
       setStatus('Geloest');
@@ -801,10 +824,19 @@ function finish(success, detail){
             state.time += this.delta; state.tries++;
             setStatus('Signal pruefen');
             pushLog(this.label, '+1 Min');
+            // Szenario 2 (E1): Kabel war bereits korrekt eingesteckt -> keine Aenderung
+            const cur = levels && levels[state.levelIdx];
+            if(cur && cur.id === 'E1'){
+              say('<span class="info">Kabel war bereits <b>korrekt eingesteckt</b>.</span> Pruefe jetzt die <b>Quelle (HDMI/DP)</b>.');
+              return;
+            }
             state.signalOk = true; updateScene();
+            const L = levels && levels[state.levelIdx];
             if(state.pcOn && state.monitorOn){
               say('<span class="good">Kabel sitzt fest.</span> <b>Login</b> ist sichtbar.');
-              finish(true, 'Signal wiederhergestellt.');
+              if(!L || L.id !== 'E1'){
+                finish(true, 'Signal wiederhergestellt.');
+              }
             } else if(!state.monitorOn){
               say('<span class="warn">Kabel sitzt fest.</span> Schalte jetzt den <b>Monitor</b> ein.');
             } else {
@@ -904,6 +936,7 @@ function finish(success, detail){
       // Reset core state
       state.time = 0; state.tries = 0; state.solved = false; state.log = [];
       state.performed = {};
+      state.currentActionId = null;
       // Apply start flags
       const L = levels[idx];
       state.pcOn = L.start.pcOn;
