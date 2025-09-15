@@ -201,6 +201,17 @@
     .card.transition-in{animation:slideInRight .32s ease both}
     .card.transitioning{pointer-events:none}
 
+    /* Restart cue: quick shrink/fade out then pop in + optional overlay */
+    @keyframes restartOut{from{transform:scale(1);opacity:1;filter:none}to{transform:scale(.98);opacity:0;filter:blur(2px)}}
+    @keyframes restartIn{from{transform:scale(1.02);opacity:0}to{transform:scale(1);opacity:1}}
+    .card.restart-out{animation:restartOut .22s ease both}
+    .card.restart-in{animation:restartIn .26s ease both}
+    .restart-overlay{position:fixed;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.35);backdrop-filter:blur(2px);z-index:900;pointer-events:none;opacity:0;animation:overlayFade .38s ease forwards}
+    .restart-indicator{display:inline-flex;gap:10px;align-items:center;padding:10px 14px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);box-shadow:var(--shadow);font-weight:700;color:var(--ink)}
+    .restart-indicator .icon{display:inline-block;transform-origin:50% 50%;animation:spin .6s ease 1}
+    @keyframes overlayFade{from{opacity:0}to{opacity:1}}
+    @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
     /* Accessibility helpers */
     [aria-live]{outline:none}
     @media (prefers-reduced-motion: reduce){
@@ -676,13 +687,38 @@ function finish(success, detail){
       }
     }
 
-    function reset(){
-      // Modal/Feier schließen und Fall neu laden (immer erlaubt)
+    function animateReset(){
       try{ if(topModalEl && topModalEl.classList.contains('open')) closeTopModal(); }catch(e){}
       try{ if(modalOpen) closeModal(); }catch(e){}
       try{ hideCelebration(); }catch(e){}
-      loadLevel(state.levelIdx);
+      const card = document.querySelector('section.card.story');
+      if(!card){ loadLevel(state.levelIdx); return; }
+      if(card.classList.contains('restart-out') || card.classList.contains('restart-in')){ loadLevel(state.levelIdx); return; }
+      // Overlay hint
+      let ov = document.createElement('div');
+      ov.className = 'restart-overlay';
+      ov.innerHTML = '<div class="restart-indicator"><span class="icon">⟳</span><span>Neustart</span></div>';
+      document.body.appendChild(ov);
+      card.classList.add('transitioning','restart-out');
+      const onOutEnd = ()=>{
+        card.removeEventListener('animationend', onOutEnd);
+        loadLevel(state.levelIdx);
+        requestAnimationFrame(()=>{
+          card.classList.remove('restart-out');
+          card.classList.add('restart-in');
+          const onInEnd = ()=>{
+            card.removeEventListener('animationend', onInEnd);
+            card.classList.remove('restart-in','transitioning');
+            // remove overlay after a short delay
+            setTimeout(()=>{ try{ ov.remove(); }catch(e){} }, 200);
+          };
+          card.addEventListener('animationend', onInEnd, { once:true });
+        });
+      };
+      card.addEventListener('animationend', onOutEnd, { once:true });
     }
+
+    function reset(){ animateReset(); }
 
     function showBest(){
       const best = loadBest();
