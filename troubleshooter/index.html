@@ -51,6 +51,19 @@
                 <rect x="240" y="12" width="270" height="160" rx="6" fill="none"/>
                 <text x="375" y="92" font-size="24" text-anchor="middle" style="fill:rgba(229,231,235,.88);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;letter-spacing:2px">NO SIGNAL</text>
               </g>
+              <g class="booterr" aria-hidden="true">
+                <rect x="240" y="12" width="270" height="160" rx="6" fill="none"/>
+                <text x="375" y="92" font-size="22" text-anchor="middle" style="fill:rgba(248,250,252,.92);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;letter-spacing:1.5px">NO BOOTABLE DEVICE</text>
+              </g>
+              <g class="bootmenu" aria-hidden="true">
+                <rect x="292" y="42" width="166" height="108" rx="10" fill="rgba(15,23,42,.8)"/>
+                <rect x="292" y="42" width="166" height="108" rx="10" class="mut" fill="none"/>
+                <text x="375" y="62" font-size="13" text-anchor="middle" style="fill:rgba(148,163,184,.88);font-weight:600">Boot Menu</text>
+                <rect x="304" y="74" width="142" height="24" rx="6" fill="rgba(96,165,250,.24)"/>
+                <text x="375" y="90" font-size="14" text-anchor="middle" style="fill:rgba(226,232,240,.95);font-weight:600">SSD (Windows)</text>
+                <text x="375" y="116" font-size="13" text-anchor="middle" style="fill:rgba(148,163,184,.88)">USB Drive</text>
+                <text x="375" y="138" font-size="13" text-anchor="middle" style="fill:rgba(148,163,184,.88)">Network Boot</text>
+              </g>
               <g class="login" aria-hidden="true">
                 <!-- Größeres, gut lesbares Login-Overlay, mittig im Monitor (270×160) -->
                 <rect x="290" y="47" width="170" height="90" rx="8" class="mut" fill="none"/>
@@ -110,6 +123,7 @@
     import scenario1 from './scenario1.js';
     import scenario2 from './scenario2.js';
     import scenario3 from './scenario3.js';
+    import scenario4 from './scenario4.js';
     // --- Persistence ---
     const STORAGE_KEY = 'pctrouble_best_v2';
     const SCORES_KEY = 'pctrouble_scores_v2';
@@ -127,7 +141,20 @@
     }
 
     // --- State ---
-    const state = { levelIdx: 0, actions: [], performed: {}, currentActionId: null };
+    const state = {
+      levelIdx: 0,
+      actions: [],
+      performed: {},
+      currentActionId: null,
+      activeSet: 'A',
+      bootError: false,
+      bootMenuOpen: false,
+      usbPresent: false,
+      bootOrderChanged: false,
+      bootOrderPersisted: false,
+      scenario4Outcome: null,
+      customResult: null
+    };
 
     // --- DOM helpers ---
     const $ = sel => document.querySelector(sel);
@@ -373,16 +400,48 @@
     function updateScene(){
       const scene = document.querySelector('.scene');
       if(!scene) return;
-      scene.classList.remove('nosig','power-on','login');
+      scene.classList.remove('nosig','power-on','login','booterr','bootmenu');
       if(state.pcOn) scene.classList.add('power-on');
-      if(state.monitorOn && (!state.pcOn || !state.signalOk)) scene.classList.add('nosig');
-      if(state.pcOn && state.monitorOn && state.signalOk) scene.classList.add('login');
+      const L = levels && levels[state.levelIdx];
+      const isBootScenario = L && L.id === 'B4';
+      if(isBootScenario){
+        if(!state.monitorOn){
+          return;
+        }
+        if(!state.bootError){
+          scene.classList.add('login');
+        } else if(state.activeSet === 'B'){
+          scene.classList.add('bootmenu');
+        } else {
+          scene.classList.add('booterr');
+        }
+      } else {
+        if(state.monitorOn && (!state.pcOn || !state.signalOk)) scene.classList.add('nosig');
+        if(state.pcOn && state.monitorOn && state.signalOk) scene.classList.add('login');
+      }
+    }
+
+    function getVisibleActions(){
+      if(!state.actions) return [];
+      const L = levels && levels[state.levelIdx];
+      if(L && L.id === 'B4'){
+        return state.actions
+          .filter(a => !a.set || a.set === state.activeSet)
+          .sort((a,b)=>parseInt(a.hotkey)-parseInt(b.hotkey));
+      }
+      return [...state.actions].sort((a,b)=>parseInt(a.hotkey)-parseInt(b.hotkey));
     }
 
     function renderActions(){
       actionsEl.innerHTML = '';
-      [...state.actions]
-        .sort((a,b)=>parseInt(a.hotkey)-parseInt(b.hotkey))
+      const L = levels && levels[state.levelIdx];
+      if(L && L.id === 'B4'){
+        const label = document.createElement('div');
+        label.className = 'action-set-label';
+        label.textContent = state.activeSet === 'B' ? 'Set B – Setup & Boot' : 'Set A – Basis-Checks';
+        actionsEl.appendChild(label);
+      }
+      getVisibleActions()
         .forEach(a=>{
           const btn = document.createElement('button');
           btn.className = 'action';
@@ -393,6 +452,11 @@
           btn.addEventListener('click', () => { lastHotkey = a.hotkey; runAction(a); });
           actionsEl.appendChild(btn);
         });
+      if(L && L.id === 'B4'){
+        actionsEl.dataset.set = state.activeSet;
+      } else {
+        actionsEl.removeAttribute('data-set');
+      }
     }
 
     
@@ -433,6 +497,19 @@ function completionIntroHtml(){
       return '<p><b>Aufgabe abgeschlossen.</b> Quelle korrekt, Signal wiederhergestellt.</p><p>Das <b>Login</b> ist sichtbar.</p>';
     case 'M3':
       return '<p><b>Aufgabe abgeschlossen.</b> POST erfolgreich, Anzeige aktiv.</p><p>Das <b>Login</b> ist sichtbar.</p>';
+    case 'B4': {
+      const outcome = state.scenario4Outcome;
+      if(outcome === 'temp-boot'){
+        return '<p><b>Temporärer Start gelungen.</b> Du hast im Boot-Menü die SSD gewählt.</p><p>Das <b>Login</b> ist sichtbar, die Änderung ist jedoch nicht dauerhaft.</p>';
+      }
+      if(outcome === 'usb-restart'){
+        return '<p><b>Aufgabe abgeschlossen.</b> USB-Geräte entfernt und sauber neu gestartet.</p><p>Das <b>Login</b> ist sichtbar.</p>';
+      }
+      if(outcome === 'bootorder-save'){
+        return '<p><b>Aufgabe abgeschlossen.</b> Bootreihenfolge dauerhaft korrigiert.</p><p>Das <b>Login</b> ist sichtbar.</p>';
+      }
+      return '<p><b>Aufgabe abgeschlossen.</b> Boot-Fehler behoben.</p><p>Das <b>Login</b> ist sichtbar.</p>';
+    }
     default:
       return '<p><b>Aufgabe geschafft.</b> PC und Monitor sind bereit.</p><p>Das <b>Login</b> ist sichtbar.</p>';
   }
@@ -458,10 +535,13 @@ function finish(success, detail){
       // Bewertung
       const t = state.time;
       const n = state.tries;
-      const ev = evalRankAndScore(t, n);
-      resultText.innerHTML = 'Zeit: <b>' + t + ' Min</b> - Schritte: <b>' + n + '</b> - Punkte: <b>' + ev.score + '</b>'; 
-      rankText.textContent = 'Bewertung: ' + ev.long; 
-      rankDot.style.background = 'linear-gradient(180deg, ' + ev.color + ', ' + ev.color + ')'; 
+      const custom = state.customResult;
+      const ev = custom || evalRankAndScore(t, n);
+      const baseText = 'Zeit: <b>' + t + ' Min</b> - Schritte: <b>' + n + '</b> - Punkte: <b>' + ev.score + '</b>';
+      const detailHtml = custom && custom.detail ? '<div class="hint">Lösung: <b>' + custom.detail + '</b></div>' : '';
+      resultText.innerHTML = baseText + detailHtml;
+      rankText.textContent = 'Bewertung: ' + ev.long;
+      rankDot.style.background = 'linear-gradient(180deg, ' + ev.color + ', ' + ev.color + ')';
 
       // Bestleistung speichern/anzeigen (besser = weniger Zeit, bei Gleichstand weniger Schritte)
       const prev = loadBest();
@@ -475,7 +555,15 @@ function finish(success, detail){
       const prevS = scores[L.id];
       const shouldUpdate = !prevS || (ev.score > prevS.score) || (ev.score === prevS.score && (t < prevS.time || (t === prevS.time && n < prevS.tries)));
       if (shouldUpdate){
-        scores[L.id] = { time: t, tries: n, rank: ev.medal, score: ev.score, updatedAt: new Date().toISOString() };
+        scores[L.id] = {
+          time: t,
+          tries: n,
+          rank: ev.medal,
+          score: ev.score,
+          outcome: state.scenario4Outcome || null,
+          detail: custom && custom.detail ? custom.detail : null,
+          updatedAt: new Date().toISOString()
+        };
         saveScores(scores);
       }
     }
@@ -524,7 +612,7 @@ function finish(success, detail){
     }
 
     // Level definitions & loader
-    const levels = [scenario1, scenario2, scenario3];
+    const levels = [scenario1, scenario2, scenario3, scenario4];
 
     function makeActions(){
       return {
@@ -751,6 +839,362 @@ function finish(success, detail){
         }
       };
     }
+
+    function setScenario4Result(outcome){
+      const map = {
+        'temp-boot': {
+          medal: 'Bronze',
+          long: 'Bronze - Temporärer Start ohne dauerhafte Lösung',
+          color: 'var(--bronze)',
+          score: 0,
+          detail: 'Temporär von der SSD gestartet (keine BIOS-Änderung).'
+        },
+        'usb-restart': {
+          medal: 'Silber',
+          long: 'Silber - USB-Geräte entfernt & sauber neu gestartet',
+          color: 'var(--silver)',
+          score: 70,
+          detail: 'USB-Sticks entfernt, danach neu gestartet.'
+        },
+        'bootorder-save': {
+          medal: 'Gold',
+          long: 'Gold - Bootreihenfolge korrigiert & gespeichert',
+          color: 'var(--gold)',
+          score: 100,
+          detail: 'Bootreihenfolge dauerhaft korrigiert.'
+        },
+        other: {
+          medal: 'Bronze',
+          long: 'Bronze - Gelöst nach mehreren Umwegen',
+          color: 'var(--bronze)',
+          score: 40,
+          detail: 'Problem nach Umwegen behoben.'
+        }
+      };
+      const key = map[outcome] ? outcome : 'other';
+      const res = map[key];
+      state.scenario4Outcome = key;
+      state.customResult = {
+        medal: res.medal,
+        long: res.long,
+        color: res.color,
+        score: res.score,
+        detail: res.detail
+      };
+    }
+
+    function makeScenario4Actions(){
+      const actions = [];
+      actions.push({
+        id: 'usb-remove',
+        label: '⏏️ USB-Sticks entfernen',
+        hotkey: '1',
+        delta: 1,
+        set: 'A',
+        effect(){
+          if(state.solved) return;
+          state.time += this.delta; state.tries++;
+          pushLog(this.label, `+${this.delta} Min`);
+          if(state.usbPresent){
+            state.usbPresent = false;
+            setStatus('USB entfernt');
+            say('<span class="good">USB-Sticks entfernt.</span> Starte neu oder wähle die SSD im Boot-Menü.');
+            openModal({
+              title: 'USB entfernt',
+              html: '<p>Du ziehst die USB-Sticks ab.</p><p>Der Boot-Fehler verschwindet erst nach einem Neustart oder einer Boot-Menü-Wahl.</p>'
+            });
+          } else {
+            setStatus('Kein USB-Stick');
+            say('<span class="warn">Es steckt kein USB-Stick mehr.</span> Der Boot-Fehler bleibt, bis ein Startlaufwerk gewählt wird.');
+            openModal({
+              title: 'Keine USB-Sticks mehr',
+              html: '<p>Es war kein USB-Stick mehr eingesteckt.</p><p>Starte neu oder wähle ein Startlaufwerk im Boot-Menü.</p>'
+            });
+          }
+          updateScene();
+        }
+      });
+
+      actions.push({
+        id: 'restart',
+        label: '🔁 Neu starten',
+        hotkey: '2',
+        delta: 2,
+        set: 'A',
+        effect(){
+          if(state.solved) return;
+          state.time += this.delta; state.tries++;
+          pushLog(this.label, `+${this.delta} Min`);
+          const resolved = !state.usbPresent || state.bootOrderPersisted;
+          state.activeSet = 'A';
+          state.bootMenuOpen = false;
+          if(resolved){
+            state.bootError = false;
+            updateScene();
+            renderActions();
+            setStatus('System bootet');
+            if(state.bootOrderPersisted){
+              say('<span class="good">Neustart erfolgreich.</span> Gespeicherte Bootreihenfolge startet von der SSD.');
+              setScenario4Result('bootorder-save');
+              finish(true, 'Bootreihenfolge gespeichert. Das System startet von der SSD.');
+            } else {
+              say('<span class="good">Neustart erfolgreich.</span> Ohne USB-Sticks findet das BIOS wieder die SSD.');
+              setScenario4Result('usb-restart');
+              finish(true, 'USB-Sticks entfernt, danach sauber neu gestartet.');
+            }
+            return;
+          }
+          updateScene();
+          setStatus('Boot-Fehler bleibt');
+          say('<span class="bad">Boot-Fehler weiterhin vorhanden.</span> „No bootable device“ erscheint erneut. Öffne das Boot-Menü.');
+          openModal({
+            title: 'Neustart ohne Erfolg',
+            html: '<p>Der PC startet neu, zeigt aber weiterhin <b>No bootable device</b>.</p><p>Nächster Schritt: Boot-Menü öffnen und das richtige Laufwerk wählen.</p>'
+          });
+        }
+      });
+
+      actions.push({
+        id: 'monitor-toggle-s4',
+        label: '🖥️ Monitor ein/aus',
+        hotkey: '3',
+        delta: 1,
+        set: 'A',
+        effect(){
+          if(state.solved) return;
+          state.time += this.delta; state.tries++;
+          pushLog(this.label, `+${this.delta} Min`);
+          state.monitorOn = !state.monitorOn;
+          updateScene();
+          if(state.monitorOn){
+            setStatus('Monitor an');
+            say('<span class="info">Monitor eingeschaltet.</span> Die Meldung „No bootable device“ bleibt.');
+            openModal({
+              title: 'Monitor eingeschaltet',
+              html: '<p>Der Monitor zeigt weiterhin <b>No bootable device</b>.</p><p>Das Problem liegt beim Booten, nicht am Display.</p>'
+            });
+          } else {
+            setStatus('Monitor aus');
+            say('<span class="warn">Monitor ausgeschaltet.</span> Das Boot-Problem bleibt unverändert.');
+            openModal({
+              title: 'Monitor ausgeschaltet',
+              html: '<p>Du schaltest den Monitor kurz aus.</p><p>Am Boot-Fehler ändert das nichts.</p>'
+            });
+          }
+        }
+      });
+
+      actions.push({
+        id: 'power-check-s4',
+        label: '🔌 Stromkette prüfen',
+        hotkey: '4',
+        delta: 1,
+        set: 'A',
+        effect(){
+          if(state.solved) return;
+          state.time += this.delta; state.tries++;
+          pushLog(this.label, `+${this.delta} Min`);
+          setStatus('Strom ok');
+          say('<span class="info">Stromversorgung passt.</span> Der Fehler steckt im Boot-Vorgang.');
+          openModal({
+            title: 'Stromversorgung geprüft',
+            html: '<p>Netzkabel, Steckdose und Schalter sind in Ordnung.</p><p>Der Fehler liegt nicht an der Stromversorgung.</p>'
+          });
+        }
+      });
+
+      actions.push({
+        id: 'signal-check-s4',
+        label: '🔗 Monitorkabel/Quelle prüfen',
+        hotkey: '5',
+        delta: 1,
+        set: 'A',
+        effect(){
+          if(state.solved) return;
+          state.time += this.delta; state.tries++;
+          pushLog(this.label, `+${this.delta} Min`);
+          setStatus('Signal ok');
+          say('<span class="info">Signalstrecke passt.</span> Das Problem liegt am Startlaufwerk.');
+          openModal({
+            title: 'Signal prüfen',
+            html: '<p>HDMI/DP-Kabel und Quelle stimmen.</p><p>Fehlerursache ist der Boot-Vorgang („No bootable device“).</p>'
+          });
+        }
+      });
+
+      actions.push({
+        id: 'boot-menu',
+        label: '🤬 Boot-Menü öffnen (F12)',
+        hotkey: '6',
+        delta: 1,
+        set: 'A',
+        effect(){
+          if(state.solved) return;
+          state.time += this.delta; state.tries++;
+          pushLog(this.label, `+${this.delta} Min`);
+          state.activeSet = 'B';
+          state.bootMenuOpen = true;
+          updateScene();
+          renderActions();
+          setStatus('Boot-Menü offen');
+          say('<span class="info">Boot-Menü geöffnet.</span> Wähle die SSD oder passe die Reihenfolge an.');
+          openModal({
+            title: 'Boot-Menü geöffnet',
+            html: '<p>Du öffnest per <b>F12</b> das Boot-Menü.</p><p>Jetzt kannst du gefahrlos ein Startlaufwerk testen – schneller als BIOS-Änderungen.</p>'
+          });
+        }
+      });
+
+      // Set B
+      actions.push({
+        id: 'boot-ssd-temp',
+        label: '💽 Von SSD starten (temporär)',
+        hotkey: '1',
+        delta: 1,
+        set: 'B',
+        effect(){
+          if(state.solved) return;
+          state.time += this.delta; state.tries++;
+          pushLog(this.label, `+${this.delta} Min`);
+          state.bootError = false;
+          state.activeSet = 'A';
+          state.bootMenuOpen = false;
+          updateScene();
+          renderActions();
+          setStatus('Temporärer Start');
+          say('<span class="good">SSD ausgewählt.</span> Das System startet, die Änderung ist nicht dauerhaft.');
+          setScenario4Result('temp-boot');
+          finish(true, 'Temporär von der SSD gestartet (Boot-Menü).');
+        }
+      });
+
+      actions.push({
+        id: 'bootorder-change',
+        label: '🔀 Bootreihenfolge ansehen/ändern',
+        hotkey: '2',
+        delta: 2,
+        set: 'B',
+        effect(){
+          if(state.solved) return;
+          state.time += this.delta; state.tries++;
+          pushLog(this.label, `+${this.delta} Min`);
+          state.bootOrderChanged = true;
+          setStatus('Reihenfolge angepasst');
+          say('<span class="info">SSD nach oben verschoben.</span> Speichern nicht vergessen.');
+          openModal({
+            title: 'Bootreihenfolge angepasst',
+            html: '<p>Du ziehst die SSD im Boot-Menü nach oben.</p><p>Jetzt noch <b>Änderungen speichern</b>, sonst bleibt alles beim Alten.</p>'
+          });
+        }
+      });
+
+      actions.push({
+        id: 'drive-check',
+        label: '📝 Laufwerke erkannt?',
+        hotkey: '3',
+        delta: 1,
+        set: 'B',
+        effect(){
+          if(state.solved) return;
+          state.time += this.delta; state.tries++;
+          pushLog(this.label, `+${this.delta} Min`);
+          setStatus('Diagnose');
+          const usbInfo = state.usbPresent ? 'Ein USB-Stick taucht ebenfalls auf – entferne ihn oder passe die Reihenfolge an.' : 'Kein Fremdlaufwerk aktiv – die SSD ist verfügbar.';
+          say('<span class="info">SSD ist gelistet.</span> ' + (state.usbPresent ? 'USB-Stick erkannt.' : 'Hardware ok.'));
+          openModal({
+            title: 'Laufwerke geprüft',
+            html: `<p>Im Boot-Menü erscheint die SSD – Hardware passt.</p><p>${usbInfo}</p>`
+          });
+        }
+      });
+
+      actions.push({
+        id: 'secure-boot-info',
+        label: '🔒 UEFI/Secure-Boot Status ansehen',
+        hotkey: '4',
+        delta: 1,
+        set: 'B',
+        effect(){
+          if(state.solved) return;
+          state.time += this.delta; state.tries++;
+          pushLog(this.label, `+${this.delta} Min`);
+          setStatus('Info');
+          say('<span class="warn">Nur Info.</span> Secure Boot ist hier nicht die Ursache.');
+          openModal({
+            title: 'Secure Boot Info',
+            html: '<p>Du wirfst einen Blick auf UEFI/Secure Boot.</p><p>Für diesen Fehler selten relevant – Fokus bleibt auf Bootlaufwerk.</p>'
+          });
+        }
+      });
+
+      actions.push({
+        id: 'bootorder-save',
+        label: '💾 Änderungen speichern',
+        hotkey: '5',
+        delta: 2,
+        set: 'B',
+        effect(){
+          if(state.solved) return;
+          state.time += this.delta; state.tries++;
+          pushLog(this.label, `+${this.delta} Min`);
+          if(!state.bootOrderChanged){
+            setStatus('Keine Änderung');
+            say('<span class="warn">Nichts zu speichern.</span> Erst Reihenfolge anpassen, dann speichern.');
+            openModal({
+              title: 'Keine neuen Änderungen',
+              html: '<p>Es gibt keine neuen Einstellungen zum Speichern.</p><p>Nutze zuerst <b>Bootreihenfolge ändern</b>.</p>'
+            });
+            return;
+          }
+          state.bootOrderPersisted = true;
+          state.bootOrderChanged = false;
+          state.bootError = false;
+          state.bootMenuOpen = false;
+          state.activeSet = 'A';
+          updateScene();
+          renderActions();
+          setStatus('Änderungen gespeichert');
+          say('<span class="good">SSD als Startlaufwerk gespeichert.</span> Der Rechner startet von der SSD.');
+          setScenario4Result('bootorder-save');
+          finish(true, 'Bootreihenfolge aktualisiert und gespeichert. Neustart bringt das Login zurück.');
+        }
+      });
+
+      actions.push({
+        id: 'boot-exit-nosave',
+        label: '🚪 BIOS schließen (ohne Speichern)',
+        hotkey: '6',
+        delta: 1,
+        set: 'B',
+        effect(){
+          if(state.solved) return;
+          state.time += this.delta; state.tries++;
+          pushLog(this.label, `+${this.delta} Min`);
+          const hadChanges = state.bootOrderChanged;
+          state.bootOrderChanged = false;
+          state.activeSet = 'A';
+          state.bootMenuOpen = false;
+          updateScene();
+          renderActions();
+          setStatus('Boot-Menü verlassen');
+          if(hadChanges){
+            say('<span class="warn">Änderungen verworfen.</span> Der Boot-Fehler bleibt bestehen.');
+            openModal({
+              title: 'BIOS ohne Speichern geschlossen',
+              html: '<p>Du verlässt das Boot-Menü ohne zu speichern.</p><p>Alle Anpassungen werden verworfen, der PC startet neu und zeigt erneut <b>No bootable device</b>.</p>'
+            });
+          } else {
+            say('<span class="info">Keine Änderung vorgenommen.</span> Der Boot-Fehler bleibt bestehen.');
+            openModal({
+              title: 'Boot-Menü verlassen',
+              html: '<p>Du schliesst das Boot-Menü ohne Änderungen.</p><p>Der PC startet neu und landet wieder bei <b>No bootable device</b>.</p>'
+            });
+          }
+        }
+      });
+
+      return actions;
+    }
     function getActionsForLevel(levelId){
       const A = makeActions();
       if(levelId === 'L0'){
@@ -759,6 +1203,8 @@ function finish(success, detail){
         return [A.monitorCable, A.monitorToggle, A.bios, A.cpu, A.power, A.source];
       } else if(levelId === 'M3'){
         return [A.postCheck, A.monitorToggle, A.bios, A.ramFix, A.power, A.cmosReset];
+      } else if(levelId === 'B4'){
+        return makeScenario4Actions();
       } else {
         return [A.monitorToggle, A.bios, A.power, A.network, A.cpu, A.source];
       }
@@ -772,9 +1218,18 @@ function finish(success, detail){
       state.currentActionId = null;
       // Apply start flags
       const L = levels[idx];
-      state.pcOn = L.start.pcOn;
-      state.monitorOn = L.start.monitorOn;
-      state.signalOk = L.start.signalOk;
+      const start = L.start || {};
+      state.pcOn = !!start.pcOn;
+      state.monitorOn = !!start.monitorOn;
+      state.signalOk = !!start.signalOk;
+      state.bootError = !!start.bootError;
+      state.activeSet = start.activeSet || 'A';
+      state.bootMenuOpen = !!start.bootMenuOpen;
+      state.usbPresent = start.usbPresent !== undefined ? start.usbPresent : false;
+      state.bootOrderChanged = !!start.bootOrderChanged;
+      state.bootOrderPersisted = !!start.bootOrderPersisted;
+      state.scenario4Outcome = null;
+      state.customResult = null;
 
       // Actions per Level
       state.actions = getActionsForLevel(L.id);
@@ -839,6 +1294,15 @@ function finish(success, detail){
       feedbackEl.innerHTML = 'Wähle deinen ersten Schritt.'; stepLogEl.innerHTML = '';
       summary.classList.remove('active');
 
+      const legendEl = document.querySelector('.legend');
+      if(legendEl){
+        if(L.id === 'B4'){
+          legendEl.textContent = 'Tasten: [1–6] Aktionen je Set · [R] Neustart';
+        } else {
+          legendEl.textContent = 'Tasten: [1–6] Aktionen · [R] Neustart';
+        }
+      }
+
       // Visuals
       updateScene();
 
@@ -895,7 +1359,8 @@ function finish(success, detail){
           return `<li><b>Fall ${idx+1}:</b> ${L.name} - <i>noch kein Ergebnis</i></li>`;
         }
         const color = s.rank === 'Gold' ? 'var(--gold)' : (s.rank === 'Silber' ? 'var(--silver)' : 'var(--bronze)');
-        return `<li><b>Fall ${idx+1}:</b> ${L.name} - Zeit: <b>${s.time} Min</b>, Schritte: <b>${s.tries}</b>, Rang: <b style="color:${color}">${s.rank}</b>, Punkte: <b>${s.score}</b></li>`;
+        const detail = s.detail ? `, Lösung: <i>${s.detail}</i>` : '';
+        return `<li><b>Fall ${idx+1}:</b> ${L.name} - Zeit: <b>${s.time} Min</b>, Schritte: <b>${s.tries}</b>, Rang: <b style="color:${color}">${s.rank}</b>, Punkte: <b>${s.score}</b>${detail}</li>`;
       }).join('');
       const html = `<p class="hint">Deine besten Ergebnisse pro Szenario:</p><ul class="hint">${items}</ul>`;
       openTopModal({ title: 'Score', html });
@@ -941,7 +1406,7 @@ function finish(success, detail){
         }
         return;
       }
-      const action = state.actions.find(a => a.hotkey === e.key);
+      const action = getVisibleActions().find(a => a.hotkey === e.key);
       if(action){
         // remember which key triggered the upcoming modal (if any)
         lastHotkey = e.key;

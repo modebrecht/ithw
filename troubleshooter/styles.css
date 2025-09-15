@@ -188,12 +188,27 @@ details[open].hintbox summary::before, details[open].didaktik summary::before{
 .scene .mutfill{fill:rgba(255,255,255,.04)}
 .scene .no-signal{display:none}
 .scene.nosig .no-signal{display:block}
+.scene .booterr,.scene .bootmenu{display:none}
+.scene.booterr .booterr{display:block}
+.scene.bootmenu .bootmenu{display:block}
 .scene .login{display:none}
 .scene.login .login{display:block}
 .scene.power-on .led{stroke: var(--good); fill: var(--good)}
 /* Screen nur sichtbar, wenn Monitor "an" (No-Signal oder Login) */
 .scene .screen{display:none}
-.scene.nosig .screen, .scene.login .screen{display:block}
+.scene.nosig .screen, .scene.login .screen, .scene.booterr .screen, .scene.bootmenu .screen{display:block}
+
+.action-set-label{
+  grid-column:1 / -1;
+  font-size:12px;
+  letter-spacing:.4px;
+  text-transform:uppercase;
+  color:var(--ink-dim);
+  padding:4px 4px 0 4px;
+  font-weight:600;
+  margin-bottom:2px;
+}
+.actions[data-set="B"] .action-set-label{color:var(--accent)}
 
 /* Action message */
 .action-message{display:none;margin-top:12px;background:var(--card);border:1px solid rgba(255,255,255,.16);border-radius:16px;box-shadow:var(--shadow);padding:18px}
