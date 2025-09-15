@@ -203,9 +203,9 @@ details[open].hintbox summary::before, details[open].didaktik summary::before{
 .action-message .mbody{font-size:14px;color:var(--ink-dim);grid-column:1;grid-row:2}
 .action-message .mfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
 /* Place the primary action as a tall side button matching modal height */
-/* only for completion modal (adds .completion class) */
-.action-message.open.completion .mfoot{grid-column:2;grid-row:1 / span 2;margin-top:0;align-items:stretch}
-.action-message.open.completion .mfoot .btn{height:100%;width:100%;display:flex;align-items:center;justify-content:center}
+/* apply to all open modals so the Schliessen button spans full height */
+.action-message.open .mfoot{grid-column:2;grid-row:1 / span 2;margin-top:0;align-items:stretch}
+.action-message.open .mfoot .btn{height:100%;width:100%;display:flex;align-items:center;justify-content:center}
 .scene.mini svg{max-height:160px}
 .scene.mini{margin-top:10px}
 
