@@ -10,23 +10,117 @@
   <div class="wrap">
     <header>
       <div class="title">PC-Troubleshooter <span class="badge" id="verTag">v2.4</span></div>
-      <div class="badge" id="levelTag" aria-live="polite">Fall 1/1 • <b>Einfach</b></div>
-          <button class="btn" id="scoreBtn" title="Score anzeigen" aria-label="Score anzeigen">🏆 Score</button></header>
-
-    <!-- Modal/Message area shown above the story -->
-    <div class="action-message" id="actionMessageTop" aria-hidden="true">
-      <header class="mhead">
-        <h3 id="messageTitleTop">Aktion</h3>
-      </header>
-      <div class="mbody" id="messageBodyTop"></div>
-      <div class="mfoot">
-        <button class="btn primary" id="messageOkTop">Schliessen</button>
+      <div class="header-controls">
+        <div class="badge" id="levelTag" aria-live="polite" hidden>Fall 1 • <b>Einfach</b></div>
+        <button class="btn" id="backToHubBtn" title="Zurück zum Hub" aria-label="Zurück zum Hub" hidden>🏠 Hub</button>
+        <button class="btn" id="scoreBtn" title="Score anzeigen" aria-label="Score anzeigen">🏆 Score</button>
       </div>
-    </div>
+    </header>
 
-    <!-- Single card: story, actions & info -->
-    <section class="card story" aria-labelledby="storyTitle">
-      <div class="inner">
+    <section id="hubView" class="hub" aria-label="Szenario-Hub">
+      <p class="hub-intro">Wähle ein Szenario und arbeite dich Schritt für Schritt durch die Fehlersuche.</p>
+      <div class="hub-grid">
+        <article class="hub-card" data-index="1" data-scenario="L0" data-start-label="Starten" data-default-meta="Noch keine Bestleistung.">
+          <div class="hub-card-top">
+            <span class="hub-number">1</span>
+            <div class="hub-info">
+              <h3>Fall 1</h3>
+              <p>Der PC startet nicht</p>
+            </div>
+            <span class="hub-badge" data-medal>—</span>
+          </div>
+          <p class="hub-desc">Der Rechner reagiert nicht auf den Power-Knopf. Prüfe Strom und Anzeige.</p>
+          <p class="hub-meta" data-meta>Noch keine Bestleistung.</p>
+          <button class="btn primary hub-start" data-start>Starten</button>
+        </article>
+
+        <article class="hub-card is-locked" data-index="2" data-scenario="E1" data-requires="L0" data-start-label="Starten" data-locked-label="🔒 Gesperrt" data-default-meta="Noch keine Bestleistung." data-locked-meta="Schalte Fall 1 frei, um zu starten.">
+          <div class="hub-card-top">
+            <span class="hub-number">2</span>
+            <div class="hub-info">
+              <h3>Fall 2</h3>
+              <p>No Signal (falsche Quelle)</p>
+            </div>
+            <span class="hub-badge" data-medal>—</span>
+          </div>
+          <p class="hub-desc">Bildschirm bleibt schwarz, obwohl der PC läuft. Finde das fehlende Signal.</p>
+          <p class="hub-meta" data-meta>Schalte Fall 1 frei, um zu starten.</p>
+          <button class="btn hub-start locked" data-start aria-disabled="true" disabled>🔒 Gesperrt</button>
+        </article>
+
+        <article class="hub-card is-locked" data-index="3" data-scenario="M3" data-requires="E1" data-start-label="Starten" data-locked-label="🔒 Gesperrt" data-default-meta="Noch keine Bestleistung." data-locked-meta="Schalte Fall 2 frei, um zu starten.">
+          <div class="hub-card-top">
+            <span class="hub-number">3</span>
+            <div class="hub-info">
+              <h3>Fall 3</h3>
+              <p>Kein Bild trotz Start</p>
+            </div>
+            <span class="hub-badge" data-medal>—</span>
+          </div>
+          <p class="hub-desc">POST-Fehler? Analysiere Hinweise von LEDs und Pieptönen.</p>
+          <p class="hub-meta" data-meta>Schalte Fall 2 frei, um zu starten.</p>
+          <button class="btn hub-start locked" data-start aria-disabled="true" disabled>🔒 Gesperrt</button>
+        </article>
+
+        <article class="hub-card is-locked" data-index="4" data-scenario="S4" data-requires="M3" data-start-label="Starten" data-locked-label="🔒 Gesperrt" data-default-meta="Noch keine Bestleistung." data-locked-meta="Schalte Fall 3 frei, um zu starten.">
+          <div class="hub-card-top">
+            <span class="hub-number">4</span>
+            <div class="hub-info">
+              <h3>Fall 4</h3>
+              <p>No bootable device</p>
+            </div>
+            <span class="hub-badge" data-medal>—</span>
+          </div>
+          <p class="hub-desc">Bootfehler beheben und den richtigen Startdatenträger finden.</p>
+          <p class="hub-meta" data-meta>Schalte Fall 3 frei, um zu starten.</p>
+          <button class="btn hub-start locked" data-start aria-disabled="true" disabled>🔒 Gesperrt</button>
+        </article>
+
+        <article class="hub-card is-locked placeholder" data-index="5" data-placeholder="true" data-locked-label="🔒 Bald verfügbar" data-default-meta="Bleib dran!">
+          <div class="hub-card-top">
+            <span class="hub-number">5</span>
+            <div class="hub-info">
+              <h3>Fall 5</h3>
+              <p>PLACEHOLDER_5</p>
+            </div>
+            <span class="hub-badge" data-medal>—</span>
+          </div>
+          <p class="hub-desc">Geplant – weiteres Szenario in Vorbereitung.</p>
+          <p class="hub-meta" data-meta>Bleib dran!</p>
+          <button class="btn hub-start locked" data-start aria-disabled="true" disabled>🔒 Bald verfügbar</button>
+        </article>
+
+        <article class="hub-card is-locked placeholder" data-index="6" data-placeholder="true" data-locked-label="🔒 Bald verfügbar" data-default-meta="Bleib dran!">
+          <div class="hub-card-top">
+            <span class="hub-number">6</span>
+            <div class="hub-info">
+              <h3>Fall 6</h3>
+              <p>PLACEHOLDER_6</p>
+            </div>
+            <span class="hub-badge" data-medal>—</span>
+          </div>
+          <p class="hub-desc">Geplant – weiteres Szenario in Vorbereitung.</p>
+          <p class="hub-meta" data-meta>Bleib dran!</p>
+          <button class="btn hub-start locked" data-start aria-disabled="true" disabled>🔒 Bald verfügbar</button>
+        </article>
+      </div>
+    </section>
+
+    <div id="scenarioView" class="scenario-view" hidden>
+      <!-- Modal/Message area shown oberhalb der Story -->
+      <div class="action-message" id="actionMessageTop" aria-hidden="true">
+        <header class="mhead">
+          <h3 id="messageTitleTop">Aktion</h3>
+        </header>
+        <div class="mbody" id="messageBodyTop"></div>
+        <div class="mfoot">
+          <button class="btn primary" id="messageOkTop">Schliessen</button>
+        </div>
+      </div>
+ 
+      <!-- Single card: story, actions & info -->
+      <section class="card story" aria-labelledby="storyTitle">
+        <div class="inner">
           <h2 id="storyTitle">Szenario: Der PC, der nicht starten will</h2>
           <p id="storyText">
             Du sitzt im Informatikraum und dein PC reagiert nicht: Du drückst den Power‑Knopf, aber es passiert nichts.
@@ -115,7 +209,8 @@
             <div class="hint" id="bestRow" style="display:none;margin-top:8px">Bestleistung: <b id="bestText">—</b></div>
           </div>
         </div>
-    </section>
+      </section>
+    </div>
   </div>
 
   <script type="module">
@@ -175,6 +270,13 @@
     const scoreBtn = document.getElementById('scoreBtn');
     const hint1Btn = document.getElementById('hint1Btn');
     const goalBtn = document.getElementById('goalBtn');
+    const hubView = document.getElementById('hubView');
+    const scenarioView = document.getElementById('scenarioView');
+    const levelTagEl = document.getElementById('levelTag');
+    const backToHubBtn = document.getElementById('backToHubBtn');
+    let currentView = 'hub';
+
+    function isScenarioActive(){ return currentView === 'scenario'; }
 
     const hint1Html = 'Was kannst du prüfen, <b>ohne den PC zu öffnen</b>?';
     const hint2Html = `<ul class="hint"><li><b>Stromversorgung:</b> Steckdosenleiste an? Netzkabel fest am PC und an der Leiste/Steckdose? Netzteil‑Schalter (I/O) auf <b>I</b> (falls vorhanden)?</li><li><b>Anzeige/Signal:</b> Monitor eingeschaltet? Richtigen Eingang (HDMI/DP) gewählt? Kabel steckt fest? Falls möglich, anderen Port/Kabel testen.</li><li>Wenn der PC weiterhin <i>gar nicht</i> reagiert, wären interne Ursachen der nächste Schritt – in diesem Level bleiben wir bei externen Checks.</li></ul>`;
@@ -214,7 +316,7 @@
         modalEl.classList.remove('completion');
       }
       if(modalOkEl) modalOkEl.textContent = okLabel;
-      if(title === 'Aufgabe abgeschlossen' && modalOkEl){ modalOkEl.textContent = 'Nächste Aufgabe'; }
+      if(title === 'Aufgabe abgeschlossen' && modalOkEl){ modalOkEl.textContent = 'Zurück zum Hub'; }
       modalEl.classList.add('open');
       modalEl.setAttribute('aria-hidden','false');
       lastFocusEl = document.activeElement;
@@ -258,6 +360,28 @@
       if(lastFocusEl) lastFocusEl.focus();
       modalOpenKey = null;
     }
+    function showHub(){
+      try{ if(topModalEl && topModalEl.classList.contains('open')) closeTopModal(); }catch(e){}
+      try{ if(modalOpen) closeModal(); }catch(e){}
+      hideCelebration();
+      if(scenarioView) scenarioView.setAttribute('hidden','');
+      if(hubView) hubView.removeAttribute('hidden');
+      if(levelTagEl) levelTagEl.setAttribute('hidden','');
+      if(backToHubBtn) backToHubBtn.setAttribute('hidden','');
+      currentView = 'hub';
+      try{ renderHub(); }catch(e){}
+    }
+    function startScenario(idx){
+      if(!levels || idx < 0 || idx >= levels.length) return;
+      if(hubView) hubView.setAttribute('hidden','');
+      if(scenarioView) scenarioView.removeAttribute('hidden');
+      if(levelTagEl) levelTagEl.removeAttribute('hidden');
+      if(backToHubBtn) backToHubBtn.removeAttribute('hidden');
+      try{ if(topModalEl && topModalEl.classList.contains('open')) closeTopModal(); }catch(e){}
+      hideCelebration();
+      currentView = 'scenario';
+      loadLevel(idx);
+    }
     function showCelebration(){
       if(celebrationEl) return;
       if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){ return; }
@@ -284,38 +408,11 @@
       if(celebrationTimer){ clearInterval(celebrationTimer); celebrationTimer = null; }
       if(celebrationEl){ celebrationEl.remove(); celebrationEl = null; }
     }
-    // Transition helper: animate card out/in when switching levels
-    function animateToLevel(idx){
-      const card = document.querySelector('section.card.story');
-      if(!card){ loadLevel(idx); return; }
-      // If already animating, skip to direct load
-      if(card.classList.contains('transition-out') || card.classList.contains('transition-in')){
-        loadLevel(idx); return;
-      }
-      card.classList.add('transitioning','transition-out');
-      const onOutEnd = ()=>{
-        card.removeEventListener('animationend', onOutEnd);
-        loadLevel(idx);
-        // Next tick to ensure DOM updates before animating in
-        requestAnimationFrame(()=>{
-          card.classList.remove('transition-out');
-          card.classList.add('transition-in');
-          const onInEnd = ()=>{
-            card.removeEventListener('animationend', onInEnd);
-            card.classList.remove('transition-in','transitioning');
-          };
-          card.addEventListener('animationend', onInEnd, { once:true });
-        });
-      };
-      card.addEventListener('animationend', onOutEnd, { once:true });
-    }
-
     if(modalOkEl) modalOkEl.addEventListener('click', () => {
-      // If success modal, advance to next scenario with animation
+      // If success modal, return to the hub overview
       if(modalTitleEl && modalTitleEl.textContent === 'Aufgabe abgeschlossen'){
-        const next = (state.levelIdx + 1) % levels.length;
         closeModal(); hideCelebration();
-        animateToLevel(next);
+        showHub();
       } else {
         closeModal();
       }
@@ -347,7 +444,7 @@
         openModal({
           title: 'Aufgabe abgeschlossen',
           html: completionIntroHtml(),
-          okLabel: 'Nächste Aufgabe'
+          okLabel: 'Zurück zum Hub'
         });
         return;
       }
@@ -361,7 +458,7 @@
         openModal({
           title: 'Aufgabe abgeschlossen',
           html: completionIntroHtml(),
-          okLabel: 'Nächste Aufgabe'
+          okLabel: 'Zurück zum Hub'
         });
       } else if (!modalOpen){
         const html = (feedbackEl && feedbackEl.innerHTML) ? feedbackEl.innerHTML : 'Aktion ausgeführt.';
@@ -381,7 +478,7 @@
           const hasPower = !!state.performed['power-cable'];
           if(!state.solved && hasMonitor && hasPower && state.monitorOn){
             finish(true, 'Stromversorgung und Monitor aktiviert.');
-            openModal({ title: 'Aufgabe abgeschlossen', html: completionIntroHtml(), okLabel: 'N��chste Aufgabe' });
+            openModal({ title: 'Aufgabe abgeschlossen', html: completionIntroHtml(), okLabel: 'Zurück zum Hub' });
             return true;
           }
           break;
@@ -392,7 +489,7 @@
           const isSourceNow = state.currentActionId === 'source';
           if(!state.solved && didMonitor && isSourceNow && state.monitorOn){
             finish(true, 'Quelle korrekt, Signal wiederhergestellt.');
-            openModal({ title: 'Aufgabe abgeschlossen', html: completionIntroHtml(), okLabel: 'N��chste Aufgabe' });
+            openModal({ title: 'Aufgabe abgeschlossen', html: completionIntroHtml(), okLabel: 'Zurück zum Hub' });
             return true;
           }
           break;
@@ -601,6 +698,7 @@ function finish(success, detail){
         }
         saveScores(scores);
       }
+      renderHub();
     }
 
     function animateReset(){
@@ -634,7 +732,7 @@ function finish(success, detail){
       card.addEventListener('animationend', onOutEnd, { once:true });
     }
 
-    function reset(){ animateReset(); }
+    function reset(){ if(!isScenarioActive()) return; animateReset(); }
 
     function showBest(){
       const best = loadBest();
@@ -648,6 +746,63 @@ function finish(success, detail){
 
     // Level definitions & loader
     const levels = [scenario1, scenario2, scenario3, scenario4];
+
+    function renderHub(){
+      if(!hubView) return;
+      const scores = loadScores();
+      const cards = hubView.querySelectorAll('.hub-card');
+      cards.forEach(card => {
+        const scenarioId = card.getAttribute('data-scenario');
+        const requires = card.getAttribute('data-requires');
+        const defaultMeta = card.getAttribute('data-default-meta') || 'Noch keine Bestleistung.';
+        const lockedMeta = card.getAttribute('data-locked-meta');
+        const startLabel = card.getAttribute('data-start-label') || 'Starten';
+        const lockedLabel = card.getAttribute('data-locked-label') || '🔒 Gesperrt';
+        const isPlaceholder = card.hasAttribute('data-placeholder');
+        const medalEl = card.querySelector('[data-medal]');
+        const metaEl = card.querySelector('[data-meta]');
+        const startBtn = card.querySelector('[data-start]');
+
+        let unlocked = !requires;
+        if(requires){ unlocked = !!(scores && scores[requires]); }
+        if(isPlaceholder){ unlocked = false; }
+
+        if(startBtn){
+          startBtn.disabled = !unlocked;
+          startBtn.setAttribute('aria-disabled', unlocked ? 'false' : 'true');
+          startBtn.classList.toggle('locked', !unlocked);
+          startBtn.classList.toggle('primary', unlocked);
+          startBtn.textContent = unlocked ? startLabel : lockedLabel;
+        }
+
+        let rank = null;
+        if(scenarioId && scores && scores[scenarioId] && scores[scenarioId].rank){
+          rank = scores[scenarioId].rank;
+        }
+        const rankKey = rank ? rank.toLowerCase() : 'none';
+        card.setAttribute('data-rank', rankKey);
+        card.classList.toggle('is-locked', !unlocked);
+        card.classList.toggle('is-unlocked', unlocked);
+
+        if(medalEl){
+          if(rank === 'Gold'){ medalEl.textContent = '🥇 Gold'; }
+          else if(rank === 'Silber'){ medalEl.textContent = '🥈 Silber'; }
+          else if(rank === 'Bronze'){ medalEl.textContent = '🥉 Bronze'; }
+          else { medalEl.textContent = '—'; }
+        }
+
+        if(metaEl){
+          if(scenarioId && scores && scores[scenarioId]){
+            const s = scores[scenarioId];
+            metaEl.innerHTML = `Bestleistung: <strong>${s.time} Min</strong> · <strong>${s.tries}</strong> Schritte`;
+          } else if(!unlocked && lockedMeta){
+            metaEl.textContent = lockedMeta;
+          } else {
+            metaEl.textContent = defaultMeta;
+          }
+        }
+      });
+    }
 
     function makeActions(){
       return {
@@ -1207,7 +1362,7 @@ function finish(success, detail){
               openModal({
                 title: 'Aufgabe abgeschlossen',
                 html: completionIntroHtml(),
-                okLabel: 'Nächste Aufgabe',
+                okLabel: 'Zurück zum Hub',
                 scene: { pcOn: true, monitorOn: true, signalOk: true }
               });
             }
@@ -1229,7 +1384,7 @@ function finish(success, detail){
               openModal({
                 title: 'Aufgabe abgeschlossen',
                 html: completionIntroHtml(),
-                okLabel: 'Nächste Aufgabe',
+                okLabel: 'Zurück zum Hub',
                 scene: { pcOn: true, monitorOn: true, signalOk: true }
               });
             }
@@ -1254,51 +1409,12 @@ function finish(success, detail){
       updateScene();
 
       // Badge text
-      const tag = document.getElementById('levelTag');
-      if(tag){ tag.innerHTML = `Fall ${idx+1}/${levels.length} - <b>Einfach</b>`; }
+      if(levelTagEl){ levelTagEl.innerHTML = `Fall ${idx+1} • <b>${L.name}</b>`; }
+      showBest();
     }
 
-    // Clicking the badge: no-op (navigation via prev/next buttons)
-    document.getElementById('levelTag').addEventListener('click', ()=>{});
-    // Inject previous/next buttons around the level tag and group closely
-    (function(){
-      const levelTagEl = document.getElementById('levelTag');
-      if(!levelTagEl || !levelTagEl.parentNode) return;
-      // Wrap in a compact nav container
-      const wrap = document.createElement('div');
-      wrap.className = 'level-nav';
-      levelTagEl.parentNode.insertBefore(wrap, levelTagEl);
-      wrap.appendChild(levelTagEl);
-      // Prev
-      const prevBtn = document.createElement('button');
-      prevBtn.className = 'btn';
-      prevBtn.id = 'levelPrev';
-      prevBtn.title = 'Vorheriger Fall';
-      prevBtn.setAttribute('aria-label','Vorheriger Fall');
-      prevBtn.textContent = '<';
-      wrap.insertBefore(prevBtn, levelTagEl);
-      prevBtn.addEventListener('click', ()=>{
-        closeModal(); hideCelebration();
-        const prev = (state.levelIdx - 1 + levels.length) % levels.length;
-        animateToLevel(prev);
-      });
-      // Next
-      const nextBtn = document.createElement('button');
-      nextBtn.className = 'btn';
-      nextBtn.id = 'levelNext';
-      nextBtn.title = 'Nächster Fall';
-      nextBtn.setAttribute('aria-label','Nächster Fall');
-      nextBtn.textContent = '>';
-      wrap.appendChild(nextBtn);
-      nextBtn.addEventListener('click', ()=>{
-        closeModal(); hideCelebration();
-        const next = (state.levelIdx + 1) % levels.length;
-        animateToLevel(next);
-      });
-    })();
-
     // Score-Modal oeffnen
-    if (document.getElementById('scoreBtn')) document.getElementById('scoreBtn').addEventListener('click', ()=>{
+    if (scoreBtn) scoreBtn.addEventListener('click', ()=>{
       const scores = loadScores();
       const items = levels.map((L, idx)=>{
         const s = scores[L.id];
@@ -1311,6 +1427,19 @@ function finish(success, detail){
       const html = `<p class="hint">Deine besten Ergebnisse pro Szenario:</p><ul class="hint">${items}</ul>`;
       openTopModal({ title: 'Score', html });
     });
+    if(backToHubBtn){ backToHubBtn.addEventListener('click', () => { showHub(); }); }
+    if(hubView){
+      hubView.addEventListener('click', (event)=>{
+        const btn = event.target.closest('[data-start]');
+        if(!btn || btn.disabled) return;
+        const card = btn.closest('.hub-card');
+        if(!card) return;
+        const scenarioId = card.getAttribute('data-scenario');
+        if(!scenarioId) return;
+        const idx = levels.findIndex(L => L.id === scenarioId);
+        if(idx !== -1){ startScenario(idx); }
+      });
+    }
     // Move footer buttons into the statusbar (right side)
     (function(){
       const statusBar = document.querySelector('.statusbar');
@@ -1336,8 +1465,10 @@ function finish(success, detail){
     // Hotkeys 1-6 + R
     window.addEventListener('keydown', (e)=>{
       const k = e.key.toLowerCase();
-      // Neustart (R) ist immer erlaubt, selbst wenn ein Modal offen ist
-      if(k==='r'){ reset(); return; }
+      if(k==='r'){
+        if(isScenarioActive()) reset();
+        return;
+      }
       // While a modal is open, allow ESC or same opener key to close, unless solved
       if(modalOpen){
         if(!state.solved){
@@ -1352,6 +1483,7 @@ function finish(success, detail){
         }
         return;
       }
+      if(!isScenarioActive()) return;
       const L = levels && levels[state.levelIdx];
       const isS4 = !!(L && L.id === 'S4');
       const activeSet = isS4 ? (state.activeSet || 'A') : null;
@@ -1363,9 +1495,8 @@ function finish(success, detail){
       }
     });
 
-        // Init
-    loadLevel(0);
-    showBest();
+    // Init Hub view
+    showHub();
   </script>
 </body>
 </html>
