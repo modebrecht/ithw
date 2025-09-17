@@ -1,7 +1,7 @@
 export default {
   id: 'S4',
   name: 'No bootable device (Bootfehler)',
-  storyTitle: 'Szenario: "No bootable device" trotz Start',
+  storyTitle: 'Szenario: "No bootable device"',
   storyText:
     'Der PC startet, Monitor und Signal sind aktiv – doch statt Windows erscheint sofort <b>NO BOOTABLE DEVICE</b>. ' +
     'Finde den Fehler und bringe das System wieder bis zum Login.',

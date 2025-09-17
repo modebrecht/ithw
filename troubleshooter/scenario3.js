@@ -1,6 +1,6 @@
 export default {
   id: 'M3',
-  name: 'Kein Bild trotz Start (POST)',
+  name: 'Kein Bild trotz Start',
   storyTitle: 'Szenario: Kein Bild trotz Start',
   storyText: 'Der PC läuft (Lüfter/LED), der Monitor ist an – doch es erscheint <i>kein Bild</i> (No Signal). <b>Was prüfst du als Nächstes?</b>',
   hints: {
