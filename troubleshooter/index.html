@@ -7,11 +7,26 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="wrap">
+  <div id="hubApp" class="hub-app">
+    <header class="hub-header">
+      <h1>PC-Troubleshooter Hub</h1>
+      <p>Wähle ein Szenario und trainiere deine Fehlersuche Schritt für Schritt.</p>
+      <p class="hub-hint">🔒 Szenarien werden nacheinander freigeschaltet. Fortschritt wird lokal gespeichert.</p>
+    </header>
+    <main class="hub-main">
+      <div class="hub-grid" id="hubGrid" aria-live="polite"></div>
+    </main>
+  </div>
+
+  <div class="wrap hidden" id="gameApp">
     <header>
       <div class="title">PC-Troubleshooter <span class="badge" id="verTag">v2.4</span></div>
       <div class="badge" id="levelTag" aria-live="polite">Fall 1/1 • <b>Einfach</b></div>
-          <button class="btn" id="scoreBtn" title="Score anzeigen" aria-label="Score anzeigen">🏆 Score</button></header>
+      <div class="controls">
+        <button class="btn" id="hubBtn" title="Zurück zum Hub" aria-label="Zurück zum Hub">🏠 Hub</button>
+        <button class="btn" id="scoreBtn" title="Score anzeigen" aria-label="Score anzeigen">🏆 Score</button>
+      </div>
+    </header>
 
     <!-- Modal/Message area shown above the story -->
     <div class="action-message" id="actionMessageTop" aria-hidden="true">
@@ -160,6 +175,9 @@
 
     // --- DOM helpers ---
     const $ = sel => document.querySelector(sel);
+    const hubApp = document.getElementById('hubApp');
+    const hubGrid = document.getElementById('hubGrid');
+    const gameApp = document.getElementById('gameApp');
     const timeEl = $('#time');
     const triesEl = $('#tries');
     const statusEl = $('#status');
@@ -173,6 +191,7 @@
     const bestRow = $('#bestRow');
     const bestText = $('#bestText');
     const scoreBtn = document.getElementById('scoreBtn');
+    const hubBtn = document.getElementById('hubBtn');
     const hint1Btn = document.getElementById('hint1Btn');
     const goalBtn = document.getElementById('goalBtn');
 
@@ -214,7 +233,7 @@
         modalEl.classList.remove('completion');
       }
       if(modalOkEl) modalOkEl.textContent = okLabel;
-      if(title === 'Aufgabe abgeschlossen' && modalOkEl){ modalOkEl.textContent = 'Nächste Aufgabe'; }
+      if(title === 'Aufgabe abgeschlossen' && modalOkEl){ modalOkEl.textContent = 'Zurück zum Hub'; }
       modalEl.classList.add('open');
       modalEl.setAttribute('aria-hidden','false');
       lastFocusEl = document.activeElement;
@@ -286,6 +305,17 @@
     }
     // Transition helper: animate card out/in when switching levels
     function animateToLevel(idx){
+      if(!isLevelUnlockedByIndex(idx)){
+        const conf = getScenarioConfigByLevelIndex(idx);
+        const requirement = conf && conf.unlockAfter ? getScenarioConfigById(conf.unlockAfter) : null;
+        const reqText = requirement ? `${requirement.label} (${requirement.name})` : 'das vorherige Szenario';
+        openModal({
+          title: 'Szenario gesperrt',
+          html: `<p>🔒 Dieses Szenario ist noch gesperrt.</p><p>Schliesse zuerst <b>${reqText}</b> ab.</p>`,
+          okLabel: 'Okay'
+        });
+        return;
+      }
       const card = document.querySelector('section.card.story');
       if(!card){ loadLevel(idx); return; }
       // If already animating, skip to direct load
@@ -311,11 +341,10 @@
     }
 
     if(modalOkEl) modalOkEl.addEventListener('click', () => {
-      // If success modal, advance to next scenario with animation
       if(modalTitleEl && modalTitleEl.textContent === 'Aufgabe abgeschlossen'){
-        const next = (state.levelIdx + 1) % levels.length;
-        closeModal(); hideCelebration();
-        animateToLevel(next);
+        closeModal();
+        hideCelebration();
+        showHub({ focusFirst: true });
       } else {
         closeModal();
       }
@@ -347,7 +376,7 @@
         openModal({
           title: 'Aufgabe abgeschlossen',
           html: completionIntroHtml(),
-          okLabel: 'Nächste Aufgabe'
+          okLabel: 'Zurück zum Hub'
         });
         return;
       }
@@ -361,7 +390,7 @@
         openModal({
           title: 'Aufgabe abgeschlossen',
           html: completionIntroHtml(),
-          okLabel: 'Nächste Aufgabe'
+          okLabel: 'Zurück zum Hub'
         });
       } else if (!modalOpen){
         const html = (feedbackEl && feedbackEl.innerHTML) ? feedbackEl.innerHTML : 'Aktion ausgeführt.';
@@ -648,6 +677,220 @@ function finish(success, detail){
 
     // Level definitions & loader
     const levels = [scenario1, scenario2, scenario3, scenario4];
+    const scenarioList = [
+      {
+        id: scenario1.id,
+        levelIdx: 0,
+        order: 1,
+        label: 'Szenario 1',
+        name: scenario1.name,
+        description: 'PC reagiert nicht beim Einschalten – prüfe Strom und Monitor.',
+        difficulty: 'Einfach',
+        unlockAfter: null
+      },
+      {
+        id: scenario2.id,
+        levelIdx: 1,
+        order: 2,
+        label: 'Szenario 2',
+        name: scenario2.name,
+        description: 'PC läuft, aber kein Bild – finde die richtige Quelle oder das Kabel.',
+        difficulty: 'Einfach',
+        unlockAfter: scenario1.id
+      },
+      {
+        id: scenario3.id,
+        levelIdx: 2,
+        order: 3,
+        label: 'Szenario 3',
+        name: scenario3.name,
+        description: 'POST stoppt ohne Bild – analysiere Hinweise und sichere den RAM.',
+        difficulty: 'Mittel',
+        unlockAfter: scenario2.id
+      },
+      {
+        id: scenario4.id,
+        levelIdx: 3,
+        order: 4,
+        label: 'Szenario 4',
+        name: scenario4.name,
+        description: 'Bootfehler "No bootable device" – bring den PC zurück zum Login.',
+        difficulty: 'Fortgeschritten',
+        unlockAfter: scenario3.id
+      },
+      {
+        id: 'PLACEHOLDER_5',
+        order: 5,
+        label: 'Szenario 5',
+        name: 'PLACEHOLDER_5',
+        description: 'Neues Szenario in Vorbereitung.',
+        difficulty: 'In Planung',
+        placeholder: true
+      },
+      {
+        id: 'PLACEHOLDER_6',
+        order: 6,
+        label: 'Szenario 6',
+        name: 'PLACEHOLDER_6',
+        description: 'Neues Szenario in Vorbereitung.',
+        difficulty: 'In Planung',
+        placeholder: true
+      }
+    ];
+    const levelInfo = scenarioList
+      .filter(item => !item.placeholder && typeof item.levelIdx === 'number')
+      .reduce((acc, item) => {
+        acc[item.id] = { order: item.order, difficulty: item.difficulty };
+        return acc;
+      }, {});
+    const realScenarioCount = levels.length;
+
+    function getScenarioConfigById(id){
+      return scenarioList.find(item => item.id === id);
+    }
+    function getScenarioConfigByLevelIndex(idx){
+      return scenarioList.find(item => !item.placeholder && item.levelIdx === idx);
+    }
+    function hasCompletedScenario(id, scores){
+      return !!(scores && scores[id]);
+    }
+    function isScenarioUnlocked(config, scores){
+      if(!config) return false;
+      if(config.placeholder) return false;
+      if(!config.unlockAfter) return true;
+      return hasCompletedScenario(config.unlockAfter, scores);
+    }
+    function isLevelUnlockedByIndex(idx, scores = loadScores()){
+      const conf = getScenarioConfigByLevelIndex(idx);
+      if(!conf) return false;
+      return isScenarioUnlocked(conf, scores);
+    }
+
+    function getMedalMeta(rank){
+      switch(rank){
+        case 'Gold':
+          return { className: 'hub-medal hub-medal--gold', label: 'Gold' };
+        case 'Silber':
+          return { className: 'hub-medal hub-medal--silver', label: 'Silber' };
+        case 'Bronze':
+          return { className: 'hub-medal hub-medal--bronze', label: 'Bronze' };
+        default:
+          return { className: 'hub-medal hub-medal--none', label: 'Keine Auszeichnung' };
+      }
+    }
+
+    function buildStatusText(conf, score, unlocked){
+      if(conf.placeholder){
+        return 'Platzhalter – dieses Szenario folgt demnächst.';
+      }
+      if(score){
+        return `Beste Runde: ${score.time} Min • ${score.tries} Schritte`;
+      }
+      if(!unlocked){
+        const requirement = conf.unlockAfter ? getScenarioConfigById(conf.unlockAfter) : null;
+        if(requirement){
+          return `🔒 Schließe zuerst ${requirement.label} (${requirement.name}) ab.`;
+        }
+        return '🔒 Dieses Szenario ist noch gesperrt.';
+      }
+      return 'Noch keine Auszeichnung erspielt.';
+    }
+
+    function renderHub(){
+      if(!hubGrid) return;
+      const scores = loadScores();
+      hubGrid.innerHTML = '';
+      scenarioList.forEach(conf => {
+        const card = document.createElement('article');
+        card.className = 'hub-card';
+        const isUnlocked = isScenarioUnlocked(conf, scores);
+        if(conf.placeholder){
+          card.classList.add('placeholder', 'locked');
+        } else if(!isUnlocked){
+          card.classList.add('locked');
+        }
+
+        const header = document.createElement('div');
+        header.className = 'hub-card-header';
+        const numberEl = document.createElement('span');
+        numberEl.className = 'hub-card-number';
+        numberEl.textContent = conf.label || `Szenario ${conf.order}`;
+        header.appendChild(numberEl);
+        const medal = getMedalMeta(conf.placeholder ? null : (scores[conf.id] && scores[conf.id].rank));
+        const medalEl = document.createElement('span');
+        medalEl.className = medal.className;
+        medalEl.textContent = medal.label;
+        header.appendChild(medalEl);
+        card.appendChild(header);
+
+        const title = document.createElement('h3');
+        title.textContent = conf.name;
+        card.appendChild(title);
+
+        const desc = document.createElement('p');
+        desc.textContent = conf.description;
+        card.appendChild(desc);
+
+        if(conf.difficulty){
+          const diff = document.createElement('div');
+          diff.className = 'hub-difficulty';
+          diff.textContent = conf.placeholder ? conf.difficulty : `Schwierigkeit: ${conf.difficulty}`;
+          card.appendChild(diff);
+        }
+
+        const status = document.createElement('div');
+        status.className = 'hub-status';
+        status.textContent = buildStatusText(conf, scores[conf.id], isUnlocked);
+        card.appendChild(status);
+
+        const actions = document.createElement('div');
+        actions.className = 'hub-actions';
+        const btn = document.createElement('button');
+        btn.className = 'btn primary';
+        if(conf.placeholder){
+          btn.textContent = 'In Arbeit';
+          btn.disabled = true;
+        } else if(isUnlocked){
+          btn.textContent = scores[conf.id] ? 'Erneut spielen' : 'Starten';
+          btn.addEventListener('click', () => {
+            showScenario(conf.levelIdx);
+          });
+        } else {
+          btn.textContent = '🔒 Gesperrt';
+          btn.disabled = true;
+        }
+        actions.appendChild(btn);
+        card.appendChild(actions);
+
+        hubGrid.appendChild(card);
+      });
+    }
+
+    function showHub({ focusFirst=false }={}){
+      renderHub();
+      if(gameApp){ gameApp.classList.add('hidden'); }
+      if(hubApp){ hubApp.classList.remove('hidden'); }
+      if(focusFirst && hubGrid){
+        const first = hubGrid.querySelector('button:not([disabled])');
+        if(first){ first.focus(); }
+      }
+      window.scrollTo(0, 0);
+    }
+
+    function showScenario(idx){
+      const scores = loadScores();
+      if(!isLevelUnlockedByIndex(idx, scores)){
+        return;
+      }
+      if(hubApp){ hubApp.classList.add('hidden'); }
+      if(gameApp){ gameApp.classList.remove('hidden'); }
+      try{ if(topModalEl && topModalEl.classList.contains('open')) closeTopModal(); }catch(e){}
+      try{ if(modalOpen) closeModal(); }catch(e){}
+      hideCelebration();
+      loadLevel(idx);
+      showBest();
+      window.scrollTo(0, 0);
+    }
 
     function makeActions(){
       return {
@@ -1207,7 +1450,7 @@ function finish(success, detail){
               openModal({
                 title: 'Aufgabe abgeschlossen',
                 html: completionIntroHtml(),
-                okLabel: 'Nächste Aufgabe',
+                okLabel: 'Zurück zum Hub',
                 scene: { pcOn: true, monitorOn: true, signalOk: true }
               });
             }
@@ -1229,7 +1472,7 @@ function finish(success, detail){
               openModal({
                 title: 'Aufgabe abgeschlossen',
                 html: completionIntroHtml(),
-                okLabel: 'Nächste Aufgabe',
+                okLabel: 'Zurück zum Hub',
                 scene: { pcOn: true, monitorOn: true, signalOk: true }
               });
             }
@@ -1255,7 +1498,12 @@ function finish(success, detail){
 
       // Badge text
       const tag = document.getElementById('levelTag');
-      if(tag){ tag.innerHTML = `Fall ${idx+1}/${levels.length} - <b>Einfach</b>`; }
+      const info = L ? levelInfo[L.id] : null;
+      if(tag){
+        const order = info && info.order ? info.order : (idx + 1);
+        const diff = info && info.difficulty ? info.difficulty : 'Einfach';
+        tag.innerHTML = `Fall ${order}/${realScenarioCount} - <b>${diff}</b>`;
+      }
     }
 
     // Clicking the badge: no-op (navigation via prev/next buttons)
@@ -1298,7 +1546,7 @@ function finish(success, detail){
     })();
 
     // Score-Modal oeffnen
-    if (document.getElementById('scoreBtn')) document.getElementById('scoreBtn').addEventListener('click', ()=>{
+    function openScoreboard(){
       const scores = loadScores();
       const items = levels.map((L, idx)=>{
         const s = scores[L.id];
@@ -1310,7 +1558,16 @@ function finish(success, detail){
       }).join('');
       const html = `<p class="hint">Deine besten Ergebnisse pro Szenario:</p><ul class="hint">${items}</ul>`;
       openTopModal({ title: 'Score', html });
-    });
+    }
+    if(scoreBtn){ scoreBtn.addEventListener('click', openScoreboard); }
+    if(hubBtn){
+      hubBtn.addEventListener('click', () => {
+        try{ if(topModalEl && topModalEl.classList.contains('open')) closeTopModal(); }catch(e){}
+        if(modalOpen){ closeModal(); }
+        hideCelebration();
+        showHub({ focusFirst: true });
+      });
+    }
     // Move footer buttons into the statusbar (right side)
     (function(){
       const statusBar = document.querySelector('.statusbar');
@@ -1335,6 +1592,7 @@ function finish(success, detail){
 
     // Hotkeys 1-6 + R
     window.addEventListener('keydown', (e)=>{
+      if(gameApp && gameApp.classList.contains('hidden')) return;
       const k = e.key.toLowerCase();
       // Neustart (R) ist immer erlaubt, selbst wenn ein Modal offen ist
       if(k==='r'){ reset(); return; }
@@ -1366,6 +1624,7 @@ function finish(success, detail){
         // Init
     loadLevel(0);
     showBest();
+    showHub();
   </script>
 </body>
 </html>
