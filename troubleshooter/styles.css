@@ -124,13 +124,23 @@ header .controls{display:flex;gap:8px;align-items:center}
 .hub-item.placeholder{opacity:.65}
 .hub-lock{font-weight:600}
 
+/* Completed cards use medal-coloured frame */
+.hub-item.completed{border-width:2px}
+.hub-item.completed.rank-gold{border-color:rgba(251,191,36,.75)}
+.hub-item.completed.rank-silber{border-color:rgba(203,213,225,.70)}
+.hub-item.completed.rank-bronze{border-color:rgba(217,119,6,.70)}
+.hub-item.completed.rank-none{border-color:rgba(148,163,184,.45)}
+
+
 /* Medaillen stärker wie im Screenshot */
 .hub-medal{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:4px 10px;border-radius:999px;
+  grid-column:3;
+  justify-self:end;
+  display:inline-flex;align-items:center;justify-content:center;gap:4px;
+  height:38px;padding:0 16px;border-radius:999px;
   border:1px solid rgba(255,255,255,.12);
   background:rgba(255,255,255,.05);
-  font-size:12px;font-weight:700;color:var(--ink)
+  font-size:12px;font-weight:700;color:var(--ink);white-space:nowrap
 }
 .hub-medal.gold{background:rgba(251,191,36,.16);border-color:rgba(251,191,36,.55);color:var(--gold)}
 .hub-medal.silver{background:rgba(203,213,225,.16);border-color:rgba(203,213,225,.50);color:var(--silver)}
