@@ -7,11 +7,29 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="wrap">
+  <div class="wrap hub-view" id="hubView">
+    <header class="hub-header">
+      <div class="title">PC-Troubleshooter <span class="badge" id="hubVerTag">v2.4</span></div>
+      <div class="hub-info" id="hubInfo"></div>
+    </header>
+    <section class="card hub-card" aria-labelledby="hubTitle">
+      <div class="inner">
+        <h2 id="hubTitle">Willkommen im Szenario-Hub</h2>
+        <p class="hint">Wähle ein Szenario, verbessere deine Medaillen und schalte weitere Fälle frei.</p>
+        <div class="hub-grid" id="scenarioList" aria-live="polite"></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="wrap hidden" id="scenarioView">
     <header>
       <div class="title">PC-Troubleshooter <span class="badge" id="verTag">v2.4</span></div>
-      <div class="badge" id="levelTag" aria-live="polite">Fall 1/1 • <b>Einfach</b></div>
-          <button class="btn" id="scoreBtn" title="Score anzeigen" aria-label="Score anzeigen">🏆 Score</button></header>
+      <div class="controls">
+        <div class="badge" id="levelTag" aria-live="polite">Fall 1/4 • <b>Einfach</b></div>
+        <button class="btn" type="button" id="scoreBtn" title="Score anzeigen" aria-label="Score anzeigen">🏆 Score</button>
+        <button class="btn" type="button" id="hubBtn" title="Zurück zum Hub" aria-label="Zurück zum Hub">🏠 Hub</button>
+      </div>
+    </header>
 
     <!-- Modal/Message area shown above the story -->
     <div class="action-message" id="actionMessageTop" aria-hidden="true">
@@ -123,9 +141,11 @@
     import scenario2 from './scenario2.js';
     import scenario3 from './scenario3.js';
     import scenario4 from './scenario4.js';
+    const levels = [scenario1, scenario2, scenario3, scenario4];
     // --- Persistence ---
     const STORAGE_KEY = 'pctrouble_best_v2';
     const SCORES_KEY = 'pctrouble_scores_v2';
+    const PROGRESS_KEY = 'pctrouble_progress_v1';
     function loadBest(){
       try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); }catch{ return null; }
     }
@@ -137,6 +157,48 @@
     }
     function saveScores(scores){
       try{ localStorage.setItem(SCORES_KEY, JSON.stringify(scores)); }catch{}
+    }
+    function defaultProgress(){
+      const unlocked = {};
+      if(levels.length){ unlocked[levels[0].id] = true; }
+      return { unlocked, completed: {} };
+    }
+    function normalizeProgress(raw){
+      const base = defaultProgress();
+      if(raw && typeof raw === 'object'){
+        if(raw.unlocked && typeof raw.unlocked === 'object'){
+          for(const key of Object.keys(raw.unlocked)){
+            if(raw.unlocked[key]) base.unlocked[key] = true;
+          }
+        }
+        if(raw.completed && typeof raw.completed === 'object'){
+          for(const key of Object.keys(raw.completed)){
+            if(raw.completed[key]) base.completed[key] = true;
+          }
+        }
+      }
+      try{
+        const scores = loadScores();
+        levels.forEach((level, idx) => {
+          if(scores && scores[level.id]){
+            base.unlocked[level.id] = true;
+            base.completed[level.id] = true;
+            const next = levels[idx + 1];
+            if(next){ base.unlocked[next.id] = true; }
+          }
+        });
+      }catch(e){}
+      return base;
+    }
+    function loadProgress(){
+      try{
+        const stored = localStorage.getItem(PROGRESS_KEY);
+        if(!stored) return defaultProgress();
+        return normalizeProgress(JSON.parse(stored));
+      }catch{ return defaultProgress(); }
+    }
+    function saveProgress(data){
+      try{ localStorage.setItem(PROGRESS_KEY, JSON.stringify(data)); }catch{}
     }
 
     // --- State ---
@@ -157,6 +219,56 @@
       s4UsedBootMenu: false,
       s4ChangedBootOrder: false
     };
+    let progress = loadProgress();
+    progress = normalizeProgress(progress);
+
+    function isLevelUnlocked(idx){
+      const level = levels[idx];
+      if(!level) return false;
+      progress = normalizeProgress(progress);
+      return !!progress.unlocked[level.id];
+    }
+    function isLevelCompleted(idx){
+      const level = levels[idx];
+      if(!level) return false;
+      progress = normalizeProgress(progress);
+      return !!progress.completed[level.id];
+    }
+    function updateProgressAfterCompletion(idx){
+      const level = levels[idx];
+      if(!level) return;
+      progress = normalizeProgress(progress);
+      progress.unlocked[level.id] = true;
+      progress.completed[level.id] = true;
+      const next = levels[idx + 1];
+      if(next){ progress.unlocked[next.id] = true; }
+      saveProgress(progress);
+    }
+    function unlockedCount(){
+      progress = normalizeProgress(progress);
+      return levels.reduce((sum, level) => sum + (progress.unlocked[level.id] ? 1 : 0), 0);
+    }
+    function completedCount(){
+      progress = normalizeProgress(progress);
+      return levels.reduce((sum, level) => sum + (progress.completed[level.id] ? 1 : 0), 0);
+    }
+    function findFirstUnlockedIndex(){
+      progress = normalizeProgress(progress);
+      for(let i=0;i<levels.length;i++){
+        if(isLevelUnlocked(i)) return i;
+      }
+      return 0;
+    }
+    function findUnlockedIndex(startIdx, direction){
+      progress = normalizeProgress(progress);
+      if(!levels.length) return startIdx;
+      let idx = startIdx;
+      for(let i=0;i<levels.length;i++){
+        idx = (idx + direction + levels.length) % levels.length;
+        if(isLevelUnlocked(idx)) return idx;
+      }
+      return startIdx;
+    }
 
     // --- DOM helpers ---
     const $ = sel => document.querySelector(sel);
@@ -172,9 +284,171 @@
     const rankDot = $('#rankDot');
     const bestRow = $('#bestRow');
     const bestText = $('#bestText');
+    const hubView = document.getElementById('hubView');
+    const scenarioView = document.getElementById('scenarioView');
+    const scenarioListEl = document.getElementById('scenarioList');
+    const hubInfoEl = document.getElementById('hubInfo');
+    const hubBtn = document.getElementById('hubBtn');
     const scoreBtn = document.getElementById('scoreBtn');
     const hint1Btn = document.getElementById('hint1Btn');
     const goalBtn = document.getElementById('goalBtn');
+    let scenarioActive = false;
+
+    function createMedalBadge(rank){
+      const span = document.createElement('span');
+      span.className = 'hub-medal';
+      let text = '—';
+      let variant = 'none';
+      if(rank === 'Gold'){ text = '🥇 Gold'; variant = 'gold'; }
+      else if(rank === 'Silber'){ text = '🥈 Silber'; variant = 'silver'; }
+      else if(rank === 'Bronze'){ text = '🥉 Bronze'; variant = 'bronze'; }
+      span.classList.add(variant);
+      span.textContent = text;
+      span.setAttribute('aria-label', `Abzeichen: ${rank || 'keines'}`);
+      return span;
+    }
+
+    function renderHub(){
+      if(!scenarioListEl) return;
+      progress = normalizeProgress(progress);
+      const scores = loadScores();
+      scenarioListEl.innerHTML = '';
+      const baseEntries = levels.map((level, idx) => ({
+        type: 'scenario',
+        level,
+        index: idx,
+        number: idx + 1
+      }));
+      const placeholders = [
+        { type: 'placeholder', id: 'PLACEHOLDER_5', name: 'PLACEHOLDER_5', number: baseEntries.length + 1 },
+        { type: 'placeholder', id: 'PLACEHOLDER_6', name: 'PLACEHOLDER_6', number: baseEntries.length + 2 }
+      ];
+      const entries = baseEntries.concat(placeholders);
+      entries.forEach(entry => {
+        const item = document.createElement('article');
+        item.className = 'hub-item';
+        const header = document.createElement('div');
+        header.className = 'hub-item-header';
+        const label = document.createElement('span');
+        label.className = 'hub-item-label';
+        label.textContent = `Szenario ${entry.number}`;
+        header.appendChild(label);
+        const rank = entry.type === 'scenario' ? (scores[entry.level.id]?.rank || null) : null;
+        header.appendChild(createMedalBadge(rank));
+        item.appendChild(header);
+
+        const title = document.createElement('h3');
+        title.textContent = entry.type === 'scenario' ? entry.level.name : entry.name;
+        item.appendChild(title);
+
+        if(entry.type === 'placeholder'){
+          item.classList.add('placeholder');
+          const status = document.createElement('p');
+          status.className = 'hub-status';
+          status.textContent = 'Bald verfügbar';
+          item.appendChild(status);
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'btn';
+          btn.disabled = true;
+          btn.textContent = 'In Arbeit';
+          item.appendChild(btn);
+          scenarioListEl.appendChild(item);
+          return;
+        }
+
+        const unlocked = isLevelUnlocked(entry.index);
+        const completed = isLevelCompleted(entry.index);
+        if(!unlocked){ item.classList.add('locked'); }
+        if(completed){ item.classList.add('completed'); }
+
+        const status = document.createElement('p');
+        status.className = 'hub-status';
+        if(unlocked){
+          status.textContent = completed ? 'Status: Abgeschlossen' : 'Status: Freigeschaltet';
+        } else {
+          const req = entry.number > 1 ? ` – Schließe Szenario ${entry.number - 1} ab.` : '';
+          status.innerHTML = `Status: <span class="hub-lock">🔒 Gesperrt</span>${req}`;
+        }
+        item.appendChild(status);
+
+        const best = document.createElement('p');
+        best.className = 'hub-best';
+        const score = scores[entry.level.id];
+        if(score){
+          const rankLabel = score.rank || '—';
+          const timeLabel = typeof score.time === 'number' ? `${score.time} Min` : '— Min';
+          const triesLabel = typeof score.tries === 'number' ? `${score.tries} Schritte` : '— Schritte';
+          best.innerHTML = `Bestes Ergebnis: <b>${rankLabel}</b> · ${timeLabel} / ${triesLabel}`;
+        } else {
+          best.textContent = 'Noch keine Medaille.';
+        }
+        item.appendChild(best);
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        if(unlocked){
+          btn.className = 'btn primary';
+          btn.textContent = 'Starten';
+          btn.addEventListener('click', () => startScenario(entry.index));
+        } else {
+          btn.className = 'btn';
+          btn.disabled = true;
+          btn.textContent = '🔒 Gesperrt';
+        }
+        item.appendChild(btn);
+
+        scenarioListEl.appendChild(item);
+      });
+
+      if(hubInfoEl){
+        hubInfoEl.innerHTML = '';
+        const completedBadge = document.createElement('span');
+        completedBadge.className = 'badge';
+        completedBadge.textContent = `Abgeschlossen: ${completedCount()}/${levels.length}`;
+        hubInfoEl.appendChild(completedBadge);
+        const unlockedBadge = document.createElement('span');
+        unlockedBadge.className = 'badge';
+        unlockedBadge.textContent = `Freigeschaltet: ${unlockedCount()}/${levels.length}`;
+        hubInfoEl.appendChild(unlockedBadge);
+      }
+    }
+
+    function showHub(){
+      progress = normalizeProgress(progress);
+      saveProgress(progress);
+      if(hubView) hubView.classList.remove('hidden');
+      if(scenarioView) scenarioView.classList.add('hidden');
+      scenarioActive = false;
+      renderHub();
+      if(document.body){ document.body.classList.add('hub-active'); }
+    }
+
+    function startScenario(idx){
+      if(!isLevelUnlocked(idx)) return;
+      if(hubView) hubView.classList.add('hidden');
+      if(scenarioView) scenarioView.classList.remove('hidden');
+      if(document.body){ document.body.classList.remove('hub-active'); }
+      scenarioActive = true;
+      try{ if(topModalEl && topModalEl.classList.contains('open')) closeTopModal(); }catch(e){}
+      try{ if(modalOpen) closeModal(); }catch(e){}
+      hideCelebration();
+      loadLevel(idx);
+      const firstAction = actionsEl ? actionsEl.querySelector('button.action') : null;
+      if(firstAction) firstAction.focus();
+    }
+
+    function returnToHub(options = {}){
+      const fromModal = options.fromModal === true;
+      if(!fromModal){
+        try{ if(modalOpen) closeModal(); }catch(e){}
+      }
+      try{ if(topModalEl && topModalEl.classList.contains('open')) closeTopModal(); }catch(e){}
+      hideCelebration();
+      showHub();
+      const focusTarget = scenarioListEl && scenarioListEl.querySelector('button:not([disabled])');
+      if(focusTarget) focusTarget.focus();
+    }
 
     const hint1Html = 'Was kannst du prüfen, <b>ohne den PC zu öffnen</b>?';
     const hint2Html = `<ul class="hint"><li><b>Stromversorgung:</b> Steckdosenleiste an? Netzkabel fest am PC und an der Leiste/Steckdose? Netzteil‑Schalter (I/O) auf <b>I</b> (falls vorhanden)?</li><li><b>Anzeige/Signal:</b> Monitor eingeschaltet? Richtigen Eingang (HDMI/DP) gewählt? Kabel steckt fest? Falls möglich, anderen Port/Kabel testen.</li><li>Wenn der PC weiterhin <i>gar nicht</i> reagiert, wären interne Ursachen der nächste Schritt – in diesem Level bleiben wir bei externen Checks.</li></ul>`;
@@ -214,7 +488,7 @@
         modalEl.classList.remove('completion');
       }
       if(modalOkEl) modalOkEl.textContent = okLabel;
-      if(title === 'Aufgabe abgeschlossen' && modalOkEl){ modalOkEl.textContent = 'Nächste Aufgabe'; }
+      if(title === 'Aufgabe abgeschlossen' && modalOkEl){ modalOkEl.textContent = 'Zurück zum Hub'; }
       modalEl.classList.add('open');
       modalEl.setAttribute('aria-hidden','false');
       lastFocusEl = document.activeElement;
@@ -311,16 +585,16 @@
     }
 
     if(modalOkEl) modalOkEl.addEventListener('click', () => {
-      // If success modal, advance to next scenario with animation
       if(modalTitleEl && modalTitleEl.textContent === 'Aufgabe abgeschlossen'){
-        const next = (state.levelIdx + 1) % levels.length;
-        closeModal(); hideCelebration();
-        animateToLevel(next);
+        closeModal();
+        hideCelebration();
+        returnToHub({ fromModal: true });
       } else {
         closeModal();
       }
     });
     if(topModalOkEl) topModalOkEl.addEventListener('click', () => { closeTopModal(); });
+    if(hubBtn) hubBtn.addEventListener('click', () => returnToHub());
 
     function setStatus(txt){ statusEl.textContent = txt; renderMeters(); }
     function renderMeters(){ timeEl.textContent = state.time; triesEl.textContent = state.tries; }
@@ -347,7 +621,7 @@
         openModal({
           title: 'Aufgabe abgeschlossen',
           html: completionIntroHtml(),
-          okLabel: 'Nächste Aufgabe'
+          okLabel: 'Zurück zum Hub'
         });
         return;
       }
@@ -361,7 +635,7 @@
         openModal({
           title: 'Aufgabe abgeschlossen',
           html: completionIntroHtml(),
-          okLabel: 'Nächste Aufgabe'
+          okLabel: 'Zurück zum Hub'
         });
       } else if (!modalOpen){
         const html = (feedbackEl && feedbackEl.innerHTML) ? feedbackEl.innerHTML : 'Aktion ausgeführt.';
@@ -381,7 +655,7 @@
           const hasPower = !!state.performed['power-cable'];
           if(!state.solved && hasMonitor && hasPower && state.monitorOn){
             finish(true, 'Stromversorgung und Monitor aktiviert.');
-            openModal({ title: 'Aufgabe abgeschlossen', html: completionIntroHtml(), okLabel: 'N��chste Aufgabe' });
+            openModal({ title: 'Aufgabe abgeschlossen', html: completionIntroHtml(), okLabel: 'Zurück zum Hub' });
             return true;
           }
           break;
@@ -392,7 +666,7 @@
           const isSourceNow = state.currentActionId === 'source';
           if(!state.solved && didMonitor && isSourceNow && state.monitorOn){
             finish(true, 'Quelle korrekt, Signal wiederhergestellt.');
-            openModal({ title: 'Aufgabe abgeschlossen', html: completionIntroHtml(), okLabel: 'N��chste Aufgabe' });
+            openModal({ title: 'Aufgabe abgeschlossen', html: completionIntroHtml(), okLabel: 'Zurück zum Hub' });
             return true;
           }
           break;
@@ -601,6 +875,8 @@ function finish(success, detail){
         }
         saveScores(scores);
       }
+      updateProgressAfterCompletion(state.levelIdx);
+      renderHub();
     }
 
     function animateReset(){
@@ -647,8 +923,6 @@ function finish(success, detail){
     }
 
     // Level definitions & loader
-    const levels = [scenario1, scenario2, scenario3, scenario4];
-
     function makeActions(){
       return {
         // L0-only
@@ -1165,6 +1439,9 @@ function finish(success, detail){
     }
 
     function loadLevel(idx){
+      if(!isLevelUnlocked(idx)){
+        idx = findFirstUnlockedIndex();
+      }
       state.levelIdx = idx;
       // Reset core state
       state.time = 0; state.tries = 0; state.solved = false; state.log = [];
@@ -1207,7 +1484,7 @@ function finish(success, detail){
               openModal({
                 title: 'Aufgabe abgeschlossen',
                 html: completionIntroHtml(),
-                okLabel: 'Nächste Aufgabe',
+                okLabel: 'Zurück zum Hub',
                 scene: { pcOn: true, monitorOn: true, signalOk: true }
               });
             }
@@ -1229,7 +1506,7 @@ function finish(success, detail){
               openModal({
                 title: 'Aufgabe abgeschlossen',
                 html: completionIntroHtml(),
-                okLabel: 'Nächste Aufgabe',
+                okLabel: 'Zurück zum Hub',
                 scene: { pcOn: true, monitorOn: true, signalOk: true }
               });
             }
@@ -1256,6 +1533,8 @@ function finish(success, detail){
       // Badge text
       const tag = document.getElementById('levelTag');
       if(tag){ tag.innerHTML = `Fall ${idx+1}/${levels.length} - <b>Einfach</b>`; }
+
+      showBest();
     }
 
     // Clicking the badge: no-op (navigation via prev/next buttons)
@@ -1278,9 +1557,10 @@ function finish(success, detail){
       prevBtn.textContent = '<';
       wrap.insertBefore(prevBtn, levelTagEl);
       prevBtn.addEventListener('click', ()=>{
+        if(!scenarioActive) return;
         closeModal(); hideCelebration();
-        const prev = (state.levelIdx - 1 + levels.length) % levels.length;
-        animateToLevel(prev);
+        const prev = findUnlockedIndex(state.levelIdx, -1);
+        if(prev !== state.levelIdx) animateToLevel(prev);
       });
       // Next
       const nextBtn = document.createElement('button');
@@ -1291,9 +1571,10 @@ function finish(success, detail){
       nextBtn.textContent = '>';
       wrap.appendChild(nextBtn);
       nextBtn.addEventListener('click', ()=>{
+        if(!scenarioActive) return;
         closeModal(); hideCelebration();
-        const next = (state.levelIdx + 1) % levels.length;
-        animateToLevel(next);
+        const next = findUnlockedIndex(state.levelIdx, 1);
+        if(next !== state.levelIdx) animateToLevel(next);
       });
     })();
 
@@ -1337,7 +1618,7 @@ function finish(success, detail){
     window.addEventListener('keydown', (e)=>{
       const k = e.key.toLowerCase();
       // Neustart (R) ist immer erlaubt, selbst wenn ein Modal offen ist
-      if(k==='r'){ reset(); return; }
+      if(k==='r'){ if(scenarioActive) reset(); return; }
       // While a modal is open, allow ESC or same opener key to close, unless solved
       if(modalOpen){
         if(!state.solved){
@@ -1352,6 +1633,7 @@ function finish(success, detail){
         }
         return;
       }
+      if(!scenarioActive) return;
       const L = levels && levels[state.levelIdx];
       const isS4 = !!(L && L.id === 'S4');
       const activeSet = isS4 ? (state.activeSet || 'A') : null;
@@ -1364,8 +1646,7 @@ function finish(success, detail){
     });
 
         // Init
-    loadLevel(0);
-    showBest();
+    showHub();
   </script>
 </body>
 </html>
