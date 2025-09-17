@@ -36,6 +36,32 @@ header{display:flex;gap:16px;align-items:center;justify-content:space-between;ma
 header .btn{border-radius:999px;width:var(--ctrl-size);height:var(--ctrl-size);padding:0;display:inline-grid;place-items:center}
 /* Allow score button to expand for label */
 #scoreBtn{width:auto;padding:0 14px}
+
+.hub{margin-bottom:24px}
+.hub .inner{display:flex;flex-direction:column;gap:12px}
+.hub-intro{margin:0;color:var(--ink-dim)}
+.hub-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:4px}
+.scenario-card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow)}
+.scenario-card.placeholder{opacity:.6}
+.scenario-card.locked{opacity:.65}
+.scenario-card.locked .hub-start{cursor:not-allowed}
+.scenario-meta{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.scenario-number{font-size:.8rem;color:var(--ink-dim);letter-spacing:.06em;text-transform:uppercase;font-weight:700}
+.hub-badge{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(15,23,42,.6);color:var(--ink-dim)}
+.hub-badge .icon{font-size:1rem}
+.hub-badge.gold{background:var(--gold);color:#1f2937;border-color:rgba(0,0,0,.08)}
+.hub-badge.silver{background:var(--silver);color:#0f172a;border-color:rgba(0,0,0,.08)}
+.hub-badge.bronze{background:var(--bronze);color:#0f172a;border-color:rgba(0,0,0,.08)}
+.hub-badge.none{border-style:dashed}
+.scenario-card h3{margin:0;font-size:1.05rem}
+.scenario-card p{margin:0;color:var(--ink-dim);font-size:.9rem}
+.scenario-progress{margin-top:4px;margin-bottom:0;color:var(--ink-dim);font-size:.8rem}
+.hub-start{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:auto;font-weight:600}
+.hub-start .icon{font-size:1.1rem}
+.hub-start[disabled]{opacity:.7}
+.hub-start.primary{background:linear-gradient(180deg,rgba(96,165,250,.24),rgba(34,211,238,.14))}
+
+#levelTag.hub-tag{background:linear-gradient(180deg,rgba(96,165,250,.14),rgba(34,211,238,.08));color:var(--ink);border-color:rgba(96,165,250,.28)}
 /* Level navigation group as button group (no gaps) */
 .level-nav{display:flex;align-items:stretch;gap:0}
 .level-nav .btn{width:var(--ctrl-size);height:var(--ctrl-size);padding:0}

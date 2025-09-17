@@ -11,7 +11,16 @@
     <header>
       <div class="title">PC-Troubleshooter <span class="badge" id="verTag">v2.4</span></div>
       <div class="badge" id="levelTag" aria-live="polite">Fall 1/1 • <b>Einfach</b></div>
-          <button class="btn" id="scoreBtn" title="Score anzeigen" aria-label="Score anzeigen">🏆 Score</button></header>
+      <button class="btn" id="scoreBtn" title="Score anzeigen" aria-label="Score anzeigen">🏆 Score</button>
+    </header>
+
+    <section class="card hub" id="hubView" aria-labelledby="hubTitle">
+      <div class="inner">
+        <h2 id="hubTitle">Szenario-Hub</h2>
+        <p class="hub-intro">Wähle ein Szenario, sammle Medaillen und schalte neue Fälle frei.</p>
+        <div class="hub-grid" id="hubScenarios" aria-live="polite"></div>
+      </div>
+    </section>
 
     <!-- Modal/Message area shown above the story -->
     <div class="action-message" id="actionMessageTop" aria-hidden="true">
@@ -25,7 +34,7 @@
     </div>
 
     <!-- Single card: story, actions & info -->
-    <section class="card story" aria-labelledby="storyTitle">
+    <section class="card story" id="scenarioView" aria-labelledby="storyTitle" hidden>
       <div class="inner">
           <h2 id="storyTitle">Szenario: Der PC, der nicht starten will</h2>
           <p id="storyText">
@@ -158,6 +167,12 @@
       s4ChangedBootOrder: false
     };
 
+    const navControls = { prevBtn: null, nextBtn: null };
+    const PLACEHOLDER_SCENARIOS = [
+      { id: 'PLACEHOLDER_5', name: 'PLACEHOLDER_5', description: 'In Vorbereitung.' },
+      { id: 'PLACEHOLDER_6', name: 'PLACEHOLDER_6', description: 'In Vorbereitung.' }
+    ];
+
     // --- DOM helpers ---
     const $ = sel => document.querySelector(sel);
     const timeEl = $('#time');
@@ -179,6 +194,199 @@
     const hint1Html = 'Was kannst du prüfen, <b>ohne den PC zu öffnen</b>?';
     const hint2Html = `<ul class="hint"><li><b>Stromversorgung:</b> Steckdosenleiste an? Netzkabel fest am PC und an der Leiste/Steckdose? Netzteil‑Schalter (I/O) auf <b>I</b> (falls vorhanden)?</li><li><b>Anzeige/Signal:</b> Monitor eingeschaltet? Richtigen Eingang (HDMI/DP) gewählt? Kabel steckt fest? Falls möglich, anderen Port/Kabel testen.</li><li>Wenn der PC weiterhin <i>gar nicht</i> reagiert, wären interne Ursachen der nächste Schritt – in diesem Level bleiben wir bei externen Checks.</li></ul>`;
     const goalHtml = `<ul class="hint"><li><b>Du übst:</b> strukturiert Fehler finden (erst extern, dann intern), Entscheidungen begründen und deine Schritte protokollieren.</li><li><b>LP21:</b> MI 3.3 «Fehler systematisch suchen &amp; beheben», MI 2.2 «Geräte zweckmässig einsetzen» — genau das trainierst du hier im Szenario.</li><li><b>Tipps fürs Szenario:</b> formuliere deine Vermutung laut, notiere jeden Schritt (Zeit/Schritte siehst du links) und vergleiche danach mit deiner Bestleistung.</li></ul>`;
+
+    document.body.dataset.view = 'hub';
+
+    function stripHtml(html=''){
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html;
+      return tmp.textContent || tmp.innerText || '';
+    }
+
+    function getMedalInfo(rank){
+      switch(rank){
+        case 'Gold':
+          return { className: 'gold', label: 'Gold', emoji: '🥇' };
+        case 'Silber':
+          return { className: 'silver', label: 'Silber', emoji: '🥈' };
+        case 'Bronze':
+          return { className: 'bronze', label: 'Bronze', emoji: '🥉' };
+        default:
+          return { className: 'none', label: 'Keine Auszeichnung', emoji: '–' };
+      }
+    }
+
+    function isScenarioUnlocked(idx, scores){
+      if(idx <= 0) return true;
+      const prevLevel = levels[idx - 1];
+      if(!prevLevel) return false;
+      const store = scores || loadScores();
+      return !!store[prevLevel.id];
+    }
+
+    function renderHub(){
+      const container = document.getElementById('hubScenarios');
+      if(!container) return;
+      const scores = loadScores();
+      container.innerHTML = '';
+      levels.forEach((level, idx)=>{
+        const card = document.createElement('div');
+        card.className = 'scenario-card';
+        card.dataset.index = String(idx);
+
+        const unlocked = isScenarioUnlocked(idx, scores);
+        if(!unlocked){ card.classList.add('locked'); }
+
+        const meta = document.createElement('div');
+        meta.className = 'scenario-meta';
+        const number = document.createElement('span');
+        number.className = 'scenario-number';
+        number.textContent = `Fall ${idx+1}`;
+        const badgeInfo = getMedalInfo(scores[level.id]?.rank);
+        const badge = document.createElement('span');
+        badge.className = `hub-badge ${badgeInfo.className}`;
+        badge.innerHTML = `${badgeInfo.emoji ? `<span class="icon">${badgeInfo.emoji}</span>` : ''}<span>${badgeInfo.label}</span>`;
+        meta.append(number, badge);
+
+        const title = document.createElement('h3');
+        title.textContent = `${level.name}`;
+
+        const desc = document.createElement('p');
+        const story = stripHtml(level.storyTitle || '') || stripHtml(level.storyText || '');
+        desc.textContent = story.replace(/^Szenario:\s*/i, '') || 'Starte das Szenario.';
+
+        const best = scores[level.id];
+        const progress = document.createElement('p');
+        progress.className = 'scenario-progress';
+        if(best){
+          progress.textContent = `Bestleistung: ${best.time} Min • ${best.tries} Schritte`;
+        } else {
+          progress.textContent = 'Noch keine Bestleistung.';
+        }
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn hub-start primary';
+        if(unlocked){
+          const hasResult = !!best;
+          btn.innerHTML = `<span class="icon">${hasResult ? '🔁' : '▶'}</span><span>${hasResult ? 'Erneut spielen' : 'Starten'}</span>`;
+          btn.addEventListener('click', ()=>{ showScenario(idx); });
+        } else {
+          btn.disabled = true;
+          btn.classList.remove('primary');
+          const prevLevel = levels[idx - 1];
+          const reason = prevLevel ? `Schliesse Fall ${idx} (${prevLevel.name}) ab, um dieses Szenario zu starten.` : 'Dieses Szenario ist noch gesperrt.';
+          btn.title = reason;
+          btn.setAttribute('aria-disabled','true');
+          btn.innerHTML = '<span class="icon">🔒</span><span>Gesperrt</span>';
+        }
+
+        card.append(meta, title, desc, progress, btn);
+        container.appendChild(card);
+      });
+
+      PLACEHOLDER_SCENARIOS.forEach((ph, phIdx)=>{
+        const card = document.createElement('div');
+        card.className = 'scenario-card placeholder';
+
+        const meta = document.createElement('div');
+        meta.className = 'scenario-meta';
+        const number = document.createElement('span');
+        number.className = 'scenario-number';
+        number.textContent = `Fall ${levels.length + phIdx + 1}`;
+        const badge = document.createElement('span');
+        badge.className = 'hub-badge none';
+        badge.innerHTML = '<span class="icon">⏳</span><span>In Planung</span>';
+        meta.append(number, badge);
+
+        const title = document.createElement('h3');
+        title.textContent = ph.name;
+
+        const desc = document.createElement('p');
+        desc.textContent = ph.description || 'Bald verfügbar.';
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn hub-start';
+        btn.disabled = true;
+        btn.setAttribute('aria-disabled','true');
+        btn.innerHTML = '<span class="icon">🔜</span><span>Folgt bald</span>';
+
+        card.append(meta, title, desc, btn);
+        container.appendChild(card);
+      });
+    }
+
+    function updateNavigationButtons(){
+      const view = document.body.dataset.view || 'scenario';
+      const { prevBtn, nextBtn } = navControls;
+      if(prevBtn){
+        const isScenarioView = view === 'scenario';
+        prevBtn.hidden = !isScenarioView;
+        const disabled = !isScenarioView || state.levelIdx <= 0;
+        prevBtn.disabled = disabled;
+        if(isScenarioView){
+          prevBtn.setAttribute('aria-disabled', String(disabled));
+        } else {
+          prevBtn.removeAttribute('aria-disabled');
+        }
+      }
+      if(nextBtn){
+        const isScenarioView = view === 'scenario';
+        const target = state.levelIdx + 1;
+        const canGoNext = isScenarioView && target < levels.length && isScenarioUnlocked(target);
+        nextBtn.hidden = !isScenarioView;
+        nextBtn.disabled = !canGoNext;
+        if(isScenarioView){
+          nextBtn.title = canGoNext ? 'Nächster Fall' : 'Szenario noch gesperrt';
+          nextBtn.setAttribute('aria-disabled', String(!canGoNext));
+        } else {
+          nextBtn.title = 'Nächster Fall';
+          nextBtn.removeAttribute('aria-disabled');
+        }
+      }
+    }
+
+    function refreshProgressUI(){
+      renderHub();
+      updateNavigationButtons();
+    }
+
+    function showHub(){
+      const hub = document.getElementById('hubView');
+      const scenarioCard = document.getElementById('scenarioView');
+      if(hub) hub.hidden = false;
+      if(scenarioCard) scenarioCard.hidden = true;
+      document.body.dataset.view = 'hub';
+      const levelTag = document.getElementById('levelTag');
+      if(levelTag){
+        levelTag.textContent = 'Szenario-Hub';
+        levelTag.classList.add('hub-tag');
+      }
+      refreshProgressUI();
+    }
+
+    function showScenario(idx, options={}){
+      if(typeof idx !== 'number' || idx < 0 || idx >= levels.length) return;
+      const scores = loadScores();
+      if(!isScenarioUnlocked(idx, scores)){
+        refreshProgressUI();
+        return;
+      }
+      const hub = document.getElementById('hubView');
+      const scenarioCard = document.getElementById('scenarioView');
+      if(hub) hub.hidden = true;
+      if(scenarioCard) scenarioCard.hidden = false;
+      document.body.dataset.view = 'scenario';
+      const levelTag = document.getElementById('levelTag');
+      if(levelTag) levelTag.classList.remove('hub-tag');
+      if(options.animate){
+        animateToLevel(idx);
+      } else {
+        loadLevel(idx);
+      }
+      updateNavigationButtons();
+    }
 
     // Message helpers
     let modalOpen = false, lastFocusEl = null;
@@ -213,8 +421,14 @@
         modalBodyEl.innerHTML = html;
         modalEl.classList.remove('completion');
       }
-      if(modalOkEl) modalOkEl.textContent = okLabel;
-      if(title === 'Aufgabe abgeschlossen' && modalOkEl){ modalOkEl.textContent = 'Nächste Aufgabe'; }
+      if(modalOkEl){
+        modalOkEl.textContent = okLabel;
+        modalOkEl.dataset.action = 'close';
+      }
+      if(title === 'Aufgabe abgeschlossen' && modalOkEl){
+        modalOkEl.textContent = 'Zurück zum Hub';
+        modalOkEl.dataset.action = 'hub';
+      }
       modalEl.classList.add('open');
       modalEl.setAttribute('aria-hidden','false');
       lastFocusEl = document.activeElement;
@@ -245,6 +459,7 @@
       modalEl.classList.remove('completion');
       modalEl.setAttribute('aria-hidden','true');
       actionsEl.style.display = '';
+      if(modalOkEl) modalOkEl.dataset.action = 'close';
       if(lastFocusEl) lastFocusEl.focus();
       hideCelebration();
       modalOpenKey = null;
@@ -286,8 +501,9 @@
     }
     // Transition helper: animate card out/in when switching levels
     function animateToLevel(idx){
-      const card = document.querySelector('section.card.story');
+      const card = document.getElementById('scenarioView');
       if(!card){ loadLevel(idx); return; }
+      card.hidden = false;
       // If already animating, skip to direct load
       if(card.classList.contains('transition-out') || card.classList.contains('transition-in')){
         loadLevel(idx); return;
@@ -296,6 +512,7 @@
       const onOutEnd = ()=>{
         card.removeEventListener('animationend', onOutEnd);
         loadLevel(idx);
+        updateNavigationButtons();
         // Next tick to ensure DOM updates before animating in
         requestAnimationFrame(()=>{
           card.classList.remove('transition-out');
@@ -311,11 +528,11 @@
     }
 
     if(modalOkEl) modalOkEl.addEventListener('click', () => {
-      // If success modal, advance to next scenario with animation
-      if(modalTitleEl && modalTitleEl.textContent === 'Aufgabe abgeschlossen'){
-        const next = (state.levelIdx + 1) % levels.length;
-        closeModal(); hideCelebration();
-        animateToLevel(next);
+      const action = modalOkEl.dataset.action || 'close';
+      if(action === 'hub'){
+        closeModal();
+        hideCelebration();
+        showHub();
       } else {
         closeModal();
       }
@@ -347,7 +564,7 @@
         openModal({
           title: 'Aufgabe abgeschlossen',
           html: completionIntroHtml(),
-          okLabel: 'Nächste Aufgabe'
+          okLabel: 'Zurück zum Hub'
         });
         return;
       }
@@ -361,7 +578,7 @@
         openModal({
           title: 'Aufgabe abgeschlossen',
           html: completionIntroHtml(),
-          okLabel: 'Nächste Aufgabe'
+          okLabel: 'Zurück zum Hub'
         });
       } else if (!modalOpen){
         const html = (feedbackEl && feedbackEl.innerHTML) ? feedbackEl.innerHTML : 'Aktion ausgeführt.';
@@ -601,6 +818,7 @@ function finish(success, detail){
         }
         saveScores(scores);
       }
+      refreshProgressUI();
     }
 
     function animateReset(){
@@ -1207,7 +1425,7 @@ function finish(success, detail){
               openModal({
                 title: 'Aufgabe abgeschlossen',
                 html: completionIntroHtml(),
-                okLabel: 'Nächste Aufgabe',
+                okLabel: 'Zurück zum Hub',
                 scene: { pcOn: true, monitorOn: true, signalOk: true }
               });
             }
@@ -1229,7 +1447,7 @@ function finish(success, detail){
               openModal({
                 title: 'Aufgabe abgeschlossen',
                 html: completionIntroHtml(),
-                okLabel: 'Nächste Aufgabe',
+                okLabel: 'Zurück zum Hub',
                 scene: { pcOn: true, monitorOn: true, signalOk: true }
               });
             }
@@ -1256,6 +1474,9 @@ function finish(success, detail){
       // Badge text
       const tag = document.getElementById('levelTag');
       if(tag){ tag.innerHTML = `Fall ${idx+1}/${levels.length} - <b>Einfach</b>`; }
+
+      showBest();
+      updateNavigationButtons();
     }
 
     // Clicking the badge: no-op (navigation via prev/next buttons)
@@ -1278,9 +1499,12 @@ function finish(success, detail){
       prevBtn.textContent = '<';
       wrap.insertBefore(prevBtn, levelTagEl);
       prevBtn.addEventListener('click', ()=>{
+        if(prevBtn.disabled) return;
         closeModal(); hideCelebration();
-        const prev = (state.levelIdx - 1 + levels.length) % levels.length;
-        animateToLevel(prev);
+        const target = state.levelIdx - 1;
+        if(target >= 0){
+          showScenario(target, { animate: true });
+        }
       });
       // Next
       const nextBtn = document.createElement('button');
@@ -1291,10 +1515,15 @@ function finish(success, detail){
       nextBtn.textContent = '>';
       wrap.appendChild(nextBtn);
       nextBtn.addEventListener('click', ()=>{
+        if(nextBtn.disabled) return;
         closeModal(); hideCelebration();
-        const next = (state.levelIdx + 1) % levels.length;
-        animateToLevel(next);
+        const target = state.levelIdx + 1;
+        if(target < levels.length){
+          showScenario(target, { animate: true });
+        }
       });
+      navControls.prevBtn = prevBtn;
+      navControls.nextBtn = nextBtn;
     })();
 
     // Score-Modal oeffnen
@@ -1336,8 +1565,12 @@ function finish(success, detail){
     // Hotkeys 1-6 + R
     window.addEventListener('keydown', (e)=>{
       const k = e.key.toLowerCase();
-      // Neustart (R) ist immer erlaubt, selbst wenn ein Modal offen ist
-      if(k==='r'){ reset(); return; }
+      const view = document.body.dataset.view || 'scenario';
+      // Neustart (R) ist nur im Szenario aktiv
+      if(k==='r'){
+        if(view === 'scenario'){ reset(); }
+        return;
+      }
       // While a modal is open, allow ESC or same opener key to close, unless solved
       if(modalOpen){
         if(!state.solved){
@@ -1352,6 +1585,7 @@ function finish(success, detail){
         }
         return;
       }
+      if(view !== 'scenario') return;
       const L = levels && levels[state.levelIdx];
       const isS4 = !!(L && L.id === 'S4');
       const activeSet = isS4 ? (state.activeSet || 'A') : null;
@@ -1365,7 +1599,7 @@ function finish(success, detail){
 
         // Init
     loadLevel(0);
-    showBest();
+    showHub();
   </script>
 </body>
 </html>
