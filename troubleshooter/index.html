@@ -141,7 +141,8 @@
     import scenario2 from './scenario2.js';
     import scenario3 from './scenario3.js';
     import scenario4 from './scenario4.js';
-    const levels = [scenario1, scenario2, scenario3, scenario4];
+    import scenario5 from './scenario5.js';
+    const levels = [scenario1, scenario2, scenario3, scenario4, scenario5];
     // --- Persistence ---
     const STORAGE_KEY = 'pctrouble_best_v2';
     const SCORES_KEY = 'pctrouble_scores_v2';
@@ -217,7 +218,11 @@
       s4SolvedBy: null,
       s4RemovedUsb: false,
       s4UsedBootMenu: false,
-      s4ChangedBootOrder: false
+      s4ChangedBootOrder: false,
+      networkConnected: true,
+      switchLedOn: true,
+      n1SolvedBy: null,
+      n1CheckedLed: false
     };
     let progress = loadProgress();
     progress = normalizeProgress(progress);
@@ -776,6 +781,25 @@ function evaluateScenarioResult(){
       const t = state.time;
       const n = state.tries;
       const L = levels && levels[state.levelIdx];
+      if(L && L.id === 'N1'){
+        const ev = evalRankAndScore(t, n);
+        const seq = Array.isArray(state.actionSequence) ? state.actionSequence.slice() : [];
+        let detailText = '';
+        const lanIdx = seq.indexOf('lan-cable');
+        if(lanIdx === 0 && seq.length === 1){
+          detailText = 'Pfad: Netzwerkkabel direkt eingesteckt.';
+        } else if(lanIdx > 0){
+          const prior = seq.slice(0, lanIdx);
+          if(prior.length === 1 && prior[0] === 'lan-led'){
+            detailText = 'Pfad: Link-LED prüfen → Netzwerkkabel einstecken.';
+          } else {
+            detailText = 'Pfad: Netzwerkkabel einstecken (mit Umwegen).';
+          }
+        } else if(lanIdx === 0){
+          detailText = 'Pfad: Netzwerkkabel einstecken.';
+        }
+        return { medal: ev.medal, long: ev.long, color: ev.color, score: ev.score, detailText, time: t, tries: n };
+      }
       if(L && L.id === 'S4'){
         const seq = Array.isArray(state.actionSequence) ? state.actionSequence.slice() : [];
         const solvedBy = state.s4SolvedBy;
@@ -845,6 +869,11 @@ function completionIntroHtml(){
       return '<p><b>Aufgabe abgeschlossen.</b> Quelle korrekt, Signal wiederhergestellt.</p><p>Das <b>Login</b> ist sichtbar.</p>';
     case 'M3':
       return '<p><b>Aufgabe abgeschlossen.</b> POST erfolgreich, Anzeige aktiv.</p><p>Das <b>Login</b> ist sichtbar.</p>';
+    case 'N1':
+      if(state.n1SolvedBy === 'lan'){
+        return '<p><b>Aufgabe abgeschlossen.</b> Das LAN-Kabel steckt wieder fest, die Domänen-Anmeldung funktioniert.</p><p>Du kannst dich nun ganz normal anmelden.</p>';
+      }
+      return '<p><b>Aufgabe abgeschlossen.</b> Anmeldung wieder möglich.</p><p>Netzwerkverbindung sicherstellen und sauber dokumentieren.</p>';
     case 'S4': {
       switch(state.s4SolvedBy){
         case 'temp-ssd':
@@ -884,7 +913,7 @@ function finish(success, detail){
       const t = evaluation.time;
       const n = evaluation.tries;
       const level = levels[state.levelIdx];
-      if(level && level.id === 'S4'){
+      if(level && (level.id === 'S4' || level.id === 'N1')){
         const parts = [];
         if(evaluation.detailText) parts.push(evaluation.detailText);
         parts.push(`Zeit: <b>${t} Min</b> - Schritte: <b>${n}</b> - Punkte: <b>${evaluation.score}</b>`);
@@ -1184,6 +1213,111 @@ function finish(success, detail){
         }
       };
     }
+    function makeScenario5Actions(){
+      return [
+        {
+          id: 'lan-cable',
+          label: '🔌 Netzwerkkabel einstecken',
+          hotkey: '1',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            if(state.networkConnected){
+              setStatus('Netzwerk geprüft');
+              say('<span class="info">LAN-Kabel sitzt bereits.</span> Der Fehler liegt woanders – der Login scheitert trotzdem.');
+              return;
+            }
+            state.networkConnected = true;
+            state.switchLedOn = true;
+            state.n1SolvedBy = 'lan';
+            setStatus('Netzwerk verbunden');
+            finish(true, 'Netzwerkkabel eingesteckt – Domänen-Login klappt wieder.');
+          }
+        },
+        {
+          id: 'lan-led',
+          label: '💡 Link-LED am Switch prüfen',
+          hotkey: '2',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            state.n1CheckedLed = true;
+            if(state.networkConnected){
+              state.switchLedOn = true;
+              setStatus('Netzwerk aktiv');
+              say('<span class="info">Link-LED leuchtet.</span> Verbindung steht – die Domäne ist erreichbar.');
+            } else {
+              state.switchLedOn = false;
+              setStatus('Kein Link');
+              say('<span class="warn">Keine Link-LED.</span> Netzwerkkabel prüfen, richtige Dose wählen und sauber einstecken.');
+            }
+          }
+        },
+        {
+          id: 'n1-bios',
+          label: '⚙️ Direkt ins BIOS starten',
+          hotkey: '3',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            setStatus('Nicht zielführend');
+            say('<span class="warn">BIOS ändert hier nichts.</span> Windows läuft bereits – es fehlt die Verbindung zur Domäne.');
+          }
+        },
+        {
+          id: 'n1-cpu',
+          label: '🧰 Prozessor ausbauen & neu einsetzen',
+          hotkey: '4',
+          delta: 8,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, '+8 Min');
+            setStatus('Risiko hoch');
+            say('<span class="bad">Overkill!</span> Ein CPU-Umbau hilft nicht bei einem Anmeldeproblem. Fokus auf die Netzwerkverbindung.');
+          }
+        },
+        {
+          id: 'n1-monitor',
+          label: '🖥️ Monitor ein/aus',
+          hotkey: '5',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            state.monitorOn = !state.monitorOn;
+            updateScene();
+            if(state.monitorOn){
+              setStatus('Monitor an');
+              say('<span class="info">Monitor eingeschaltet.</span> Der Login ist sichtbar – das Problem bleibt die fehlende Domänenverbindung.');
+            } else {
+              setStatus('Monitor aus');
+              say('<span class="warn">Monitor ausgeschaltet.</span> So siehst du nichts – schalte ihn wieder ein und prüfe das Netzwerk.');
+            }
+          }
+        },
+        {
+          id: 'n1-ram',
+          label: '📏 Arbeitsspeicher überprüfen',
+          hotkey: '6',
+          delta: 5,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, '+5 Min');
+            setStatus('Nicht zielführend');
+            say('<span class="bad">Falsche Baustelle.</span> RAM hat nichts mit dem fehlenden Domänenkontakt zu tun – kümmere dich um das LAN-Kabel.');
+          }
+        }
+      ];
+    }
     function makeScenario4Actions(){
       return [
         {
@@ -1467,6 +1601,8 @@ function finish(success, detail){
         return [A.monitorCable, A.monitorToggle, A.bios, A.cpu, A.power, A.source];
       } else if(levelId === 'M3'){
         return [A.postCheck, A.monitorToggle, A.bios, A.ramFix, A.power, A.cmosReset];
+      } else if(levelId === 'N1'){
+        return makeScenario5Actions();
       } else if(levelId === 'S4'){
         return makeScenario4Actions();
       } else {
@@ -1494,11 +1630,15 @@ function finish(success, detail){
       state.usbPresent = 'usbPresent' in L.start ? L.start.usbPresent : true;
       state.bootOrderChanged = !!L.start.bootOrderChanged;
       state.bootOrderPersisted = !!L.start.bootOrderPersisted;
+      state.networkConnected = 'networkConnected' in L.start ? L.start.networkConnected : true;
+      state.switchLedOn = 'switchLedOn' in L.start ? L.start.switchLedOn : state.networkConnected;
       state.actionSequence = [];
       state.s4SolvedBy = null;
       state.s4RemovedUsb = false;
       state.s4UsedBootMenu = false;
       state.s4ChangedBootOrder = false;
+      state.n1SolvedBy = null;
+      state.n1CheckedLed = false;
 
       // Actions per Level
       state.actions = getActionsForLevel(L.id);
