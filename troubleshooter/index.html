@@ -81,12 +81,17 @@
                 <text x="290" y="126" font-size="13" style="fill:rgba(229,231,235,.65);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;">  Network Boot</text>
                 <text x="375" y="148" font-size="11" text-anchor="middle" style="fill:rgba(229,231,235,.5);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;">ENTER = Start · ESC = Zurück</text>
               </g>
-              <g class="login" aria-hidden="true">
+              <g class="login login-default" aria-hidden="true">
                 <!-- Größeres, gut lesbares Login-Overlay, mittig im Monitor (270×160) -->
                 <rect x="290" y="47" width="170" height="90" rx="8" class="mut" fill="none"/>
                 <text x="375" y="80" font-size="32" text-anchor="middle" style="fill:rgba(229,231,235,.95);font-weight:700">Login</text>
                 <rect x="310" y="96" width="130" height="12" rx="6" class="mut" fill="none"/>
                 <rect x="310" y="118" width="130" height="12" rx="6" class="mut" fill="none"/>
+              </g>
+              <g class="login login-domain-error" aria-hidden="true">
+                <rect x="290" y="47" width="170" height="90" rx="8" class="mut" fill="none"/>
+                <text x="375" y="82" font-size="18" text-anchor="middle" style="fill:rgba(229,231,235,.95);font-weight:700">Fehler:</text>
+                <text x="375" y="108" font-size="16" text-anchor="middle" style="fill:rgba(229,231,235,.9);font-weight:600">Domäne nicht verfügbar!</text>
               </g>
             </svg>
           </figure>
@@ -720,7 +725,7 @@
     function updateScene(){
       const scene = document.querySelector('.scene');
       if(!scene) return;
-      scene.classList.remove('nosig','power-on','login','booterr','bootmenu');
+      scene.classList.remove('nosig','power-on','login','booterr','bootmenu','domain-error');
       if(state.pcOn) scene.classList.add('power-on');
       const L = levels && levels[state.levelIdx];
       if(L && L.id === 'S4'){
@@ -736,7 +741,12 @@
         }
       } else {
         if(state.monitorOn && (!state.pcOn || !state.signalOk)) scene.classList.add('nosig');
-        if(state.pcOn && state.monitorOn && state.signalOk) scene.classList.add('login');
+        if(state.pcOn && state.monitorOn && state.signalOk){
+          scene.classList.add('login');
+          if(L && L.id === 'N1' && !state.lanConnected){
+            scene.classList.add('domain-error');
+          }
+        }
       }
     }
 
@@ -1495,6 +1505,7 @@ function finish(success, detail){
             }
             state.lanConnected = true;
             state.switchLedOn = true;
+            updateScene();
             setStatus('Netzwerk verbunden');
             say('<span class="good">Link aktiv.</span> Die Domäne ist wieder erreichbar – starte den Login neu.');
             openModal({
@@ -1547,6 +1558,7 @@ function finish(success, detail){
               setStatus('Login erfolgreich');
               say('<span class="good">Anmeldung erfolgreich.</span> Mit Netzwerkverbindung klappt der Domänen-Login wieder.');
               state.n1SolvedBy = 'network';
+              updateScene();
               finish(true, 'Netzwerkkabel korrekt angeschlossen – Domänen-Login funktioniert wieder.');
               return;
             }
