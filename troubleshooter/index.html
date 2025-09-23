@@ -294,6 +294,29 @@
     const goalBtn = document.getElementById('goalBtn');
     let scenarioActive = false;
 
+    const versionBadges = [document.getElementById('hubVerTag'), document.getElementById('verTag')];
+    versionBadges.forEach(badge => {
+      if(!badge) return;
+      badge.classList.add('badge-action');
+      badge.setAttribute('role','button');
+      badge.setAttribute('tabindex','0');
+      badge.setAttribute('title','Fortschritt zurücksetzen');
+      const label = badge.textContent ? badge.textContent.trim() : '';
+      if(label){
+        badge.setAttribute('aria-label', `Version ${label} – Fortschritt zurücksetzen`);
+      } else {
+        badge.setAttribute('aria-label', 'Fortschritt zurücksetzen');
+      }
+      const handleClick = () => resetAllProgress();
+      badge.addEventListener('click', handleClick);
+      badge.addEventListener('keydown', event => {
+        if(event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar'){
+          event.preventDefault();
+          badge.click();
+        }
+      });
+    });
+
     function createMedalBadge(rank){
       const span = document.createElement('span');
       span.className = 'hub-medal';
@@ -448,6 +471,19 @@
       showHub();
       const focusTarget = scenarioListEl && scenarioListEl.querySelector('button:not([disabled])');
       if(focusTarget) focusTarget.focus();
+    }
+
+    function resetAllProgress(){
+      const confirmed = window.confirm('Fortschritt wirklich löschen? Alle Freischaltungen, Scores und Bestleistungen werden entfernt.');
+      if(!confirmed) return;
+      try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+      try{ localStorage.removeItem(SCORES_KEY); }catch(e){}
+      try{ localStorage.removeItem(PROGRESS_KEY); }catch(e){}
+      progress = defaultProgress();
+      saveProgress(progress);
+      showBest();
+      returnToHub();
+      window.alert('Fortschritt wurde zurückgesetzt.');
     }
 
     const hint1Html = 'Was kannst du prüfen, <b>ohne den PC zu öffnen</b>?';
