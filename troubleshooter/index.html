@@ -88,6 +88,17 @@
                 <rect x="310" y="96" width="130" height="12" rx="6" class="mut" fill="none"/>
                 <rect x="310" y="118" width="130" height="12" rx="6" class="mut" fill="none"/>
               </g>
+              <g class="login-error" aria-hidden="true">
+                <rect x="285" y="40" width="180" height="110" rx="12" class="login-error-bg"/>
+                <text x="375" y="78" font-size="22" text-anchor="middle" style="fill:rgba(248,250,252,.94);font-weight:700">Login-Fehler</text>
+                <text x="375" y="106" font-size="13" text-anchor="middle" style="fill:rgba(248,250,252,.78);letter-spacing:.4px">Profil nicht verfügbar</text>
+                <text x="375" y="126" font-size="12" text-anchor="middle" style="fill:rgba(248,250,252,.65);letter-spacing:.4px">Domäne nicht erreichbar</text>
+              </g>
+              <g class="net-indicator" aria-hidden="true">
+                <rect x="92" y="60" width="66" height="24" rx="8" class="mut" fill="none"/>
+                <circle cx="112" cy="72" r="5" class="net-led" fill="none"/>
+                <text x="146" y="77" font-size="11" text-anchor="middle" style="fill:rgba(148,163,184,.8);font-weight:600;letter-spacing:1.2px">LINK</text>
+              </g>
             </svg>
           </figure>
 
@@ -141,7 +152,8 @@
     import scenario2 from './scenario2.js';
     import scenario3 from './scenario3.js';
     import scenario4 from './scenario4.js';
-    const levels = [scenario1, scenario2, scenario3, scenario4];
+    import scenario5 from './scenario5.js';
+    const levels = [scenario1, scenario2, scenario3, scenario4, scenario5];
     // --- Persistence ---
     const STORAGE_KEY = 'pctrouble_best_v2';
     const SCORES_KEY = 'pctrouble_scores_v2';
@@ -213,6 +225,9 @@
       usbPresent: true,
       bootOrderChanged: false,
       bootOrderPersisted: false,
+      networkOk: true,
+      loginError: false,
+      n1LinkChecked: false,
       actionSequence: [],
       s4SolvedBy: null,
       s4RemovedUsb: false,
@@ -342,10 +357,15 @@
         index: idx,
         number: idx + 1
       }));
-      const placeholders = [
-        { type: 'placeholder', id: 'PLACEHOLDER_5', name: 'PLACEHOLDER_5', number: baseEntries.length + 1 },
-        { type: 'placeholder', id: 'PLACEHOLDER_6', name: 'PLACEHOLDER_6', number: baseEntries.length + 2 }
-      ];
+      const placeholders = Array.from({ length: 2 }, (_, idx) => {
+        const number = baseEntries.length + idx + 1;
+        return {
+          type: 'placeholder',
+          id: `PLACEHOLDER_${number}`,
+          name: `PLACEHOLDER_${number}`,
+          number
+        };
+      });
       const entries = baseEntries.concat(placeholders);
       entries.forEach(entry => {
         const item = document.createElement('article');
@@ -716,10 +736,11 @@
     function updateScene(){
       const scene = document.querySelector('.scene');
       if(!scene) return;
-      scene.classList.remove('nosig','power-on','login','booterr','bootmenu');
+      scene.classList.remove('nosig','power-on','login','booterr','bootmenu','loginerr','net-ok','net-down');
       if(state.pcOn) scene.classList.add('power-on');
       const L = levels && levels[state.levelIdx];
       if(L && L.id === 'S4'){
+        scene.classList.add('net-ok');
         if(!state.monitorOn){
           return;
         }
@@ -730,9 +751,23 @@
         } else {
           scene.classList.add('booterr');
         }
+      } else if(L && L.id === 'N1'){
+        if(state.networkOk){
+          scene.classList.add('net-ok');
+        } else {
+          scene.classList.add('net-down');
+        }
+        if(state.monitorOn){
+          if(state.networkOk){
+            scene.classList.add('login');
+          } else {
+            scene.classList.add('loginerr');
+          }
+        }
       } else {
         if(state.monitorOn && (!state.pcOn || !state.signalOk)) scene.classList.add('nosig');
         if(state.pcOn && state.monitorOn && state.signalOk) scene.classList.add('login');
+        scene.classList.add('net-ok');
       }
     }
 
@@ -845,6 +880,8 @@ function completionIntroHtml(){
       return '<p><b>Aufgabe abgeschlossen.</b> Quelle korrekt, Signal wiederhergestellt.</p><p>Das <b>Login</b> ist sichtbar.</p>';
     case 'M3':
       return '<p><b>Aufgabe abgeschlossen.</b> POST erfolgreich, Anzeige aktiv.</p><p>Das <b>Login</b> ist sichtbar.</p>';
+    case 'N1':
+      return '<p><b>Aufgabe abgeschlossen.</b> Netzwerkkabel steckt, Link-LED aktiv.</p><p>Domänen-Login funktioniert wieder.</p>';
     case 'S4': {
       switch(state.s4SolvedBy){
         case 'temp-ssd':
@@ -876,7 +913,11 @@ function finish(success, detail){
       state.solved = true;
       showCelebration();
       setStatus('Geloest');
-      say(`<span class="good">Problem behoben.</span> ${detail} Der PC startet, du kannst weiterarbeiten.`);
+      const level = levels[state.levelIdx];
+      const closing = level && level.id === 'N1'
+        ? 'Du kannst dich wieder an der Domäne anmelden.'
+        : 'Der PC startet, du kannst weiterarbeiten.';
+      say(`<span class="good">Problem behoben.</span> ${detail} ${closing}`);
       // Hinweis: Reset bleibt jederzeit möglich
 
       // Bewertung
@@ -983,9 +1024,60 @@ function finish(success, detail){
           effect(){
             if(state.solved) return;
             state.time += this.delta; state.tries++;
+            const cur = levels && levels[state.levelIdx];
+            if(cur && cur.id === 'N1'){
+              pushLog(this.label, '+1 Min');
+              if(state.networkOk){
+                setStatus('Netzwerk geprüft');
+                say('<span class="info">Kabel sitzt.</span> Link-LED blinkt – die Domäne ist erreichbar. Versuche den Login erneut.');
+                openModal({
+                  title: this.label,
+                  html: '<p>Das Netzwerkkabel sitzt fest. Am Switch blinkt die Link-LED.</p><p>Die Verbindung steht – melde dich erneut an.</p>'
+                });
+                return;
+              }
+              state.networkOk = true;
+              state.loginError = false;
+              updateScene();
+              setStatus('Netzwerk verbunden');
+              say('<span class="good">Kabel steckt wieder.</span> Link-LED blinkt, die Domäne ist erreichbar.');
+              finish(true, 'Netzwerkkabel verbunden – Domänen-Login wieder möglich.');
+              return;
+            }
             setStatus('Nicht relevant');
             pushLog(this.label, '+1 Min');
             say('<span class="warn">Kein Einfluss aufs Einschalten.</span> Nützlich bei Internet-/Anmeldeproblemen. Hier zuerst <b>Strom</b> und <b>Monitor</b> klären.');
+          }
+        },
+        switchLed: {
+          id: 'switch-led',
+          label: '💡 Switch-Port (Link-LED) prüfen',
+          hotkey: '1',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            setStatus('Netzwerk prüfen');
+            pushLog(this.label, '+1 Min');
+            const cur = levels && levels[state.levelIdx];
+            if(cur && cur.id === 'N1'){
+              state.n1LinkChecked = true;
+              if(state.networkOk){
+                say('<span class="good">Link-LED aktiv.</span> Verbindung steht – melde dich erneut an.');
+                openModal({
+                  title: this.label,
+                  html: '<p>Am Switch-Port blinkt die Link-LED.</p><p>Die Domäne ist erreichbar – der Login sollte funktionieren.</p>'
+                });
+              } else {
+                say('<span class="warn">Keine Link-LED.</span> Kein Netzwerk-Link – prüfe das <b>Netzwerkkabel</b> oder eine andere Dose.');
+                openModal({
+                  title: this.label,
+                  html: '<p>Die Link-LED bleibt dunkel – es besteht keine Verbindung.</p><p>Stecke das <b>Netzwerkkabel</b> korrekt ein oder teste eine andere Dose.</p>'
+                });
+              }
+              return;
+            }
+            say('<span class="info">Netzwerk geprüft.</span>');
           }
         },
         // Shared
@@ -1010,12 +1102,21 @@ function finish(success, detail){
               state.monitorOn = true; updateScene();
               setStatus('Monitor an');
               pushLog(this.label, '+1 Min');
+              const cur = levels && levels[state.levelIdx];
               if(state.pcOn && state.signalOk){
-                say('<span class="good">Monitor eingeschaltet.</span> <b>Login</b> ist sichtbar.');
-                openModal({
-                  title: 'Bild vorhanden',
-                  html: '<p>Der Monitor ist an und zeigt <b>Login</b>.</p><p>Gut gemacht!</p>'
-                });
+                if(cur && cur.id === 'N1'){
+                  say('<span class="info">Monitor eingeschaltet.</span> Windows zeigt weiterhin den <b>Login-Fehler</b>. Prüfe das <b>Netzwerkkabel</b>.');
+                  openModal({
+                    title: 'Login sichtbar',
+                    html: '<p>Der Monitor zeigt das Windows-Login.</p><p>Fehler: «Profil nicht verfügbar / Domäne nicht erreichbar» – prüfe <b>Netzwerkkabel</b> bzw. <b>Switch-Link</b>.</p>'
+                  });
+                } else {
+                  say('<span class="good">Monitor eingeschaltet.</span> <b>Login</b> ist sichtbar.');
+                  openModal({
+                    title: 'Bild vorhanden',
+                    html: '<p>Der Monitor ist an und zeigt <b>Login</b>.</p><p>Gut gemacht!</p>'
+                  });
+                }
               } else {
                 say('<span class="warn">Monitor ist an.</span> Anzeige zeigt <b>NO SIGNAL</b>. Prüfe <b>Quelle (HDMI/DP)</b> oder <b>Monitorkabel</b>.');
                 openModal({
@@ -1036,8 +1137,11 @@ function finish(success, detail){
             state.time += this.delta; state.tries++;
             setStatus('Nicht zielfuehrend');
             pushLog(this.label, '+1 Min');
+            const cur = levels && levels[state.levelIdx];
             if(!state.pcOn){
               say(`<span class="bad">Das geht (noch) nicht.</span> Solange der PC <i>gar nicht</i> startet, kommst du nicht ins BIOS. Erst muss <b>Strom</b> anliegen.`);
+            } else if(cur && cur.id === 'N1'){
+              say('<span class="warn">Nicht zielführend.</span> Der PC läuft – der Domänen-Login scheitert wegen fehlender Verbindung. Prüfe <b>Netzwerkkabel</b> und <b>Switch-Link</b>.');
             } else {
               say(`<span class="warn">Nicht zielführend.</span> Das Problem betrifft <b>Anzeige/Signal</b>, nicht das BIOS. Prüfe Monitor <b>ein/aus</b>, <b>Quelle</b> oder <b>Kabel</b>.`);
             }
@@ -1053,7 +1157,38 @@ function finish(success, detail){
             state.time += this.delta; state.tries++;
             setStatus('Risiko hoch');
             pushLog(this.label, '+8 Min');
-            say(`<span class="bad">Overkill!</span> Das ist ein tiefer Eingriff mit Risiko. Zuerst immer die <b>einfachen</b> Dinge prüfen: Strom, Kabel, Schalter.`);
+            const cur = levels && levels[state.levelIdx];
+            if(cur && cur.id === 'N1'){
+              say('<span class="bad">Overkill!</span> CPU ausbauen hilft nicht bei Domänen-Logins. Prüfe lieber <b>Netzwerkkabel</b> und <b>Switch-Link</b>.');
+            } else {
+              say(`<span class="bad">Overkill!</span> Das ist ein tiefer Eingriff mit Risiko. Zuerst immer die <b>einfachen</b> Dinge prüfen: Strom, Kabel, Schalter.`);
+            }
+          }
+        },
+        ramLogin: {
+          id: 'ram-login',
+          label: '📏 Arbeitsspeicher überprüfen',
+          hotkey: '5',
+          delta: 4,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            setStatus('Nicht zielfuehrend');
+            pushLog(this.label, `+${this.delta} Min`);
+            const cur = levels && levels[state.levelIdx];
+            if(cur && cur.id === 'N1'){
+              say('<span class="bad">Nicht ursächlich.</span> Der PC startet – RAM ist nicht das Problem. Fokus auf <b>Netzwerk</b> (Kabel, Switch-LED).');
+              openModal({
+                title: this.label,
+                html: '<p>Du baust RAM aus und wieder ein – der PC lief bereits.</p><p>Das Login scheitert wegen fehlender Domänenverbindung. Prüfe <b>Netzwerkkabel</b> und <b>Switch-Port</b>.</p>'
+              });
+            } else {
+              say('<span class="bad">Overkill / nicht symptombezogen.</span> Bei diesem Fehler zuerst die einfachen Checks (Strom, Monitor) erledigen.');
+              openModal({
+                title: this.label,
+                html: '<p>RAM prüfen ist hier unnötig.</p><p>Konzentriere dich auf die einfachen äusseren Faktoren.</p>'
+              });
+            }
           }
         },
         power: {
@@ -1469,6 +1604,8 @@ function finish(success, detail){
         return [A.postCheck, A.monitorToggle, A.bios, A.ramFix, A.power, A.cmosReset];
       } else if(levelId === 'S4'){
         return makeScenario4Actions();
+      } else if(levelId === 'N1'){
+        return [A.switchLed, A.monitorToggle, A.bios, A.cpu, A.ramLogin, A.network];
       } else {
         return [A.monitorToggle, A.bios, A.power, A.network, A.cpu, A.source];
       }
@@ -1494,6 +1631,9 @@ function finish(success, detail){
       state.usbPresent = 'usbPresent' in L.start ? L.start.usbPresent : true;
       state.bootOrderChanged = !!L.start.bootOrderChanged;
       state.bootOrderPersisted = !!L.start.bootOrderPersisted;
+      state.networkOk = 'networkOk' in L.start ? L.start.networkOk : true;
+      state.loginError = 'loginError' in L.start ? L.start.loginError : false;
+      state.n1LinkChecked = false;
       state.actionSequence = [];
       state.s4SolvedBy = null;
       state.s4RemovedUsb = false;
@@ -1559,8 +1699,14 @@ function finish(success, detail){
       const h2 = document.getElementById('hintText2'); if(h2) h2.innerHTML = L.hints.h2;
 
       // Status
-      setStatus('Unbekannt'); renderMeters();
-      feedbackEl.innerHTML = 'Wähle deinen ersten Schritt.'; stepLogEl.innerHTML = '';
+      const initialStatus = L.id === 'N1' ? 'Loginfehler' : 'Unbekannt';
+      setStatus(initialStatus); renderMeters();
+      if(L.id === 'N1'){
+        feedbackEl.innerHTML = 'Windows meldet: <b>Profil nicht verfügbar / Domäne nicht erreichbar</b>. Prüfe die Netzwerkverbindung.';
+      } else {
+        feedbackEl.innerHTML = 'Wähle deinen ersten Schritt.';
+      }
+      stepLogEl.innerHTML = '';
       summary.classList.remove('active');
 
       // Visuals
@@ -1568,7 +1714,11 @@ function finish(success, detail){
 
       // Badge text
       const tag = document.getElementById('levelTag');
-      if(tag){ tag.innerHTML = `Fall ${idx+1}/${levels.length} - <b>Einfach</b>`; }
+      if(tag){
+        const difficultyMap = { L0: 'Einfach', E1: 'Einfach', M3: 'Einfach', S4: 'Fortgeschritten', N1: 'Mittel' };
+        const diff = difficultyMap[L.id] || 'Einfach';
+        tag.innerHTML = `Fall ${idx+1}/${levels.length} - <b>${diff}</b>`;
+      }
 
       showBest();
     }
