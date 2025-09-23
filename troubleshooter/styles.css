@@ -291,10 +291,17 @@ details[open].hintbox summary::before, details[open].didaktik summary::before{
 .scene.bootmenu .bootmenu{display:block}
 .scene .login{display:none}
 .scene.login .login{display:block}
+.scene .domain-msg{display:none}
+.scene.domain-err .domain-msg{display:block}
+.scene.domain-err .login{display:none}
 .scene.power-on .led{stroke: var(--good); fill: var(--good)}
 /* Screen nur sichtbar, wenn Monitor "an" (No-Signal oder Login) */
 .scene .screen{display:none}
-.scene.nosig .screen, .scene.login .screen, .scene.booterr .screen, .scene.bootmenu .screen{display:block}
+.scene.nosig .screen,
+.scene.login .screen,
+.scene.booterr .screen,
+.scene.bootmenu .screen,
+.scene.domain-err .screen{display:block}
 .scene.bootmenu .bootmenu-bg{fill:rgba(15,23,42,.94);stroke:rgba(148,163,184,.45);stroke-width:1}
 
 /* Action message */

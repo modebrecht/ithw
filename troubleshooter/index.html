@@ -88,6 +88,13 @@
                 <rect x="310" y="96" width="130" height="12" rx="6" class="mut" fill="none"/>
                 <rect x="310" y="118" width="130" height="12" rx="6" class="mut" fill="none"/>
               </g>
+              <g class="domain-msg" aria-hidden="true">
+                <rect x="290" y="47" width="170" height="90" rx="8" class="mut" fill="none"/>
+                <text x="375" y="78" font-size="18" text-anchor="middle" style="fill:rgba(229,231,235,.95);font-weight:700">
+                  <tspan x="375" dy="0">Fehler:</tspan>
+                  <tspan x="375" dy="22">Domäne nicht verfügbar!</tspan>
+                </text>
+              </g>
             </svg>
           </figure>
 
@@ -720,7 +727,7 @@
     function updateScene(){
       const scene = document.querySelector('.scene');
       if(!scene) return;
-      scene.classList.remove('nosig','power-on','login','booterr','bootmenu');
+      scene.classList.remove('nosig','power-on','login','booterr','bootmenu','domain-err');
       if(state.pcOn) scene.classList.add('power-on');
       const L = levels && levels[state.levelIdx];
       if(L && L.id === 'S4'){
@@ -736,7 +743,10 @@
         }
       } else {
         if(state.monitorOn && (!state.pcOn || !state.signalOk)) scene.classList.add('nosig');
-        if(state.pcOn && state.monitorOn && state.signalOk) scene.classList.add('login');
+        if(state.pcOn && state.monitorOn && state.signalOk){
+          scene.classList.add('login');
+          if(L && L.id === 'N1') scene.classList.add('domain-err');
+        }
       }
     }
 
