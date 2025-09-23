@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>PC-Troubleshooter v2.5</title>
+  <title>PC-Troubleshooter v2.6</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="wrap hub-view" id="hubView">
     <header class="hub-header">
-      <div class="title">PC-Troubleshooter <span class="badge" id="hubVerTag">v2.5</span></div>
+      <div class="title">PC-Troubleshooter <span class="badge" id="hubVerTag">v2.6</span></div>
       <div class="hub-info" id="hubInfo"></div>
     </header>
     <section class="hub-card" aria-labelledby="hubTitle">
@@ -23,9 +23,9 @@
 
   <div class="wrap hidden" id="scenarioView">
     <header>
-      <div class="title">PC-Troubleshooter <span class="badge" id="verTag">v2.5</span></div>
+      <div class="title">PC-Troubleshooter <span class="badge" id="verTag">v2.6</span></div>
       <div class="controls">
-        <div class="badge" id="levelTag" aria-live="polite">Fall 1/4 • <b>Einfach</b></div>
+        <div class="badge" id="levelTag" aria-live="polite">Fall 1/5 • <b>Einfach</b></div>
         <button class="btn" type="button" id="scoreBtn" title="Score anzeigen" aria-label="Score anzeigen">🏆 Score</button>
         <button class="btn" type="button" id="hubBtn" title="Zurück zum Hub" aria-label="Zurück zum Hub">🏠 Hub</button>
       </div>
@@ -141,7 +141,8 @@
     import scenario2 from './scenario2.js';
     import scenario3 from './scenario3.js';
     import scenario4 from './scenario4.js';
-    const levels = [scenario1, scenario2, scenario3, scenario4];
+    import scenario5 from './scenario5.js';
+    const levels = [scenario1, scenario2, scenario3, scenario4, scenario5];
     // --- Persistence ---
     const STORAGE_KEY = 'pctrouble_best_v2';
     const SCORES_KEY = 'pctrouble_scores_v2';
@@ -217,7 +218,10 @@
       s4SolvedBy: null,
       s4RemovedUsb: false,
       s4UsedBootMenu: false,
-      s4ChangedBootOrder: false
+      s4ChangedBootOrder: false,
+      lanConnected: true,
+      switchLedOn: true,
+      n1SolvedBy: null
     };
     let progress = loadProgress();
     progress = normalizeProgress(progress);
@@ -845,6 +849,11 @@ function completionIntroHtml(){
       return '<p><b>Aufgabe abgeschlossen.</b> Quelle korrekt, Signal wiederhergestellt.</p><p>Das <b>Login</b> ist sichtbar.</p>';
     case 'M3':
       return '<p><b>Aufgabe abgeschlossen.</b> POST erfolgreich, Anzeige aktiv.</p><p>Das <b>Login</b> ist sichtbar.</p>';
+    case 'N1':
+      if(state.n1SolvedBy === 'network'){
+        return '<p><b>Aufgabe abgeschlossen.</b> Netzwerkkabel steckt wieder – die Domäne ist erreichbar.</p><p>Das <b>Login</b> funktioniert.</p>';
+      }
+      return '<p><b>Aufgabe abgeschlossen.</b> Anmeldung möglich.</p><p>Das <b>Login</b> ist sichtbar.</p>';
     case 'S4': {
       switch(state.s4SolvedBy){
         case 'temp-ssd':
@@ -1459,6 +1468,98 @@ function finish(success, detail){
         }
       ];
     }
+    function makeScenario5Actions(base){
+      const monitor = Object.assign({}, base.monitorToggle, { hotkey: '3' });
+      const bios = Object.assign({}, base.bios, { hotkey: '4' });
+      const cpu = Object.assign({}, base.cpu, { hotkey: '5' });
+      return [
+        {
+          id: 'lan-cable',
+          label: '🌐 Netzwerkkabel einstecken',
+          hotkey: '1',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            const already = !!state.lanConnected;
+            setStatus('Netzwerk prüfen');
+            if(already){
+              setStatus('Netzwerk verbunden');
+              say('<span class="info">Kabel sitzt bereits.</span> Der Fehler liegt nicht am PC – versuche den Login erneut.');
+              openModal({
+                title: this.label,
+                html: '<p>Das Netzwerkkabel war bereits korrekt eingesteckt.</p><p>Prüfe ggf. eine andere Dose oder den Switch-Port.</p>'
+              });
+              return;
+            }
+            state.lanConnected = true;
+            state.switchLedOn = true;
+            setStatus('Netzwerk verbunden');
+            say('<span class="good">Link aktiv.</span> Die Domäne ist wieder erreichbar – starte den Login neu.');
+            openModal({
+              title: this.label,
+              html: '<p>Du steckst das Netzwerkkabel in die richtige Dose.</p><p>Am Switch leuchtet die Link-LED. Führe jetzt den Login erneut aus.</p>'
+            });
+          }
+        },
+        {
+          id: 'switch-led',
+          label: '💡 Switch-Port prüfen (Link-LED)',
+          hotkey: '2',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            if(state.lanConnected){
+              state.switchLedOn = true;
+              setStatus('Netzwerk verbunden');
+              say('<span class="info">Link-LED grün.</span> Verbindung steht – der Login sollte funktionieren.');
+              openModal({
+                title: this.label,
+                html: '<p>Die Link-LED am Switch blinkt grün. Das Kabel steckt korrekt.</p><p>Starte den Login erneut.</p>'
+              });
+            } else {
+              state.switchLedOn = false;
+              setStatus('Keine Verbindung');
+              say('<span class="warn">Link-LED aus.</span> Kein Netzwerk – Kabel kontrollieren.');
+              openModal({
+                title: this.label,
+                html: '<p>Die Link-LED bleibt dunkel – es liegt keine Verbindung an.</p><p>Stecke das Netzwerkkabel korrekt ein (richtige Dose).</p>'
+              });
+            }
+          }
+        },
+        monitor,
+        bios,
+        cpu,
+        {
+          id: 'retry-login',
+          label: '👤 Erneut anmelden (Domäne/Offline)',
+          hotkey: '6',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            if(state.lanConnected){
+              setStatus('Login erfolgreich');
+              say('<span class="good">Anmeldung erfolgreich.</span> Mit Netzwerkverbindung klappt der Domänen-Login wieder.');
+              state.n1SolvedBy = 'network';
+              finish(true, 'Netzwerkkabel korrekt angeschlossen – Domänen-Login funktioniert wieder.');
+              return;
+            }
+            setStatus('Domäne nicht erreichbar');
+            say('<span class="warn">Domäne offline.</span> Ohne Netzwerk kein Profil. Stecke das LAN-Kabel ein oder nutze nur im Notfall ein lokales Konto.');
+            openModal({
+              title: this.label,
+              html: '<p>Die Anmeldung scheitert weiterhin: Die Domäne ist nicht erreichbar.</p><p>Verbinde das Netzwerkkabel oder verwende ein lokales Konto als Notlösung.</p>'
+            });
+          }
+        }
+      ];
+    }
     function getActionsForLevel(levelId){
       const A = makeActions();
       if(levelId === 'L0'){
@@ -1469,6 +1570,8 @@ function finish(success, detail){
         return [A.postCheck, A.monitorToggle, A.bios, A.ramFix, A.power, A.cmosReset];
       } else if(levelId === 'S4'){
         return makeScenario4Actions();
+      } else if(levelId === 'N1'){
+        return makeScenario5Actions(A);
       } else {
         return [A.monitorToggle, A.bios, A.power, A.network, A.cpu, A.source];
       }
@@ -1499,6 +1602,9 @@ function finish(success, detail){
       state.s4RemovedUsb = false;
       state.s4UsedBootMenu = false;
       state.s4ChangedBootOrder = false;
+      state.lanConnected = 'lanConnected' in L.start ? !!L.start.lanConnected : true;
+      state.switchLedOn = 'switchLedOn' in L.start ? !!L.start.switchLedOn : state.lanConnected;
+      state.n1SolvedBy = null;
 
       // Actions per Level
       state.actions = getActionsForLevel(L.id);
