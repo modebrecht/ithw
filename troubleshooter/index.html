@@ -59,6 +59,25 @@
 
               <rect x="70" y="85" width="110" height="110" rx="8" class="mut" fill="none"/>
               <circle cx="100" cy="105" r="6" class="mut led" fill="none"/>
+              <g class="fan-unit" aria-hidden="true">
+                <circle cx="125" cy="150" r="24" class="fan-ring"/>
+                <circle cx="125" cy="150" r="6" class="fan-hub"/>
+                <path d="M125 128 L125 172" class="fan-blade"/>
+                <path d="M108 141 L142 159" class="fan-blade"/>
+                <path d="M142 141 L108 159" class="fan-blade"/>
+              </g>
+              <g class="fan-blocker" aria-hidden="true">
+                <line x1="110" y1="135" x2="140" y2="165"/>
+                <line x1="110" y1="165" x2="140" y2="135"/>
+              </g>
+              <g class="heat" aria-hidden="true">
+                <path d="M92 96 C104 82, 114 82, 126 96"/>
+                <path d="M118 92 C130 78, 140 78, 152 92"/>
+              </g>
+              <g class="cool-air" aria-hidden="true">
+                <path d="M92 94 C104 82, 114 82, 126 94"/>
+                <path d="M118 90 C130 78, 140 78, 152 90"/>
+              </g>
 
               <!-- Monitor -->
               <rect x="240" y="12" width="270" height="160" rx="6" class="mut" fill="none"/>
@@ -147,7 +166,8 @@
     import scenario3 from './scenario3.js';
     import scenario4 from './scenario4.js';
     import scenario5 from './scenario5.js';
-    const levels = [scenario1, scenario2, scenario3, scenario4, scenario5];
+    import scenario6 from './scenario6.js';
+    const levels = [scenario1, scenario2, scenario3, scenario4, scenario5, scenario6];
     // --- Persistence ---
     const STORAGE_KEY = 'pctrouble_best_v2';
     const SCORES_KEY = 'pctrouble_scores_v2';
@@ -226,7 +246,11 @@
       s4ChangedBootOrder: false,
       lanConnected: true,
       switchLedOn: true,
-      n1SolvedBy: null
+      n1SolvedBy: null,
+      fanBlocked: false,
+      dustCleared: false,
+      tempsStable: true,
+      overheatObserved: false
     };
     let progress = loadProgress();
     progress = normalizeProgress(progress);
@@ -351,10 +375,15 @@
         index: idx,
         number: idx + 1
       }));
-      const placeholders = [
-        { type: 'placeholder', id: 'PLACEHOLDER_5', name: 'PLACEHOLDER_5', number: baseEntries.length + 1 },
-        { type: 'placeholder', id: 'PLACEHOLDER_6', name: 'PLACEHOLDER_6', number: baseEntries.length + 2 }
-      ];
+      const placeholders = Array.from({ length: 2 }, (_, idx) => {
+        const number = baseEntries.length + idx + 1;
+        return {
+          type: 'placeholder',
+          id: `PLACEHOLDER_${number}`,
+          name: `PLACEHOLDER_${number}`,
+          number
+        };
+      });
       const entries = baseEntries.concat(placeholders);
       entries.forEach(entry => {
         const item = document.createElement('article');
@@ -725,7 +754,7 @@
     function updateScene(){
       const scene = document.querySelector('.scene');
       if(!scene) return;
-      scene.classList.remove('nosig','power-on','login','booterr','bootmenu','domain-error');
+      scene.classList.remove('nosig','power-on','login','booterr','bootmenu','domain-error','overheat','fan-blocked','fan-clean');
       if(state.pcOn) scene.classList.add('power-on');
       const L = levels && levels[state.levelIdx];
       if(L && L.id === 'S4'){
@@ -745,6 +774,11 @@
           scene.classList.add('login');
           if(L && L.id === 'N1' && !state.lanConnected){
             scene.classList.add('domain-error');
+          }
+          if(L && L.id === 'S2'){
+            if(state.fanBlocked){ scene.classList.add('fan-blocked'); }
+            if(!state.tempsStable){ scene.classList.add('overheat'); }
+            if(!state.fanBlocked && state.dustCleared){ scene.classList.add('fan-clean'); }
           }
         }
       }
@@ -859,6 +893,8 @@ function completionIntroHtml(){
       return '<p><b>Aufgabe abgeschlossen.</b> Quelle korrekt, Signal wiederhergestellt.</p><p>Das <b>Login</b> ist sichtbar.</p>';
     case 'M3':
       return '<p><b>Aufgabe abgeschlossen.</b> POST erfolgreich, Anzeige aktiv.</p><p>Das <b>Login</b> ist sichtbar.</p>';
+    case 'S2':
+      return '<p><b>Aufgabe abgeschlossen.</b> Lüfter gereinigt, Blockaden entfernt – die Kühlung arbeitet wieder zuverlässig.</p><p>Unter Last bleiben die Temperaturen stabil (Wärmeleitpaste nur bei Bedarf ansprechen).</p>';
     case 'N1':
       if(state.n1SolvedBy === 'network'){
         return '<p><b>Aufgabe abgeschlossen.</b> Netzwerkkabel steckt wieder – die Domäne ist erreichbar.</p><p>Das <b>Login</b> funktioniert.</p>';
@@ -1572,6 +1608,210 @@ function finish(success, detail){
         }
       ];
     }
+    function makeScenario6Actions(){
+      return [
+        {
+          id: 's2-network',
+          label: '🌐 Netzwerkkabel prüfen',
+          hotkey: '1',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            setStatus('Nicht relevant');
+            say('<span class="warn">Kein Netzwerkproblem.</span> Der Absturz unter Last deutet auf <b>Thermik</b> hin.');
+            openModal({
+              title: this.label,
+              html:
+                '<p>Du kontrollierst das Netzwerkkabel – es steckt korrekt, Internet funktioniert.</p>' +
+                '<p>Der Fehler tritt jedoch erst unter Last auf. Konzentriere dich auf die <b>Kühlung</b>.</p>'
+            });
+          }
+        },
+        {
+          id: 's2-monitor',
+          label: '🖥️ Monitor ein/aus',
+          hotkey: '2',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            state.monitorOn = true;
+            updateScene();
+            setStatus('Nicht relevant');
+            say('<span class="warn">Bild ist vorhanden.</span> Das Problem liegt nicht an der Anzeige, sondern an der <b>Kühlung</b>.');
+            openModal({
+              title: this.label,
+              html:
+                '<p>Du schaltest den Monitor testweise aus und wieder ein – das Bild war die ganze Zeit stabil.</p>' +
+                '<p>Der Fehler (Shutdown/Throttling) entsteht unter Last, daher <b>Lüfter und Temperaturen</b> prüfen.</p>'
+            });
+          }
+        },
+        {
+          id: 's2-stress',
+          label: '🔥 Belastungstest starten',
+          hotkey: '3',
+          delta: 2,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            setStatus('Lasttest läuft');
+            if(state.fanBlocked){
+              state.overheatObserved = true;
+              state.tempsStable = false;
+              updateScene();
+              setStatus('Überhitzung unter Last');
+              say('<span class="bad">Temperaturen steigen schnell.</span> Nach wenigen Minuten drosselt der PC – Kühlung prüfen.');
+              openModal({
+                title: this.label,
+                html:
+                  '<p>Du lässt einen Benchmark laufen. Nach kurzer Zeit geht die CPU über 90 °C, das System drosselt massiv und droht abzuschalten.</p>' +
+                  '<p>Damit ist klar: Unter <b>Last</b> fehlt Kühlung – der Lüfter könnte blockiert oder zugesetzt sein.</p>'
+              });
+              return;
+            }
+            if(!state.dustCleared){
+              state.tempsStable = false;
+              updateScene();
+              setStatus('Lasttest kritisch');
+              say('<span class="warn">Verbesserung nur teilweise.</span> Noch Staub im Kühler – weiter reinigen.');
+              openModal({
+                title: this.label,
+                html:
+                  '<p>Der Test läuft etwas ruhiger, aber die Temperaturen bleiben grenzwertig. Staub sitzt noch zwischen den Lamellen.</p>' +
+                  '<p>Reinige den Lüfter gründlich und prüfe dann erneut.</p>'
+              });
+              return;
+            }
+            setStatus('Lasttest stabil');
+            say('<span class="info">Belastungstest stabil.</span> Überwache jetzt die Temperaturen – Sensoren checken.');
+            openModal({
+              title: this.label,
+              html:
+                '<p>Nach der Reinigung läuft der Lasttest ohne Drosseln. Beobachte nun die Sensoren, um die Temperaturen zu bestätigen.</p>' +
+                '<p>Optional: Wärmeleitpaste nur ansprechen, falls sie sichtbar ausgetrocknet ist.</p>'
+            });
+          }
+        },
+        {
+          id: 's2-inspect',
+          label: '🔎 Gehäuse öffnen & Lüfter prüfen',
+          hotkey: '4',
+          delta: 2,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            setStatus('Lüfter prüfen');
+            if(state.fanBlocked){
+              say('<span class="warn">Lüfter blockiert.</span> Ein Kabel und Staub verhindern den Luftstrom.');
+              openModal({
+                title: this.label,
+                html:
+                  '<p>Mit abgenommener Seitenwand siehst du: Der hintere Lüfter steckt voller Staub, zusätzlich klemmt ein loses Kabel in den Rotorblättern.</p>' +
+                  '<p>Entferne die Blockade und reinige den Lüfter.</p>'
+              });
+            } else {
+              say('<span class="info">Lüfter dreht frei.</span> Kontrolliere noch die Temperaturentwicklung.');
+              openModal({
+                title: this.label,
+                html:
+                  '<p>Der Lüfter dreht wieder frei. Prüfe jetzt die Temperaturen unter Last – optional Wärmeleitpaste nur erwähnen, falls sie alt aussieht.</p>'
+              });
+            }
+          }
+        },
+        {
+          id: 's2-clean',
+          label: '🧹 Lüfter reinigen / Blockade entfernen',
+          hotkey: '5',
+          delta: 3,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            if(!state.fanBlocked && state.dustCleared){
+              setStatus('Bereits sauber');
+              say('<span class="info">Lüfter war schon frei.</span> Prüfe zur Sicherheit die Temperaturen unter Last.');
+              openModal({
+                title: this.label,
+                html:
+                  '<p>Du hast den Lüfter bereits gereinigt. Führe nun einen Belastungstest und das Temperatur-Monitoring durch.</p>'
+              });
+              return;
+            }
+            state.fanBlocked = false;
+            state.dustCleared = true;
+            state.tempsStable = false;
+            updateScene();
+            setStatus('Kühlung verbessert');
+            say('<span class="good">Lüfter dreht wieder.</span> Staub entfernt, Kabel fixiert – jetzt Temperaturen prüfen.');
+            openModal({
+              title: this.label,
+              html:
+                '<p>Du bläst den Staub aus dem Kühler und legst das störende Kabel beiseite. Der Lüfter dreht frei.</p>' +
+                '<p>Starte danach einen Lasttest und überwache die Temperaturen, um den Erfolg zu bestätigen.</p>'
+            });
+          }
+        },
+        {
+          id: 's2-temp',
+          label: '🌡️ Temperaturen überwachen',
+          hotkey: '6',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            if(state.fanBlocked){
+              state.tempsStable = false;
+              updateScene();
+              setStatus('Temperaturen kritisch');
+              say('<span class="bad">Sensoren schlagen aus.</span> Ohne Luftstrom steigt die Temperatur sofort – erst reinigen.');
+              openModal({
+                title: this.label,
+                html:
+                  '<p>Schon im Monitoring siehst du Temperaturen deutlich über dem Soll – der Lüfter steht still.</p>' +
+                  '<p>Reinige und befreie den Lüfter, bevor du weitere Tests machst.</p>'
+              });
+              return;
+            }
+            if(!state.dustCleared){
+              state.tempsStable = false;
+              updateScene();
+              setStatus('Temperaturen hoch');
+              say('<span class="warn">Noch zu warm.</span> Staub blockiert weiterhin den Luftstrom.');
+              openModal({
+                title: this.label,
+                html:
+                  '<p>Die Temperaturen fallen noch nicht ausreichend – es sitzt weiterhin Staub im Kühler.</p>' +
+                  '<p>Reinige den Lüfter vollständig und prüfe dann erneut.</p>'
+              });
+              return;
+            }
+            if(!state.overheatObserved){
+              setStatus('Monitoring aktiv');
+              say('<span class="warn">Idle ok, Lasttest fehlt.</span> Reproduziere den Fehler unter Last und prüfe dann erneut.');
+              openModal({
+                title: this.label,
+                html:
+                  '<p>Im Idle wirken die Temperaturen normal. Um sicher zu sein, lass einen <b>Belastungstest</b> laufen und beobachte die Sensoren nochmals.</p>'
+              });
+              return;
+            }
+            state.tempsStable = true;
+            updateScene();
+            setStatus('Temperaturen stabil');
+            say('<span class="good">Sensoren im grünen Bereich.</span> Unter Last bleibt das System stabil. Wärmeleitpaste nur bei Bedarf erneuern.');
+            finish(true, 'Kühlung gereinigt – der PC bleibt auch unter Last stabil.');
+          }
+        }
+      ];
+    }
     function getActionsForLevel(levelId){
       const A = makeActions();
       if(levelId === 'L0'){
@@ -1584,6 +1824,8 @@ function finish(success, detail){
         return makeScenario4Actions();
       } else if(levelId === 'N1'){
         return makeScenario5Actions(A);
+      } else if(levelId === 'S2'){
+        return makeScenario6Actions();
       } else {
         return [A.monitorToggle, A.bios, A.power, A.network, A.cpu, A.source];
       }
@@ -1617,6 +1859,10 @@ function finish(success, detail){
       state.lanConnected = 'lanConnected' in L.start ? !!L.start.lanConnected : true;
       state.switchLedOn = 'switchLedOn' in L.start ? !!L.start.switchLedOn : state.lanConnected;
       state.n1SolvedBy = null;
+      state.fanBlocked = 'fanBlocked' in L.start ? !!L.start.fanBlocked : false;
+      state.dustCleared = 'dustCleared' in L.start ? !!L.start.dustCleared : false;
+      state.tempsStable = 'tempsStable' in L.start ? !!L.start.tempsStable : true;
+      state.overheatObserved = 'overheatObserved' in L.start ? !!L.start.overheatObserved : false;
 
       // Actions per Level
       state.actions = getActionsForLevel(L.id);
