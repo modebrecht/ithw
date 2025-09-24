@@ -53,6 +53,21 @@
 
           <figure class="scene" role="img" aria-label="PC-Tower und Monitor auf einem Schreibtisch (neutrale Ausgangslage)">
             <svg viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <defs>
+                <linearGradient id="desktopBg" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#1d4ed8" stop-opacity="0.95"/>
+                  <stop offset="55%" stop-color="#312e81" stop-opacity="0.98"/>
+                  <stop offset="100%" stop-color="#0f172a"/>
+                </linearGradient>
+                <linearGradient id="desktopAccent" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.85"/>
+                  <stop offset="100%" stop-color="#6366f1" stop-opacity="0.55"/>
+                </linearGradient>
+                <linearGradient id="taskbarBg" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#1f2937" stop-opacity="0.92"/>
+                  <stop offset="100%" stop-color="#111827" stop-opacity="0.92"/>
+                </linearGradient>
+              </defs>
               <!-- Tischlinie -->
               <rect x="20" y="194" width="760" height="8" rx="4" class="mutfill"/>
               <rect x="20" y="194" width="760" height="8" rx="4" class="mut" fill="none"/>
@@ -111,6 +126,53 @@
                 <rect x="262" y="47" width="230" height="90" rx="8" class="mut" fill="black"/>
                 <text x="375" y="82" font-size="18" text-anchor="middle" style="fill:rgba(229,231,235,.95);font-weight:700">Fehler:</text>
                 <text x="375" y="108" font-size="16" text-anchor="middle" style="fill:rgba(229,231,235,.9);font-weight:600">Domäne nicht verfügbar!</text>
+              </g>
+              <g class="login desktop-screen" aria-hidden="true">
+                <rect x="240" y="12" width="270" height="160" rx="6" fill="url(#desktopBg)"/>
+                <ellipse cx="348" cy="78" rx="118" ry="62" fill="url(#desktopAccent)" opacity="0.8" transform="rotate(-8 348 78)"/>
+                <ellipse cx="442" cy="110" rx="96" ry="50" fill="#60a5fa" opacity="0.32" transform="rotate(6 442 110)"/>
+                <path d="M256 134 C296 112, 354 116, 398 140 C432 158, 480 154, 508 132 L508 150 C478 168, 424 170, 372 158 C322 148, 284 154, 256 164 Z" fill="#1d4ed8" opacity="0.32"/>
+                <g class="desktop-icons" aria-hidden="true">
+                  <g transform="translate(258 38)">
+                    <rect width="34" height="34" rx="8" fill="rgba(15,23,42,0.4)" stroke="rgba(248,250,252,0.18)" stroke-width="0.6"/>
+                    <rect x="3" y="3" width="28" height="28" rx="7" fill="#2563eb"/>
+                    <text x="17" y="23" font-size="14" text-anchor="middle" style="fill:#f8fafc;font-weight:700;font-family:'Segoe UI', 'Helvetica Neue', sans-serif">W</text>
+                    <text x="17" y="44" font-size="8" text-anchor="middle" style="fill:rgba(248,250,252,0.92);font-weight:500;font-family:'Segoe UI', 'Helvetica Neue', sans-serif">Word</text>
+                  </g>
+                  <g transform="translate(312 38)">
+                    <rect width="34" height="34" rx="8" fill="rgba(15,23,42,0.4)" stroke="rgba(248,250,252,0.18)" stroke-width="0.6"/>
+                    <rect x="3" y="3" width="28" height="28" rx="7" fill="#22c55e"/>
+                    <text x="17" y="23" font-size="14" text-anchor="middle" style="fill:#f8fafc;font-weight:700;font-family:'Segoe UI', 'Helvetica Neue', sans-serif">X</text>
+                    <text x="17" y="44" font-size="8" text-anchor="middle" style="fill:rgba(248,250,252,0.92);font-weight:500;font-family:'Segoe UI', 'Helvetica Neue', sans-serif">Excel</text>
+                  </g>
+                  <g transform="translate(366 38)">
+                    <rect width="34" height="34" rx="8" fill="rgba(15,23,42,0.4)" stroke="rgba(248,250,252,0.18)" stroke-width="0.6"/>
+                    <rect x="3" y="3" width="28" height="28" rx="7" fill="#f97316"/>
+                    <text x="17" y="23" font-size="14" text-anchor="middle" style="fill:#f8fafc;font-weight:700;font-family:'Segoe UI', 'Helvetica Neue', sans-serif">P</text>
+                    <text x="17" y="44" font-size="8" text-anchor="middle" style="fill:rgba(248,250,252,0.92);font-weight:500;font-family:'Segoe UI', 'Helvetica Neue', sans-serif">PowerPoint</text>
+                  </g>
+                </g>
+                <g class="taskbar" aria-hidden="true" transform="translate(250 150)">
+                  <rect width="250" height="16" rx="7" fill="url(#taskbarBg)" stroke="rgba(148,163,184,0.45)" stroke-width="0.6"/>
+                  <rect x="6" y="3" width="14" height="10" rx="3" fill="rgba(148,163,184,0.32)" stroke="rgba(248,250,252,0.16)" stroke-width="0.5"/>
+                  <rect x="8" y="4" width="4" height="3.5" rx="0.8" fill="#f8fafc"/>
+                  <rect x="13" y="4" width="4" height="3.5" rx="0.8" fill="#f8fafc"/>
+                  <rect x="8" y="8" width="4" height="3.5" rx="0.8" fill="#f8fafc"/>
+                  <rect x="13" y="8" width="4" height="3.5" rx="0.8" fill="#f8fafc"/>
+                  <rect x="26" y="3" width="72" height="10" rx="5" fill="rgba(148,163,184,0.24)" stroke="rgba(248,250,252,0.16)" stroke-width="0.5"/>
+                  <circle cx="36" cy="8" r="3" fill="none" stroke="rgba(248,250,252,0.65)" stroke-width="1"/>
+                  <line x1="38.5" y1="10.5" x2="41.5" y2="13.5" stroke="rgba(248,250,252,0.65)" stroke-width="1" stroke-linecap="round"/>
+                  <text x="52" y="11" font-size="7" text-anchor="middle" style="fill:rgba(226,232,240,0.86);font-family:'Segoe UI', 'Helvetica Neue', sans-serif;font-weight:500">Suchen</text>
+                  <circle cx="112" cy="8" r="4" fill="#38bdf8"/>
+                  <circle cx="132" cy="8" r="4" fill="#22c55e"/>
+                  <circle cx="152" cy="8" r="4" fill="#f97316"/>
+                  <rect x="112" y="13" width="40" height="1" fill="rgba(248,250,252,0.45)" opacity="0.7"/>
+                  <rect x="180" y="3" width="60" height="10" rx="5" fill="rgba(148,163,184,0.24)" stroke="rgba(248,250,252,0.16)" stroke-width="0.5"/>
+                  <path d="M188 11 L192 6 L196 11 Z" fill="rgba(248,250,252,0.8)"/>
+                  <rect x="200" y="6" width="8" height="6" rx="1.5" fill="none" stroke="rgba(248,250,252,0.8)" stroke-width="1"/>
+                  <rect x="210" y="6" width="8" height="6" rx="1.5" fill="none" stroke="rgba(248,250,252,0.8)" stroke-width="1"/>
+                  <text x="225" y="11" font-size="7" text-anchor="end" style="fill:rgba(226,232,240,0.86);font-family:'Segoe UI', 'Helvetica Neue', sans-serif;font-weight:500">10:22</text>
+                </g>
               </g>
             </svg>
           </figure>
@@ -754,7 +816,7 @@
     function updateScene(){
       const scene = document.querySelector('.scene');
       if(!scene) return;
-      scene.classList.remove('nosig','power-on','login','booterr','bootmenu','domain-error','overheat','fan-blocked','fan-clean');
+      scene.classList.remove('nosig','power-on','login','booterr','bootmenu','domain-error','desktop','overheat','fan-blocked','fan-clean');
       if(state.pcOn) scene.classList.add('power-on');
       const L = levels && levels[state.levelIdx];
       if(L && L.id === 'S4'){
@@ -776,6 +838,7 @@
             scene.classList.add('domain-error');
           }
           if(L && L.id === 'S2'){
+            scene.classList.add('desktop');
             if(state.fanBlocked){ scene.classList.add('fan-blocked'); }
             if(!state.tempsStable){ scene.classList.add('overheat'); }
             if(!state.fanBlocked && state.dustCleared){ scene.classList.add('fan-clean'); }
