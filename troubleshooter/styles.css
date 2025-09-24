@@ -295,6 +295,9 @@ details[open].hintbox summary::before, details[open].didaktik summary::before{
 .scene.login.domain-error .login-domain-error{display:block}
 .scene.login.domain-error .login-default{display:none}
 .scene.power-on .led{stroke: var(--good); fill: var(--good)}
+.scene .overheat-indicator,.scene .cool-indicator{display:none}
+.scene.overheat .overheat-indicator{display:block}
+.scene.cool .cool-indicator{display:block}
 /* Screen nur sichtbar, wenn Monitor "an" (No-Signal oder Login) */
 .scene .screen{display:none}
 .scene.nosig .screen, .scene.login .screen, .scene.booterr .screen, .scene.bootmenu .screen{display:block}
