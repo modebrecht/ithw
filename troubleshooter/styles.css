@@ -294,10 +294,12 @@ details[open].hintbox summary::before, details[open].didaktik summary::before{
 .scene.login .login-domain-error{display:none}
 .scene.login.domain-error .login-domain-error{display:block}
 .scene.login.domain-error .login-default{display:none}
+.scene .desktop{display:none}
+.scene.desktop .desktop{display:block}
 .scene.power-on .led{stroke: var(--good); fill: var(--good)}
-/* Screen nur sichtbar, wenn Monitor "an" (No-Signal oder Login) */
+/* Screen nur sichtbar, wenn Monitor "an" (No-Signal, Login, Desktop, Boot) */
 .scene .screen{display:none}
-.scene.nosig .screen, .scene.login .screen, .scene.booterr .screen, .scene.bootmenu .screen{display:block}
+.scene.nosig .screen, .scene.login .screen, .scene.desktop .screen, .scene.booterr .screen, .scene.bootmenu .screen{display:block}
 .scene.bootmenu .bootmenu-bg{fill:rgba(15,23,42,.94);stroke:rgba(148,163,184,.45);stroke-width:1}
 .scene .fan-unit .fan-ring{stroke:rgba(148,163,184,.55);fill:rgba(148,163,184,.10)}
 .scene .fan-unit .fan-blade{stroke:rgba(148,163,184,.4);stroke-width:2;stroke-linecap:round}
