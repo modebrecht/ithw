@@ -290,7 +290,10 @@ details[open].hintbox summary::before, details[open].didaktik summary::before{
 .scene.booterr .booterr{display:block}
 .scene.bootmenu .bootmenu{display:block}
 .scene .login{display:none}
+.scene .desktop{display:none}
 .scene.login .login{display:block}
+.scene.desktop-mode .desktop{display:block}
+.scene.desktop-mode .screen{display:block}
 .scene.login .login-domain-error{display:none}
 .scene.login.domain-error .login-domain-error{display:block}
 .scene.login.domain-error .login-default{display:none}
