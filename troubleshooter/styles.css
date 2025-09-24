@@ -289,25 +289,15 @@ details[open].hintbox summary::before, details[open].didaktik summary::before{
 .scene .booterr,.scene .bootmenu{display:none}
 .scene.booterr .booterr{display:block}
 .scene.bootmenu .bootmenu{display:block}
-.scene .login,.scene .desktop{display:none}
+.scene .login{display:none}
 .scene.login .login{display:block}
-.scene.desktop .desktop{display:block}
 .scene.login .login-domain-error{display:none}
 .scene.login.domain-error .login-domain-error{display:block}
 .scene.login.domain-error .login-default{display:none}
-.scene .overheat-indicator,.scene .cool-air{display:none}
-.scene.overheat .overheat-indicator{display:block}
-.scene.cool .cool-air{display:block}
-.scene .heat-wave{fill:none;stroke:#f87171;stroke-width:3;stroke-linecap:round;opacity:.75}
-.scene .heat-warning{fill:rgba(239,68,68,.85)}
-.scene .heat-warning-text{fill:#0f172a;font-size:22px;font-weight:700;text-anchor:middle;dominant-baseline:middle}
-.scene .cool-flow{fill:none;stroke:#38bdf8;stroke-width:3;stroke-linecap:round;opacity:.7}
-.scene .cool-badge{fill:rgba(34,197,94,.18);stroke:rgba(34,197,94,.6);stroke-width:2}
-.scene .cool-check{fill:none;stroke:rgba(34,197,94,.9);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
 .scene.power-on .led{stroke: var(--good); fill: var(--good)}
 /* Screen nur sichtbar, wenn Monitor "an" (No-Signal oder Login) */
 .scene .screen{display:none}
-.scene.nosig .screen, .scene.login .screen, .scene.desktop .screen, .scene.booterr .screen, .scene.bootmenu .screen{display:block}
+.scene.nosig .screen, .scene.login .screen, .scene.booterr .screen, .scene.bootmenu .screen{display:block}
 .scene.bootmenu .bootmenu-bg{fill:rgba(15,23,42,.94);stroke:rgba(148,163,184,.45);stroke-width:1}
 
 /* Action message */
