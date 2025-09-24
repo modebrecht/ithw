@@ -51,8 +51,19 @@
             Dein Ziel: In möglichst <b>wenigen Schritten</b> die Ursache finden.
           </p>
 
-          <figure class="scene" role="img" aria-label="PC-Tower und Monitor auf einem Schreibtisch (neutrale Ausgangslage)">
+          <figure class="scene" role="img" aria-label="PC-Tower und Monitor auf einem Schreibtisch (Desktopansicht)">
             <svg viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <defs>
+                <linearGradient id="desktopGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#1d4ed8" />
+                  <stop offset="55%" stop-color="#2563eb" />
+                  <stop offset="100%" stop-color="#38bdf8" />
+                </linearGradient>
+                <linearGradient id="taskbarGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#1f2937" />
+                  <stop offset="100%" stop-color="#0f172a" />
+                </linearGradient>
+              </defs>
               <!-- Tischlinie -->
               <rect x="20" y="194" width="760" height="8" rx="4" class="mutfill"/>
               <rect x="20" y="194" width="760" height="8" rx="4" class="mut" fill="none"/>
@@ -92,6 +103,78 @@
                 <rect x="262" y="47" width="230" height="90" rx="8" class="mut" fill="black"/>
                 <text x="375" y="82" font-size="18" text-anchor="middle" style="fill:rgba(229,231,235,.95);font-weight:700">Fehler:</text>
                 <text x="375" y="108" font-size="16" text-anchor="middle" style="fill:rgba(229,231,235,.9);font-weight:600">Domäne nicht verfügbar!</text>
+              </g>
+              <g class="desktop" aria-hidden="true">
+                <rect x="245" y="17" width="260" height="145" rx="5" fill="url(#desktopGradient)" opacity="0.95"/>
+                <circle cx="360" cy="84" r="68" fill="rgba(191,219,254,.24)"/>
+                <path d="M248 104c32-46 108-92 170-62 38 18 52 57 90 60 24 2 37-12 50-28v88H248z" fill="rgba(59,130,246,.35)"/>
+                <path d="M256 120c20-18 62-32 108-12s62 12 86 4c24-8 42-26 58-46" fill="none" stroke="rgba(191,219,254,.45)" stroke-width="10" stroke-linecap="round" opacity="0.8"/>
+                <g class="desktop-icons">
+                  <g>
+                    <rect x="255" y="32" width="26" height="26" rx="6" fill="rgba(248,250,252,.82)"/>
+                    <path d="M260 40h12l-12 12z" fill="#38bdf8" opacity="0.9"/>
+                    <text x="268" y="68" font-size="8" text-anchor="middle" style="fill:rgba(241,245,249,.86);font-family:'Segoe UI',sans-serif">Explorer</text>
+                  </g>
+                  <g>
+                    <rect x="293" y="32" width="26" height="26" rx="6" fill="rgba(248,250,252,.82)"/>
+                    <circle cx="306" cy="45" r="9" fill="#34d399" opacity="0.9"/>
+                    <text x="306" y="68" font-size="8" text-anchor="middle" style="fill:rgba(241,245,249,.86);font-family:'Segoe UI',sans-serif">Tools</text>
+                  </g>
+                  <g>
+                    <rect x="255" y="68" width="26" height="26" rx="6" fill="rgba(248,250,252,.82)"/>
+                    <rect x="260" y="73" width="16" height="16" rx="3" fill="#facc15" opacity="0.9"/>
+                    <text x="268" y="104" font-size="8" text-anchor="middle" style="fill:rgba(241,245,249,.86);font-family:'Segoe UI',sans-serif">Protok.</text>
+                  </g>
+                  <g>
+                    <rect x="293" y="68" width="26" height="26" rx="6" fill="rgba(248,250,252,.82)"/>
+                    <rect x="298" y="73" width="16" height="10" rx="2" fill="#f97316" opacity="0.9"/>
+                    <rect x="298" y="86" width="16" height="5" rx="1" fill="#fed7aa" opacity="0.9"/>
+                    <text x="306" y="104" font-size="8" text-anchor="middle" style="fill:rgba(241,245,249,.86);font-family:'Segoe UI',sans-serif">Notizen</text>
+                  </g>
+                  <g>
+                    <rect x="255" y="104" width="26" height="26" rx="6" fill="rgba(248,250,252,.82)"/>
+                    <path d="M260 110h16v6h-16zm0 9h16v6h-16z" fill="#6366f1" opacity="0.9"/>
+                    <text x="268" y="140" font-size="8" text-anchor="middle" style="fill:rgba(241,245,249,.86);font-family:'Segoe UI',sans-serif">Tickets</text>
+                  </g>
+                  <g>
+                    <rect x="293" y="104" width="26" height="26" rx="6" fill="rgba(248,250,252,.82)"/>
+                    <path d="M299 110l8 8 8-8v16h-16z" fill="#f87171" opacity="0.9"/>
+                    <text x="306" y="140" font-size="8" text-anchor="middle" style="fill:rgba(241,245,249,.86);font-family:'Segoe UI',sans-serif">Support</text>
+                  </g>
+                </g>
+                <g class="desktop-window">
+                  <rect x="330" y="48" width="120" height="82" rx="12" fill="rgba(15,23,42,.45)" stroke="rgba(148,163,184,.4)" stroke-width="1"/>
+                  <rect x="330" y="48" width="120" height="18" rx="12" fill="rgba(30,41,59,.7)"/>
+                  <circle cx="344" cy="57" r="3" fill="#ef4444"/>
+                  <circle cx="354" cy="57" r="3" fill="#fbbf24"/>
+                  <circle cx="364" cy="57" r="3" fill="#22c55e"/>
+                  <rect x="342" y="76" width="96" height="10" rx="4" fill="rgba(226,232,240,.5)"/>
+                  <rect x="342" y="92" width="78" height="8" rx="4" fill="rgba(226,232,240,.35)"/>
+                  <rect x="342" y="106" width="62" height="8" rx="4" fill="rgba(226,232,240,.25)"/>
+                </g>
+                <g class="taskbar">
+                  <rect x="245" y="152" width="260" height="12" rx="6" fill="url(#taskbarGradient)" opacity="0.94"/>
+                  <g class="taskbar-start">
+                    <rect x="251" y="154" width="22" height="8" rx="3" fill="rgba(248,250,252,.9)"/>
+                    <path d="M256 156h4v4h-4z" fill="#2563eb"/>
+                    <path d="M262 156h4v4h-4z" fill="#38bdf8"/>
+                    <path d="M256 160h4v4h-4z" fill="#38bdf8"/>
+                    <path d="M262 160h4v4h-4z" fill="#2563eb"/>
+                  </g>
+                  <rect x="279" y="154" width="60" height="8" rx="4" fill="rgba(148,163,184,.35)"/>
+                  <g class="taskbar-icons">
+                    <rect x="345" y="154" width="8" height="8" rx="2" fill="rgba(248,250,252,.8)"/>
+                    <rect x="357" y="154" width="8" height="8" rx="2" fill="rgba(148,163,184,.9)"/>
+                    <rect x="369" y="154" width="8" height="8" rx="2" fill="rgba(96,165,250,.9)"/>
+                    <rect x="381" y="154" width="8" height="8" rx="2" fill="rgba(34,197,94,.85)"/>
+                  </g>
+                  <g class="taskbar-tray">
+                    <rect x="420" y="153" width="80" height="10" rx="5" fill="rgba(15,23,42,.6)" stroke="rgba(148,163,184,.35)" stroke-width="0.8"/>
+                    <rect x="426" y="156" width="10" height="4" rx="2" fill="rgba(248,250,252,.9)"/>
+                    <rect x="440" y="156" width="10" height="4" rx="2" fill="rgba(96,165,250,.9)"/>
+                    <text x="490" y="160" font-size="7" text-anchor="end" style="fill:rgba(226,232,240,.85);font-family:'Segoe UI',sans-serif">14:32</text>
+                  </g>
+                </g>
               </g>
               <g class="overheat-indicator" aria-hidden="true">
                 <path class="heat-wave" d="M88 64c8-8 16-8 24 0"/>
@@ -746,7 +829,7 @@
     function updateScene(){
       const scene = document.querySelector('.scene');
       if(!scene) return;
-      scene.classList.remove('nosig','power-on','login','booterr','bootmenu','domain-error','overheat','cool');
+      scene.classList.remove('nosig','power-on','login','desktop','booterr','bootmenu','domain-error','overheat','cool');
       if(state.pcOn) scene.classList.add('power-on');
       const L = levels && levels[state.levelIdx];
       if(L && L.id === 'S4'){
@@ -763,9 +846,13 @@
       } else {
         if(state.monitorOn && (!state.pcOn || !state.signalOk)) scene.classList.add('nosig');
         if(state.pcOn && state.monitorOn && state.signalOk){
-          scene.classList.add('login');
-          if(L && L.id === 'N1' && !state.lanConnected){
-            scene.classList.add('domain-error');
+          if(L && L.id === 'S2'){
+            scene.classList.add('desktop');
+          } else {
+            scene.classList.add('login');
+            if(L && L.id === 'N1' && !state.lanConnected){
+              scene.classList.add('domain-error');
+            }
           }
         }
       }
