@@ -25,7 +25,7 @@
     <header>
       <div class="title">PC-Troubleshooter <span class="badge" id="verTag">v2.6</span></div>
       <div class="controls">
-        <div class="badge" id="levelTag" aria-live="polite">Fall 1/6 • <b>Einfach</b></div>
+        <div class="badge" id="levelTag" aria-live="polite">Fall 1/5 • <b>Einfach</b></div>
         <button class="btn" type="button" id="scoreBtn" title="Score anzeigen" aria-label="Score anzeigen">🏆 Score</button>
         <button class="btn" type="button" id="hubBtn" title="Zurück zum Hub" aria-label="Zurück zum Hub">🏠 Hub</button>
       </div>
@@ -51,19 +51,8 @@
             Dein Ziel: In möglichst <b>wenigen Schritten</b> die Ursache finden.
           </p>
 
-          <figure class="scene" role="img" aria-label="PC-Tower und Monitor auf einem Schreibtisch (Desktopansicht)">
+          <figure class="scene" role="img" aria-label="PC-Tower und Monitor auf einem Schreibtisch (neutrale Ausgangslage)">
             <svg viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <defs>
-                <linearGradient id="desktopGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#1d4ed8" />
-                  <stop offset="55%" stop-color="#2563eb" />
-                  <stop offset="100%" stop-color="#38bdf8" />
-                </linearGradient>
-                <linearGradient id="taskbarGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stop-color="#1f2937" />
-                  <stop offset="100%" stop-color="#0f172a" />
-                </linearGradient>
-              </defs>
               <!-- Tischlinie -->
               <rect x="20" y="194" width="760" height="8" rx="4" class="mutfill"/>
               <rect x="20" y="194" width="760" height="8" rx="4" class="mut" fill="none"/>
@@ -103,91 +92,6 @@
                 <rect x="262" y="47" width="230" height="90" rx="8" class="mut" fill="black"/>
                 <text x="375" y="82" font-size="18" text-anchor="middle" style="fill:rgba(229,231,235,.95);font-weight:700">Fehler:</text>
                 <text x="375" y="108" font-size="16" text-anchor="middle" style="fill:rgba(229,231,235,.9);font-weight:600">Domäne nicht verfügbar!</text>
-              </g>
-              <g class="desktop" aria-hidden="true">
-                <rect x="245" y="17" width="260" height="145" rx="5" fill="url(#desktopGradient)" opacity="0.95"/>
-                <circle cx="360" cy="84" r="68" fill="rgba(191,219,254,.24)"/>
-                <path d="M248 104c32-46 108-92 170-62 38 18 52 57 90 60 24 2 37-12 50-28v88H248z" fill="rgba(59,130,246,.35)"/>
-                <path d="M256 120c20-18 62-32 108-12s62 12 86 4c24-8 42-26 58-46" fill="none" stroke="rgba(191,219,254,.45)" stroke-width="10" stroke-linecap="round" opacity="0.8"/>
-                <g class="desktop-icons">
-                  <g>
-                    <rect x="255" y="32" width="26" height="26" rx="6" fill="rgba(248,250,252,.82)"/>
-                    <path d="M260 40h12l-12 12z" fill="#38bdf8" opacity="0.9"/>
-                    <text x="268" y="68" font-size="8" text-anchor="middle" style="fill:rgba(241,245,249,.86);font-family:'Segoe UI',sans-serif">Explorer</text>
-                  </g>
-                  <g>
-                    <rect x="293" y="32" width="26" height="26" rx="6" fill="rgba(248,250,252,.82)"/>
-                    <circle cx="306" cy="45" r="9" fill="#34d399" opacity="0.9"/>
-                    <text x="306" y="68" font-size="8" text-anchor="middle" style="fill:rgba(241,245,249,.86);font-family:'Segoe UI',sans-serif">Tools</text>
-                  </g>
-                  <g>
-                    <rect x="255" y="68" width="26" height="26" rx="6" fill="rgba(248,250,252,.82)"/>
-                    <rect x="260" y="73" width="16" height="16" rx="3" fill="#facc15" opacity="0.9"/>
-                    <text x="268" y="104" font-size="8" text-anchor="middle" style="fill:rgba(241,245,249,.86);font-family:'Segoe UI',sans-serif">Protok.</text>
-                  </g>
-                  <g>
-                    <rect x="293" y="68" width="26" height="26" rx="6" fill="rgba(248,250,252,.82)"/>
-                    <rect x="298" y="73" width="16" height="10" rx="2" fill="#f97316" opacity="0.9"/>
-                    <rect x="298" y="86" width="16" height="5" rx="1" fill="#fed7aa" opacity="0.9"/>
-                    <text x="306" y="104" font-size="8" text-anchor="middle" style="fill:rgba(241,245,249,.86);font-family:'Segoe UI',sans-serif">Notizen</text>
-                  </g>
-                  <g>
-                    <rect x="255" y="104" width="26" height="26" rx="6" fill="rgba(248,250,252,.82)"/>
-                    <path d="M260 110h16v6h-16zm0 9h16v6h-16z" fill="#6366f1" opacity="0.9"/>
-                    <text x="268" y="140" font-size="8" text-anchor="middle" style="fill:rgba(241,245,249,.86);font-family:'Segoe UI',sans-serif">Tickets</text>
-                  </g>
-                  <g>
-                    <rect x="293" y="104" width="26" height="26" rx="6" fill="rgba(248,250,252,.82)"/>
-                    <path d="M299 110l8 8 8-8v16h-16z" fill="#f87171" opacity="0.9"/>
-                    <text x="306" y="140" font-size="8" text-anchor="middle" style="fill:rgba(241,245,249,.86);font-family:'Segoe UI',sans-serif">Support</text>
-                  </g>
-                </g>
-                <g class="desktop-window">
-                  <rect x="330" y="48" width="120" height="82" rx="12" fill="rgba(15,23,42,.45)" stroke="rgba(148,163,184,.4)" stroke-width="1"/>
-                  <rect x="330" y="48" width="120" height="18" rx="12" fill="rgba(30,41,59,.7)"/>
-                  <circle cx="344" cy="57" r="3" fill="#ef4444"/>
-                  <circle cx="354" cy="57" r="3" fill="#fbbf24"/>
-                  <circle cx="364" cy="57" r="3" fill="#22c55e"/>
-                  <rect x="342" y="76" width="96" height="10" rx="4" fill="rgba(226,232,240,.5)"/>
-                  <rect x="342" y="92" width="78" height="8" rx="4" fill="rgba(226,232,240,.35)"/>
-                  <rect x="342" y="106" width="62" height="8" rx="4" fill="rgba(226,232,240,.25)"/>
-                </g>
-                <g class="taskbar">
-                  <rect x="245" y="152" width="260" height="12" rx="6" fill="url(#taskbarGradient)" opacity="0.94"/>
-                  <g class="taskbar-start">
-                    <rect x="251" y="154" width="22" height="8" rx="3" fill="rgba(248,250,252,.9)"/>
-                    <path d="M256 156h4v4h-4z" fill="#2563eb"/>
-                    <path d="M262 156h4v4h-4z" fill="#38bdf8"/>
-                    <path d="M256 160h4v4h-4z" fill="#38bdf8"/>
-                    <path d="M262 160h4v4h-4z" fill="#2563eb"/>
-                  </g>
-                  <rect x="279" y="154" width="60" height="8" rx="4" fill="rgba(148,163,184,.35)"/>
-                  <g class="taskbar-icons">
-                    <rect x="345" y="154" width="8" height="8" rx="2" fill="rgba(248,250,252,.8)"/>
-                    <rect x="357" y="154" width="8" height="8" rx="2" fill="rgba(148,163,184,.9)"/>
-                    <rect x="369" y="154" width="8" height="8" rx="2" fill="rgba(96,165,250,.9)"/>
-                    <rect x="381" y="154" width="8" height="8" rx="2" fill="rgba(34,197,94,.85)"/>
-                  </g>
-                  <g class="taskbar-tray">
-                    <rect x="420" y="153" width="80" height="10" rx="5" fill="rgba(15,23,42,.6)" stroke="rgba(148,163,184,.35)" stroke-width="0.8"/>
-                    <rect x="426" y="156" width="10" height="4" rx="2" fill="rgba(248,250,252,.9)"/>
-                    <rect x="440" y="156" width="10" height="4" rx="2" fill="rgba(96,165,250,.9)"/>
-                    <text x="490" y="160" font-size="7" text-anchor="end" style="fill:rgba(226,232,240,.85);font-family:'Segoe UI',sans-serif">14:32</text>
-                  </g>
-                </g>
-              </g>
-              <g class="overheat-indicator" aria-hidden="true">
-                <path class="heat-wave" d="M88 64c8-8 16-8 24 0"/>
-                <path class="heat-wave" d="M98 50c8-8 16-8 24 0"/>
-                <path class="heat-wave" d="M78 78c8-8 16-8 24 0"/>
-                <circle class="heat-warning" cx="125" cy="134" r="20"/>
-                <text class="heat-warning-text" x="125" y="140">!</text>
-              </g>
-              <g class="cool-air" aria-hidden="true">
-                <path class="cool-flow" d="M60 128c24 0 32-10 44-10s18 10 40 10"/>
-                <path class="cool-flow" d="M60 146c24 0 32-10 44-10s18 10 40 10"/>
-                <circle class="cool-badge" cx="125" cy="134" r="20"/>
-                <path class="cool-check" d="M116 134l6 6 10-12"/>
               </g>
             </svg>
           </figure>
@@ -243,8 +147,7 @@
     import scenario3 from './scenario3.js';
     import scenario4 from './scenario4.js';
     import scenario5 from './scenario5.js';
-    import scenario6 from './scenario6.js';
-    const levels = [scenario1, scenario2, scenario3, scenario4, scenario5, scenario6];
+    const levels = [scenario1, scenario2, scenario3, scenario4, scenario5];
     // --- Persistence ---
     const STORAGE_KEY = 'pctrouble_best_v2';
     const SCORES_KEY = 'pctrouble_scores_v2';
@@ -321,13 +224,6 @@
       s4RemovedUsb: false,
       s4UsedBootMenu: false,
       s4ChangedBootOrder: false,
-      overheat: false,
-      fanBlocked: false,
-      thermalsStable: false,
-      s2ThermalsChecked: false,
-      s2FanCleaned: false,
-      s2SolvedBy: null,
-      s2ExternalChecked: false,
       lanConnected: true,
       switchLedOn: true,
       n1SolvedBy: null
@@ -829,7 +725,7 @@
     function updateScene(){
       const scene = document.querySelector('.scene');
       if(!scene) return;
-      scene.classList.remove('nosig','power-on','login','desktop','booterr','bootmenu','domain-error','overheat','cool');
+      scene.classList.remove('nosig','power-on','login','booterr','bootmenu','domain-error');
       if(state.pcOn) scene.classList.add('power-on');
       const L = levels && levels[state.levelIdx];
       if(L && L.id === 'S4'){
@@ -846,21 +742,10 @@
       } else {
         if(state.monitorOn && (!state.pcOn || !state.signalOk)) scene.classList.add('nosig');
         if(state.pcOn && state.monitorOn && state.signalOk){
-          if(L && L.id === 'S2'){
-            scene.classList.add('desktop');
-          } else {
-            scene.classList.add('login');
-            if(L && L.id === 'N1' && !state.lanConnected){
-              scene.classList.add('domain-error');
-            }
+          scene.classList.add('login');
+          if(L && L.id === 'N1' && !state.lanConnected){
+            scene.classList.add('domain-error');
           }
-        }
-      }
-      if(L && L.id === 'S2'){
-        if(state.overheat){
-          scene.classList.add('overheat');
-        } else if(state.pcOn && state.monitorOn && state.signalOk){
-          scene.classList.add('cool');
         }
       }
     }
@@ -943,13 +828,6 @@ function evaluateScenarioResult(){
         const color = medal === 'Gold' ? 'var(--gold)' : medal === 'Silber' ? 'var(--silver)' : 'var(--bronze)';
         return { medal, long, color, score, detailText, time: t, tries: n };
       }
-      if(L && L.id === 'S2'){
-        const ev = evalRankAndScore(t, n);
-        const detailText = state.s2ThermalsChecked
-          ? 'Thermals vor dem Eingriff geprüft – saubere Diagnose.'
-          : 'Direkt gereinigt – dokumentiere künftig auch die Temperaturkurve.';
-        return { medal: ev.medal, long: ev.long, color: ev.color, score: ev.score, detailText, time: t, tries: n };
-      }
       const ev = evalRankAndScore(t, n);
       return { medal: ev.medal, long: ev.long, color: ev.color, score: ev.score, detailText: '', time: t, tries: n };
     }
@@ -981,14 +859,6 @@ function completionIntroHtml(){
       return '<p><b>Aufgabe abgeschlossen.</b> Quelle korrekt, Signal wiederhergestellt.</p><p>Das <b>Login</b> ist sichtbar.</p>';
     case 'M3':
       return '<p><b>Aufgabe abgeschlossen.</b> POST erfolgreich, Anzeige aktiv.</p><p>Das <b>Login</b> ist sichtbar.</p>';
-    case 'S2':
-      if(state.s2SolvedBy === 'diagnosed'){
-        return '<p><b>Aufgabe abgeschlossen.</b> Überhitzung erkannt, Lüfter befreit.</p><p>Unter Last bleibt das System stabil.</p>';
-      }
-      if(state.s2SolvedBy === 'blind'){
-        return '<p><b>Aufgabe abgeschlossen.</b> Lüfter gereinigt – Temperaturen wieder im grünen Bereich.</p><p>Merke dir trotzdem die Thermals als Diagnose.</p>';
-      }
-      return '<p><b>Aufgabe abgeschlossen.</b> Lüfter gereinigt – Temperaturen bleiben stabil.</p><p>Unter Last läuft der PC wieder zuverlässig.</p>';
     case 'N1':
       if(state.n1SolvedBy === 'network'){
         return '<p><b>Aufgabe abgeschlossen.</b> Netzwerkkabel steckt wieder – die Domäne ist erreichbar.</p><p>Das <b>Login</b> funktioniert.</p>';
@@ -1329,76 +1199,6 @@ function finish(success, detail){
             setStatus('Nicht zielfuehrend');
             pushLog(this.label, '+2 Min');
             say('<span class="warn">Hier unwahrscheinlich.</span> CMOS‑Reset hilft bei BIOS‑Fehlkonfig. Der Hinweis zeigt eher auf <b>RAM</b> (POST).');
-          }
-        },
-        externalCheck: {
-          id: 'external-check',
-          label: '🔎 Externe Checks & Luftwege',
-          hotkey: '1',
-          delta: 2,
-          effect(){
-            if(state.solved) return;
-            state.time += this.delta; state.tries++;
-            setStatus('Basisprüfung');
-            pushLog(this.label, '+2 Min');
-            state.s2ExternalChecked = true;
-            say('<span class="info">Kabel sitzen fest, aber die Luftschlitze sind stark verstaubt.</span> Prüfe den Lüfter und die Kühlung.');
-          }
-        },
-        thermalsCheck: {
-          id: 'thermals-check',
-          label: '🌡️ Sensorwerte unter Last beobachten',
-          hotkey: '2',
-          delta: 2,
-          effect(){
-            if(state.solved) return;
-            state.time += this.delta; state.tries++;
-            setStatus('Überhitzung');
-            pushLog(this.label, '+2 Min');
-            state.s2ThermalsChecked = true;
-            state.overheat = true;
-            updateScene();
-            say('<span class="warn">Die Temperaturen steigen binnen Minuten über 95 °C.</span> Der CPU-Lüfter läuft kaum an – vermutlich blockiert durch Staub.');
-          }
-        },
-        fanClean: {
-          id: 'fan-clean',
-          label: '🧹 Lüfter reinigen / Blockade lösen',
-          hotkey: '3',
-          delta: 3,
-          effect(){
-            if(state.solved) return;
-            state.time += this.delta; state.tries++;
-            pushLog(this.label, '+3 Min');
-            if(!state.fanBlocked){
-              setStatus('Kühlung geprüft');
-              say('<span class="info">Der Lüfter dreht bereits frei.</span> Suche weiter nach der Ursache (z.B. Sensoren, Wärmeleitpaste).');
-              return;
-            }
-            state.fanBlocked = false;
-            state.overheat = false;
-            state.thermalsStable = true;
-            state.s2FanCleaned = true;
-            state.s2SolvedBy = state.s2ThermalsChecked ? 'diagnosed' : 'blind';
-            updateScene();
-            setStatus('Kühlung stabil');
-            const detail = state.s2SolvedBy === 'blind'
-              ? 'Lüfter wieder frei – Temperaturen fallen, aber dokumentiere den Testlauf.'
-              : 'Lüfter wieder frei – Temperaturen bleiben stabil.';
-            finish(true, detail);
-          }
-        },
-        thermalPaste: {
-          id: 'thermal-paste',
-          label: '🧴 Wärmeleitpaste erneuern (Hinweis)',
-          hotkey: '4',
-          delta: 4,
-          effect(){
-            if(state.solved) return;
-            state.time += this.delta; state.tries++;
-            setStatus('Hinweis');
-            pushLog(this.label, '+4 Min');
-            say('<span class="warn">Noch nicht der erste Schritt.</span> Wärmeleitpaste tauscht du erst, wenn Lüfter und Luftstrom stimmen. Befreie zuerst den Lüfter.');
           }
         }
       };
@@ -1780,31 +1580,6 @@ function finish(success, detail){
         return [A.monitorCable, A.monitorToggle, A.bios, A.cpu, A.power, A.source];
       } else if(levelId === 'M3'){
         return [A.postCheck, A.monitorToggle, A.bios, A.ramFix, A.power, A.cmosReset];
-      } else if(levelId === 'S2'){
-        const monitor = Object.assign({}, A.monitorToggle, { hotkey: '5' });
-        const baseMonitorEffect = monitor.effect;
-        monitor.effect = function(){
-          if(state.solved) return;
-          baseMonitorEffect.call(this);
-          if(state.solved) return;
-          if(state.monitorOn){
-            setStatus('Anzeige ok');
-            say('<span class="warn">Bild vorhanden.</span> Das Problem tritt unter Last auf – kümmere dich um Lüfter und Kühlung.');
-          } else {
-            setStatus('Monitor aus');
-            say('<span class="warn">Monitor ausgeschaltet.</span> Für die Analyse wieder einschalten – Ursache bleibt die Überhitzung.');
-          }
-        };
-        const network = Object.assign({}, A.network, { hotkey: '6' });
-        const baseNetworkEffect = network.effect;
-        network.effect = function(){
-          if(state.solved) return;
-          baseNetworkEffect.call(this);
-          if(state.solved) return;
-          setStatus('Nicht relevant');
-          say('<span class="warn">Netzwerk hilft hier nicht.</span> Der Absturz entsteht durch Hitze – prüfe Lüfter und Luftwege.');
-        };
-        return [A.externalCheck, A.thermalsCheck, A.fanClean, A.thermalPaste, monitor, network];
       } else if(levelId === 'S4'){
         return makeScenario4Actions();
       } else if(levelId === 'N1'){
@@ -1839,13 +1614,6 @@ function finish(success, detail){
       state.s4RemovedUsb = false;
       state.s4UsedBootMenu = false;
       state.s4ChangedBootOrder = false;
-      state.overheat = 'overheat' in L.start ? !!L.start.overheat : false;
-      state.fanBlocked = 'fanBlocked' in L.start ? !!L.start.fanBlocked : false;
-      state.thermalsStable = 'thermalsStable' in L.start ? !!L.start.thermalsStable : false;
-      state.s2ThermalsChecked = false;
-      state.s2FanCleaned = false;
-      state.s2SolvedBy = null;
-      state.s2ExternalChecked = false;
       state.lanConnected = 'lanConnected' in L.start ? !!L.start.lanConnected : true;
       state.switchLedOn = 'switchLedOn' in L.start ? !!L.start.switchLedOn : state.lanConnected;
       state.n1SolvedBy = null;
