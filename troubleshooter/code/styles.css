@@ -1,4 +1,4 @@
-:root{
+﻿:root{
   --bg:#0f172a;           /* slate-900 */
   --card:#0b1223;         /* darker card */
   --ink:#e5e7eb;          /* gray-200 */
@@ -145,7 +145,8 @@ header .controls #hubBtn:hover,
 
 /* Beschreibung / Status unter dem Label ausrichten */
 .hub-status{
-  margin:2px 0 0 56px; /* bündig unter Labeltext */
+  text-align:left;
+  margin:2px 0 0 0;
   font-size:.95rem;
   color:var(--ink-dim);
   line-height:1.45;
@@ -153,9 +154,10 @@ header .controls #hubBtn:hover,
 
 /* Bestleistung dezenter darunter */
 .hub-best{
-  margin:0 0 0 56px;
+  margin:0;
   font-size:.92rem;
   color:var(--ink-dim);
+  text-align:left;
 }
 
 /* großer, breiter CTA */
@@ -479,3 +481,4 @@ body.top-modal-open #scenarioView > section{display:none}
 @media (prefers-reduced-motion: reduce){
   *{transition:none !important;animation:none !important}
 }
+
