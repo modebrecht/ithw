@@ -36,6 +36,7 @@
     <div class="action-message" id="actionMessageTop" aria-hidden="true">
       <header class="mhead">
         <h3 id="messageTitleTop">Aktion</h3>
+        <button class="modal-close" type="button" id="messageCloseTop" aria-label="Schliessen">×</button>
       </header>
       <div class="mbody" id="messageBodyTop"></div>
       <div class="mfoot">
@@ -186,6 +187,7 @@
           <div class="action-message" id="actionMessage" aria-hidden="true">
             <header class="mhead">
               <h3 id="messageTitle">Aktion</h3>
+              <button class="modal-close" type="button" id="messageClose" aria-label="Schliessen">×</button>
             </header>
             <div class="mbody" id="messageBody"></div>
             <div class="mfoot">
@@ -229,6 +231,7 @@
     import scenario6 from './scenario6.js';
     import scenario7 from './scenario7.js';
     const levels = [scenario1, scenario2, scenario3, scenario4, scenario5, scenario6, scenario7];
+    const topModalCloseEl = document.getElementById('messageCloseTop');
     // --- Persistence ---
     const STORAGE_KEY = 'pctrouble_best_v2';
     const SCORES_KEY = 'pctrouble_scores_v2';
@@ -2178,6 +2181,11 @@ function finish(success, detail){
     })();
 
     // Score-Modal oeffnen
+    if(topModalCloseEl){
+      topModalCloseEl.addEventListener('click', ()=>{
+        closeTopModal();
+      });
+    }
     if(scoreButtons.length){
       const handleScoreClick = ()=>{
         const scores = loadScores();
