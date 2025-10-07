@@ -31,12 +31,13 @@ body{
 .wrap{max-width:1000px;margin:clamp(16px,3vw,40px) auto;padding:0 16px}
 .hidden{display:none!important}
 header{display:flex;gap:16px;align-items:center;justify-content:space-between;margin-bottom:20px}
-#levelTag{margin-left:auto}
-/* Header controls: icon-only circles and compact nav */
+#levelTag{margin-left:0}
+/* Header controls */
 :root{ --ctrl-size: 44px; }
 header .btn{border-radius:999px;width:var(--ctrl-size);height:var(--ctrl-size);padding:0;display:inline-grid;place-items:center}
-/* Allow score buttons to expand for label */
+/* Allow pill buttons to expand for label */
 #scoreBtn,
+#hubBtn,
 #hubScoreBtn{width:auto;padding:0 18px}
 /* Hub badges & score chip share same styling */
 #hubView .hub-info .badge,
@@ -58,62 +59,50 @@ header .btn{border-radius:999px;width:var(--ctrl-size);height:var(--ctrl-size);p
   letter-spacing:.01em;
   line-height:1;
 }
-#hubView .hub-info .badge-button{
-  pointer-events:none;
-  cursor:default;
-}
-#hubView .hub-info .badge-button:focus-visible{
-  outline:none;
-}
-#hubView .hub-info .badge-button:disabled{
-  opacity:1;
-}
-header .controls #scoreBtn{
-  border-radius:999px;
-  padding:12px 10px;
-  min-height:32px;
-  height:auto;
+#hubView .hub-info .badge-button{pointer-events:none;cursor:default;}
+#hubView .hub-info .badge-button:focus-visible{outline:none;}
+#hubView .hub-info .badge-button:disabled{opacity:1;}
+
+header .controls{display:flex;gap:8px;align-items:center}
+.level-nav{display:flex;align-items:center;gap:8px}
+.level-nav .btn{display:none;width:36px;height:36px;padding:0;border-radius:50%}
+#levelPrev{font-size:20px}
+#levelNext{font-size:20px}
+
+#levelTag,
+header .controls #scoreBtn,
+header .controls #hubBtn{
   display:inline-flex;
   align-items:center;
   justify-content:center;
   gap:6px;
+  height:36px;
+  padding:0 16px;
+  border-radius:999px;
   border:1px solid rgba(148,163,184,.22);
   background:linear-gradient(135deg, rgba(96,165,250,.18), rgba(34,211,238,.1));
   color:var(--ink);
-  box-shadow:none;
   font-size:12px;
   font-weight:500;
   letter-spacing:.01em;
   line-height:1;
+  box-shadow:none;
 }
-#hubView #hubScoreBtn:hover,
-header .controls #scoreBtn:hover{
-  background:linear-gradient(135deg, rgba(96,165,250,.24), rgba(34,211,238,.16));
-}
-#hubView #hubScoreBtn:hover{
-  background:linear-gradient(135deg, rgba(96,165,250,.24), rgba(34,211,238,.16));
-}
-/* Level navigation group as button group (no gaps) */
-.level-nav{display:flex;align-items:stretch;gap:0}
-.level-nav .btn{display:none;width:var(--ctrl-size);height:var(--ctrl-size);padding:0}
-/* Ensure nav buttons match badge height exactly */
-.level-nav .btn, #levelTag.badge{height:var(--ctrl-size);box-sizing:border-box}
-/* Merge borders between neighbors */
-.level-nav > *:not(:first-child){ margin-left:-1px }
-/* Rounded outside corners only */
 #levelTag{margin-left:0}
-#levelTag.badge{height:var(--ctrl-size);padding:0 12px;font-size:14px;display:flex;align-items:center;border-radius:0}
-#levelPrev{border-top-right-radius:0;border-bottom-right-radius:0;font-size:22px}
-#levelNext{border-top-left-radius:0;border-bottom-left-radius:0;font-size:22px}
-header .controls{display:flex;gap:8px;align-items:center}
+
+#hubView #hubScoreBtn:hover,
+header .controls #scoreBtn:hover,
+header .controls #hubBtn:hover,
+#levelTag:hover{
+  background:linear-gradient(135deg, rgba(96,165,250,.24), rgba(34,211,238,.16));
+}
+
 .hub-info{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 #hubView .hub-info{gap:8px}
 .title{font-weight:800;font-size:clamp(22px,4vw,34px);letter-spacing:.2px}
 .badge{border:1px solid rgba(255,255,255,.12);padding:6px 10px;border-radius:999px;font-size:12px;color:var(--ink-dim)}
 .badge-action{cursor:pointer;user-select:none}
 .badge-action:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-/* Make level tag match nav button height */
-#levelTag.badge{height:var(--ctrl-size);padding:0 12px;font-size:14px;display:flex;align-items:center}
 
 .hub-card .inner > .hint{margin-bottom:16px}
 .hub-grid{
@@ -271,6 +260,17 @@ button.action:active{transform: translateY(0)}
 .btn:active{transform: translateY(0)}
 .btn.primary{border-color:rgba(96,165,250,.35);background:linear-gradient(180deg,rgba(96,165,250,.22),rgba(34,211,238,.12));box-shadow:0 10px 24px rgba(34,211,238,.06)}
 .btn[disabled]{opacity:.6;cursor:not-allowed}
+header .controls .btn,
+#levelTag{
+  padding:0 16px;
+  min-height:36px;
+  height:36px;
+  line-height:1;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+}
 
 .status{display:flex;align-items:center;gap:10px}
 /* generic rating dot */
