@@ -226,7 +226,8 @@
     import scenario4 from './scenario4.js';
     import scenario5 from './scenario5.js';
     import scenario6 from './scenario6.js';
-    const levels = [scenario1, scenario2, scenario3, scenario4, scenario5, scenario6];
+    import scenario7 from './scenario7.js';
+    const levels = [scenario1, scenario2, scenario3, scenario4, scenario5, scenario6, scenario7];
     // --- Persistence ---
     const STORAGE_KEY = 'pctrouble_best_v2';
     const SCORES_KEY = 'pctrouble_scores_v2';
@@ -309,7 +310,8 @@
       fanBlocked: false,
       dustCleared: false,
       tempsStable: true,
-      overheatObserved: false
+      overheatObserved: false,
+      keyboardResponsive: true
     };
     let progress = loadProgress();
     progress = normalizeProgress(progress);
@@ -458,12 +460,14 @@
         label.className = 'hub-item-label';
         label.textContent = `Szenario ${entry.number}`;
         header.appendChild(label);
-        const rank = scores[entry.level.id]?.rank || null;
+        const rank = scores[entry.level.id]?.rank || null;
+
         header.appendChild(createMedalBadge(rank));
         item.appendChild(header);
 
         const title = document.createElement('h3');
-        title.textContent = entry.level.name;
+        title.textContent = entry.level.name;
+
         item.appendChild(title);
 
 
@@ -982,6 +986,8 @@ function completionIntroHtml(){
           return '<p><b>Aufgabe abgeschlossen.</b> Bootfehler behoben.</p><p>Das <b>Login</b> ist sichtbar.</p>';
       }
     }
+    case 'K1':
+      return '<p><b>Aufgabe abgeschlossen.</b> Neustart durchgefuehrt, Tastatur reagiert wieder.</p><p>Das <b>Login</b> ist sichtbar.</p>';
     default:
       return '<p><b>Aufgabe geschafft.</b> PC und Monitor sind bereit.</p><p>Das <b>Login</b> ist sichtbar.</p>';
   }
@@ -1863,9 +1869,10 @@ function finish(success, detail){
               });
               return;
             }
-            if(!state.overheatObserved){
+            const ranStress = !!(state.performed && state.performed['s2-stress']);
+            if(!ranStress){
               setStatus('Monitoring aktiv');
-              say('<span class="warn">Idle ok, Lasttest fehlt.</span> Reproduziere den Fehler unter Last und prüfe dann erneut.');
+              say('<span class="warn">Lasttest fehlt.</span> Fuehre einen Belastungstest aus, um die Wirkung der Reinigung zu bestaetigen.');
               openModal({
                 title: this.label,
                 html:
@@ -1878,6 +1885,124 @@ function finish(success, detail){
             setStatus('Temperaturen stabil');
             say('<span class="good">Sensoren im grünen Bereich.</span> Unter Last bleibt das System stabil. Wärmeleitpaste nur bei Bedarf erneuern.');
             finish(true, 'Kühlung gereinigt – der PC bleibt auch unter Last stabil.');
+          }
+        }
+      ];
+    }
+    function makeScenario7Actions(){
+      return [
+        {
+          id: 'k1-cable',
+          label: 'USB-Stecker kontrollieren',
+          hotkey: '1',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            setStatus('Keine Aenderung');
+            say('<span class="warn">Stecker sitzt bereits fest.</span> Die Tastatur meldet sich weiterhin nicht.');
+            openModal({
+              title: this.label,
+              html:
+                '<p>Du ziehst den USB-Stecker kurz und steckst ihn sauber wieder ein.</p>' +
+                '<p>Windows meldet jedoch kein neues Geraet. Ueberlege einen <b>Neustart</b>, bevor du Hardware austauschst.</p>'
+            });
+          }
+        },
+        {
+          id: 'k1-port',
+          label: 'Anderen USB-Port testen',
+          hotkey: '2',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            setStatus('Keine Aenderung');
+            say('<span class="warn">Port-Wechsel hilft nicht.</span> Die Tastatur bleibt ohne Funktion.');
+            openModal({
+              title: this.label,
+              html:
+                '<p>Du steckst die Tastatur in einen anderen USB-Port.</p>' +
+                '<p>Auch dort wird sie nicht erkannt. Es liegt vermutlich kein Hardwaredefekt vor, sondern ein <b>temporaeres Treiberproblem</b>.</p>'
+            });
+          }
+        },
+        {
+          id: 'k1-onscreen',
+          label: 'Bildschirmtastatur nutzen',
+          hotkey: '3',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            setStatus('Workaround aktiv');
+            say('<span class="info">Bildschirmtastatur geoeffnet.</span> Notloesung moeglich, aber das eigentliche Problem bleibt bestehen.');
+            openModal({
+              title: this.label,
+              html:
+                '<p>Du aktivierst die Bildschirmtastatur und kannst dich behelfsweise anmelden.</p>' +
+                '<p>Fuer den regulaeren Betrieb solltest du das Eingabegeraet dennoch <b>korrekt initialisieren</b>.</p>'
+            });
+          }
+        },
+        {
+          id: 'k1-restart',
+          label: 'PC neu starten',
+          hotkey: '4',
+          delta: 3,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            setStatus('Neustart durchgefuehrt');
+            state.pcOn = true;
+            state.monitorOn = true;
+            state.signalOk = true;
+            state.keyboardResponsive = true;
+            updateScene();
+            say('<span class="good">Nach dem Neustart wird die Tastatur wieder erkannt.</span> Du kannst dein Passwort eingeben.');
+            finish(true, 'Neustart abgeschlossen - Tastatur reagiert wieder.');
+          }
+        },
+        {
+          id: 'k1-driver',
+          label: 'Treiber neu installieren',
+          hotkey: '5',
+          delta: 5,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            setStatus('Overkill');
+            say('<span class="warn">Treiber neu installieren dauert.</span> Fuer einen Schul-PC ist das unnoetig - versuche zuerst einfache Schritte.');
+            openModal({
+              title: this.label,
+              html:
+                '<p>Du wuerdest im Geraetemanager den Treiber entfernen und neu installieren.</p>' +
+                '<p>Das kostet Zeit und erfordert Admin-Rechte. Ein <b>Neustart</b> ist der schnellere Weg.</p>'
+            });
+          }
+        },
+        {
+          id: 'k1-replace',
+          label: 'Ersatztastatur holen',
+          hotkey: '6',
+          delta: 4,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            setStatus('Noch nicht geloest');
+            say('<span class="warn">Hardwaretausch voreilig.</span> Pruefe zuerst einfache Softwareloesungen.');
+            openModal({
+              title: this.label,
+              html:
+                '<p>Du ueberlegst, eine Ersatztastatur zu holen.</p>' +
+                '<p>Bevor du Hardware tauschst, probiere einen <b>Neustart</b>: Haeufig reicht das aus.</p>'
+            });
           }
         }
       ];
@@ -1896,6 +2021,8 @@ function finish(success, detail){
         return makeScenario5Actions(A);
       } else if(levelId === 'S2'){
         return makeScenario6Actions();
+      } else if(levelId === 'K1'){
+        return makeScenario7Actions();
       } else {
         return [A.monitorToggle, A.bios, A.power, A.network, A.cpu, A.source];
       }
@@ -1933,6 +2060,7 @@ function finish(success, detail){
       state.dustCleared = 'dustCleared' in L.start ? !!L.start.dustCleared : false;
       state.tempsStable = 'tempsStable' in L.start ? !!L.start.tempsStable : true;
       state.overheatObserved = 'overheatObserved' in L.start ? !!L.start.overheatObserved : false;
+      state.keyboardResponsive = 'keyboardResponsive' in L.start ? !!L.start.keyboardResponsive : true;
 
       // Actions per Level
       state.actions = getActionsForLevel(L.id);
