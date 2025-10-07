@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="utf-8" />
@@ -12,10 +12,12 @@
       --bg:#0f1115; --card:#171a21; --card-front:#1f2430; --accent:#13c2c2; --good:#19be6b; --bad:#ff4d4f; --text:#e8ecf1; --muted:#9aa4b2; --grid-gap:14px; --page-max:min(90vw, 1800px); --card-size:clamp(200px, 18vw, 320px);
     }
     *{box-sizing:border-box}
-    html,body{min-height:100%}
-    html{background:
-      radial-gradient(ellipse at 60% 0%, #22334a 0%, #18202b 40%, transparent 80%),
-      linear-gradient(180deg, #0b0d12 0%, #18202b 30%, #17202d 60%, #1b2230 85%, #181c22 100%);
+    html,body{
+      min-height:100%;
+      background-color:#0b0d12;
+      overscroll-behavior-y: contain;
+    }
+    html{background:#0b0d12;
       /* sanftes Scrollen zu Ankern */
       scroll-behavior:smooth;
       /* optional: festpinnen, damit beim Overscroll nichts "wegscrollt" */
@@ -25,9 +27,7 @@
       margin:0;
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,Arial,sans-serif;
       color:var(--text);
-      background:
-        radial-gradient(ellipse at 60% 0%, #22334a 0%, #18202b 40%, transparent 80%),
-        linear-gradient(180deg, #0b0d12 0%, #18202b 30%, #17202d 60%, #1b2230 85%, #181c22 100%);
+      background: linear-gradient(180deg, #0b0d12 0%, #18202b 30%, #17202d 60%, #1b2230 85%, #181c22 100%);
     }
 
     /* Header: sticky & immer sichtbar */
@@ -82,10 +82,11 @@
     /* Grid */
     .apps{
       display:grid;
-      grid-template-columns:repeat(auto-fit, minmax(var(--card-size), var(--card-size)));
+      grid-template-columns:repeat(auto-fit, minmax(240px, 300px));
       gap:var(--grid-gap);
       justify-content:center;
-      align-items:center;
+      justify-items:stretch;
+      align-items:stretch;
       max-width:var(--page-max);
       margin:0 auto;
     }
@@ -98,11 +99,26 @@
 
 
     /* Cards */
-    .app-card{ position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; 
-      background:linear-gradient(180deg,#202636,#1a1f2c); border:1px solid #243246; border-radius:16px; text-decoration:none; color:var(--text);
-      box-shadow:0 10px 24px rgba(0,0,0,.35), 0 1px 0 rgba(255,255,255,.04) inset; 
-      aspect-ratio:1/1; padding:18px; transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-      overflow:hidden
+    .app-card{
+      position:relative;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      background:linear-gradient(180deg,#202636,#1a1f2c);
+      border:1px solid #243246;
+      border-radius:16px;
+      text-decoration:none;
+      color:var(--text);
+      box-shadow:0 10px 24px rgba(0,0,0,.35), 0 1px 0 rgba(255,255,255,.04) inset;
+      aspect-ratio:1/1;
+      padding:18px;
+      transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+      overflow:hidden;
+      width:100%;
+      max-width:300px;
+      margin:0 auto;
     }
     .app-card::after{ content:""; position:absolute; inset:0; border-radius:16px; pointer-events:none; box-shadow:0 0 0 0 rgba(19,194,194,.0); transition:box-shadow .18s ease }
     .app-card:hover{ transform:translateY(-2px); border-color:#2a3a51; box-shadow:0 16px 28px rgba(0,0,0,.42) }
@@ -187,8 +203,35 @@
     }
       /* Grid-Zeilenumbruch (z. B. nach 3. Quiz-Kachel) */
     .grid-break{ grid-column:1 / -1; height:0; }
-      /* Body-Hintergrund transparent lassen – Hintergrund liegt auf <html> */
-    body{ background: none; background-color: transparent; }
+      /* Body-Hintergrund transparent lassen - Hintergrund liegt auf <html> */
+
+    /* Mobile Tweaks */
+    @media (max-width: 720px){
+      .toolbar{
+        justify-content:flex-start;
+        gap:6px;
+      }
+      .toolbar a{
+        padding:6px 12px;
+        font-size:.9rem;
+        border-width:1px;
+        border-radius:8px;
+      }
+      .apps{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:10px;
+        justify-content:center;
+      }
+      .app-card{
+        width:100%;
+        max-width:none;
+        margin:0;
+        aspect-ratio:3/4;
+        padding:14px;
+      }
+      .app-card .label{ font-size:1rem; }
+      .app-card .meta{ font-size:.8rem; }
+    }
   </style>
 </head>
 <body>
@@ -452,3 +495,6 @@
 </script>
 </body>
 </html>
+
+
+
