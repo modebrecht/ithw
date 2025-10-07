@@ -538,8 +538,11 @@
 
       if(hubInfoEl){
         hubInfoEl.innerHTML = '';
-        const completedBadge = document.createElement('span');
-        completedBadge.className = 'badge';
+        const completedBadge = document.createElement('button');
+        completedBadge.type = 'button';
+        completedBadge.className = 'badge badge-button';
+        completedBadge.setAttribute('aria-disabled', 'true');
+        completedBadge.tabIndex = -1;
         completedBadge.textContent = `Abgeschlossen: ${completedCount()}/${levels.length}`;
         hubInfoEl.appendChild(completedBadge);
         if(hubScoreBtn){

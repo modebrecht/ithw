@@ -41,7 +41,7 @@ header .btn{border-radius:999px;width:var(--ctrl-size);height:var(--ctrl-size);p
 /* Hub badges & score chip share same styling */
 #hubView .hub-info .badge,
 #hubView #hubScoreBtn{
-  padding:8px 22px;
+  padding:12px 10px;
   border-radius:999px;
   background:linear-gradient(135deg, rgba(96,165,250,.18), rgba(34,211,238,.1));
   border:1px solid rgba(148,163,184,.22);
@@ -58,9 +58,19 @@ header .btn{border-radius:999px;width:var(--ctrl-size);height:var(--ctrl-size);p
   letter-spacing:.01em;
   line-height:1;
 }
+#hubView .hub-info .badge-button{
+  pointer-events:none;
+  cursor:default;
+}
+#hubView .hub-info .badge-button:focus-visible{
+  outline:none;
+}
+#hubView .hub-info .badge-button:disabled{
+  opacity:1;
+}
 header .controls #scoreBtn{
   border-radius:999px;
-  padding:8px 22px;
+  padding:12px 10px;
   min-height:32px;
   height:auto;
   display:inline-flex;
