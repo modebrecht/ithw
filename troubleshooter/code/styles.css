@@ -209,8 +209,9 @@ header .controls #hubBtn:hover,
 .chip{background-color:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);padding:8px 10px;border-radius:10px;font-size:13px;color:var(--ink-dim)}
 .chip strong{color:var(--ink)}
 
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
 .action-set-label{grid-column:1/-1;font-size:.85rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:rgba(226,232,240,.82);margin-bottom:4px}
+@media (max-width:860px){.actions{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:640px){.actions{grid-template-columns:1fr}}
 button.action{
   appearance:none; border:none; cursor:pointer; padding:16px 18px; border-radius:12px; text-align:left; color:var(--ink);

@@ -24,9 +24,9 @@
 
   <div class="wrap hidden" id="scenarioView">
     <header>
-      <div class="title">PC-Troubleshooter <span class="badge" id="verTag">v2.6</span></div>
+      <div class="title">PC-Troubleshooter <span class="badge" id="verTag">v3.0</span></div>
       <div class="controls">
-        <div class="badge" id="levelTag" aria-live="polite">Fall 1/5 • <b>Einfach</b></div>
+        <div class="badge" id="levelTag" aria-live="polite">Fall</div>
         <button class="btn" type="button" id="scoreBtn" title="Score anzeigen" aria-label="Score anzeigen">🏆 Score</button>
         <button class="btn" type="button" id="hubBtn" title="Zurück zum Hub" aria-label="Zurück zum Hub">🏠 Hub</button>
       </div>
@@ -36,7 +36,7 @@
     <div class="action-message" id="actionMessageTop" aria-hidden="true">
       <header class="mhead">
         <h3 id="messageTitleTop">Aktion</h3>
-        <button class="modal-close" type="button" id="messageCloseTop" aria-label="Schliessen">×</button>
+        <button class="modal-close" type="button" id="messageCloseTop" aria-label="Schliessen" hidden>×</button>
       </header>
       <div class="mbody" id="messageBodyTop"></div>
       <div class="mfoot">
@@ -187,7 +187,6 @@
           <div class="action-message" id="actionMessage" aria-hidden="true">
             <header class="mhead">
               <h3 id="messageTitle">Aktion</h3>
-              <button class="modal-close" type="button" id="messageClose" aria-label="Schliessen">×</button>
             </header>
             <div class="mbody" id="messageBody"></div>
             <div class="mfoot">
@@ -681,6 +680,7 @@
       actionsEl.style.display = '';
       if(lastFocusEl) lastFocusEl.focus();
       modalOpenKey = null;
+      if(topModalCloseEl){ topModalCloseEl.hidden = true; }
     }
     function showCelebration(){
       if(celebrationEl) return;
@@ -2134,7 +2134,7 @@ function finish(success, detail){
 
       // Badge text
       const tag = document.getElementById('levelTag');
-      if(tag){ tag.innerHTML = `Fall ${idx+1}/${levels.length} - <b>Einfach</b>`; }
+      if(tag){ tag.textContent = `Fall ${idx+1}/${levels.length}`; }
 
       showBest();
     }
@@ -2182,9 +2182,8 @@ function finish(success, detail){
 
     // Score-Modal oeffnen
     if(topModalCloseEl){
-      topModalCloseEl.addEventListener('click', ()=>{
-        closeTopModal();
-      });
+      topModalCloseEl.addEventListener('click', ()=>{ closeTopModal(); });
+      topModalCloseEl.hidden = true;
     }
     if(scoreButtons.length){
       const handleScoreClick = ()=>{
@@ -2225,6 +2224,7 @@ function finish(success, detail){
             </table>
           </div>`;
         openTopModal({ title: '', subtitle, html });
+        if(topModalCloseEl){ topModalCloseEl.hidden = false; }
       };
       scoreButtons.forEach(btn => btn.addEventListener('click', handleScoreClick));
     }
