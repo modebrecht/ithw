@@ -1,24 +1,28 @@
 export default {
-  id: 'K1',
-  name: 'Tastatur reagiert nicht',
-  storyTitle: 'Szenario: Tastatur reagiert nicht',
+  id: 'S4',
+  name: 'No bootable device (Bootfehler)',
+  storyTitle: 'Szenario: "No bootable device"',
   storyText:
-    'Der PC ist gestartet, doch deine Tastatur reagiert nicht: Du willst dich anmelden, aber keine Taste wird erkannt. ' +
-    'Finde den schnellen Weg, damit die Tastatur wieder reagiert.',
+    'Der PC startet, Monitor und Signal sind aktiv – doch statt Windows erscheint sofort <b>NO BOOTABLE DEVICE</b>. ' +
+    'Finde den Fehler und bringe das System wieder bis zum Login.',
   hints: {
-    h1: 'Welche Schritte brauchst du, bevor du Hardware austauschst?',
+    h1: '<b>Externes Medium?</b> Bootet der PC vielleicht vom falschen Gerät (USB-Stick)?',
     h2:
       '<ul class="hint">' +
-      '<li><b>Kabel pruefen:</b> Steckt der USB-Stecker fest oder hilft ein anderer Port?</li>' +
-      '<li><b>Andere Geraete?</b> Maus funktioniert, Anzeige steht stabil.</li>' +
-      '<li><b>Software-Reset:</b> Ein sauberer Neustart initialisiert die Eingabegeraete neu.</li>' +
+      '<li><b>Boot-Menü nutzen:</b> Mit F12 das richtige Startlaufwerk (SSD) wählen – reversibel und schnell.</li>' +
+      '<li><b>USB-Geräte entfernen:</b> Sticks können die Bootreihenfolge überlagern. Danach <b>neu starten</b>.</li>' +
+      '<li><b>Nur wenn nötig:</b> Bootreihenfolge im BIOS dauerhaft ändern und speichern.</li>' +
       '</ul>'
   },
   start: {
     pcOn: true,
     monitorOn: true,
     signalOk: true,
-    keyboardResponsive: false
+    bootError: true,
+    activeSet: 'A',
+    bootMenuOpen: false,
+    usbPresent: true,
+    bootOrderChanged: false,
+    bootOrderPersisted: false
   }
 };
-

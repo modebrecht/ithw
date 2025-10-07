@@ -1,25 +1,28 @@
 export default {
-  id: 'N1',
-  name: 'Netzwerk/Login-Spezial (Mittel)',
-  storyTitle: 'Szenario: Domänen-Login scheitert',
+  id: 'S2',
+  name: 'Überhitzung / Lüfter blockiert',
+  storyTitle: 'Szenario: Überhitzung unter Last',
   storyText:
-    'Der PC ist gestartet, der Login-Bildschirm erscheint – doch dein Domänenkonto meldet: ' +
-    '"<b>Profil nicht verfügbar / Server nicht erreichbar</b>". ' +
-    'Finde die Ursache und ermögliche den Login.',
+    'Der PC startet normal und bleibt im Idle stabil. Doch sobald du ihn forderst, ' +
+    'tritt nach kurzer Zeit <b>Throttling oder ein Abschalten</b> auf. ' +
+    'Finde die Ursache und stelle den stabilen Betrieb wieder her.',
   hints: {
-    h1: 'Domänen-Login schlägt fehl – was sagt das über die <b>Netzwerkverbindung</b>?',
+    h1: 'Thermik-Frage: <b>Passiert der Fehler sofort oder nach einiger Zeit unter Last?</b>',
     h2:
       '<ul class="hint">' +
-      '<li><b>LAN-Kabel verfolgen:</b> Steckt es richtig? Link-LED am Switch leuchtet?</li>' +
-      '<li><b>Domäne braucht Netzwerk:</b> Ohne Verbindung klappt nur ein <b>lokales Konto</b> (Notlösung).</li>' +
-      '<li><b>Hardware-Overkill vermeiden:</b> BIOS, CPU oder RAM helfen hier nicht – Fokus auf Netzwerk.</li>' +
+      '<li><b>Frage klären:</b> „Passiert der Fehler sofort oder nach einiger Zeit unter Last?“ → deutet stark auf Thermik.</li>' +
+      '<li><b>Symptome beobachten:</b> Lasttest laufen lassen und auf Temperatur-/Lüfterverhalten achten.</li>' +
+      '<li><b>Lüfter blockiert?</b> Seitenwand öffnen, Kabel oder Staub entfernen, Lüfter frei drehen lassen.</li>' +
+      '<li><b>Nach der Reinigung:</b> Temperaturen mit Monitoring prüfen; Wärmeleitpaste nur bei Bedarf als Zusatz erwähnen.</li>' +
       '</ul>'
   },
   start: {
     pcOn: true,
     monitorOn: true,
     signalOk: true,
-    lanConnected: false,
-    switchLedOn: false
+    fanBlocked: true,
+    dustCleared: false,
+    tempsStable: true,
+    overheatObserved: false
   }
 };
