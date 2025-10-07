@@ -443,22 +443,12 @@
       progress = normalizeProgress(progress);
       const scores = loadScores();
       scenarioListEl.innerHTML = '';
-      const baseEntries = levels.map((level, idx) => ({
+      const entries = levels.map((level, idx) => ({
         type: 'scenario',
         level,
         index: idx,
         number: idx + 1
       }));
-      const placeholders = Array.from({ length: 2 }, (_, idx) => {
-        const number = baseEntries.length + idx + 1;
-        return {
-          type: 'placeholder',
-          id: `PLACEHOLDER_${number}`,
-          name: `PLACEHOLDER_${number}`,
-          number
-        };
-      });
-      const entries = baseEntries.concat(placeholders);
       entries.forEach(entry => {
         const item = document.createElement('article');
         item.className = 'hub-item';
@@ -468,29 +458,14 @@
         label.className = 'hub-item-label';
         label.textContent = `Szenario ${entry.number}`;
         header.appendChild(label);
-        const rank = entry.type === 'scenario' ? (scores[entry.level.id]?.rank || null) : null;
+        const rank = scores[entry.level.id]?.rank || null;
         header.appendChild(createMedalBadge(rank));
         item.appendChild(header);
 
         const title = document.createElement('h3');
-        title.textContent = entry.type === 'scenario' ? entry.level.name : entry.name;
+        title.textContent = entry.level.name;
         item.appendChild(title);
 
-        if(entry.type === 'placeholder'){
-          item.classList.add('placeholder');
-          const status = document.createElement('p');
-          status.className = 'hub-status';
-          status.textContent = 'Bald verfügbar';
-          item.appendChild(status);
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'btn';
-          btn.disabled = true;
-          btn.textContent = 'In Arbeit';
-          item.appendChild(btn);
-          scenarioListEl.appendChild(item);
-          return;
-        }
 
         const unlocked = isLevelUnlocked(entry.index);
         const completed = isLevelCompleted(entry.index);
