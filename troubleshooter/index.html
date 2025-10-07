@@ -384,6 +384,21 @@
     const scoreBtn = document.getElementById('scoreBtn');
     const hint1Btn = document.getElementById('hint1Btn');
     const goalBtn = document.getElementById('goalBtn');
+    const hubScoreBtn = (() => {
+      if(!hubInfoEl) return null;
+      const existing = document.getElementById('hubScoreBtn');
+      if(existing) return existing;
+      const btn = document.createElement('button');
+      btn.className = 'btn';
+      btn.type = 'button';
+      btn.id = 'hubScoreBtn';
+      btn.title = 'Score anzeigen';
+      btn.setAttribute('aria-label','Score anzeigen');
+      btn.textContent = scoreBtn ? scoreBtn.textContent : 'Score';
+      hubInfoEl.appendChild(btn);
+      return btn;
+    })();
+    const scoreButtons = [scoreBtn, hubScoreBtn].filter(Boolean);
     let scenarioActive = false;
 
     const versionBadges = [document.getElementById('hubVerTag'), document.getElementById('verTag')];
@@ -527,10 +542,9 @@
         completedBadge.className = 'badge';
         completedBadge.textContent = `Abgeschlossen: ${completedCount()}/${levels.length}`;
         hubInfoEl.appendChild(completedBadge);
-        const unlockedBadge = document.createElement('span');
-        unlockedBadge.className = 'badge';
-        unlockedBadge.textContent = `Freigeschaltet: ${unlockedCount()}/${levels.length}`;
-        hubInfoEl.appendChild(unlockedBadge);
+        if(hubScoreBtn){
+          hubInfoEl.appendChild(hubScoreBtn);
+        }
       }
     }
 
@@ -599,6 +613,10 @@
     const topModalTitleEl = document.getElementById('messageTitleTop');
     const topModalBodyEl = document.getElementById('messageBodyTop');
     const topModalOkEl = document.getElementById('messageOkTop');
+    if(topModalEl && topModalEl.parentElement !== document.body){
+      topModalEl.classList.add('top-modal');
+      document.body.appendChild(topModalEl);
+    }
     let celebrationEl = null;
     let celebrationTimer = null;
     // Track which hotkey opened the modal (if any)
@@ -631,11 +649,22 @@
       lastHotkey = null;
       if(title === 'Aufgabe abgeschlossen') showCelebration();
     }
-    function openTopModal({title='Score', html='', okLabel='Schliessen'}){
+    function openTopModal({title='Score', subtitle='', html='', okLabel='Schliessen'}){
       if(!topModalEl) return;
       modalOpen = true;
+      document.body.classList.add('top-modal-open');
       actionsEl.style.display = 'none';
-      if(topModalTitleEl) topModalTitleEl.textContent = title;
+      if(topModalTitleEl){
+        if(subtitle){
+          if(title){
+            topModalTitleEl.innerHTML = `<span class="modal-title-main">${title}</span><span class="modal-title-sub">${subtitle}</span>`;
+          } else {
+            topModalTitleEl.innerHTML = `<span class="modal-title-sub only">${subtitle}</span>`;
+          }
+        } else {
+          topModalTitleEl.textContent = title;
+        }
+      }
       if(topModalBodyEl) topModalBodyEl.innerHTML = html;
       if(topModalOkEl) topModalOkEl.textContent = okLabel;
       topModalEl.classList.add('open');
@@ -651,6 +680,7 @@
       modalEl.classList.remove('open');
       modalEl.classList.remove('completion');
       modalEl.setAttribute('aria-hidden','true');
+      document.body.classList.remove('top-modal-open');
       actionsEl.style.display = '';
       if(lastFocusEl) lastFocusEl.focus();
       hideCelebration();
@@ -661,6 +691,7 @@
       modalOpen = false;
       topModalEl.classList.remove('open');
       topModalEl.setAttribute('aria-hidden','true');
+      document.body.classList.remove('top-modal-open');
       actionsEl.style.display = '';
       if(lastFocusEl) lastFocusEl.focus();
       modalOpenKey = null;
@@ -2040,19 +2071,48 @@ function finish(success, detail){
     })();
 
     // Score-Modal oeffnen
-    if (document.getElementById('scoreBtn')) document.getElementById('scoreBtn').addEventListener('click', ()=>{
-      const scores = loadScores();
-      const items = levels.map((L, idx)=>{
-        const s = scores[L.id];
-        if(!s){
-          return `<li><b>Fall ${idx+1}:</b> ${L.name} - <i>noch kein Ergebnis</i></li>`;
-        }
-        const color = s.rank === 'Gold' ? 'var(--gold)' : (s.rank === 'Silber' ? 'var(--silver)' : 'var(--bronze)');
-        return `<li><b>Fall ${idx+1}:</b> ${L.name} - Zeit: <b>${s.time} Min</b>, Schritte: <b>${s.tries}</b>, Rang: <b style="color:${color}">${s.rank}</b>, Punkte: <b>${s.score}</b></li>`;
-      }).join('');
-      const html = `<p class="hint">Deine besten Ergebnisse pro Szenario:</p><ul class="hint">${items}</ul>`;
-      openTopModal({ title: 'Score', html });
-    });
+    if(scoreButtons.length){
+      const handleScoreClick = ()=>{
+        const scores = loadScores();
+        const rows = levels.map((L, idx)=>{
+          const s = scores[L.id];
+          const hasScore = !!s;
+          const rank = hasScore ? (s.rank || '-') : '-';
+          const rankClass = hasScore && rank ? `rank-${rank.toLowerCase()}` : 'rank-none';
+          const timeLabel = hasScore && typeof s.time === 'number' ? `${s.time} Min` : '–';
+          const triesLabel = hasScore && typeof s.tries === 'number' ? `${s.tries}` : '–';
+          const scoreLabel = hasScore && typeof s.score === 'number' ? `${s.score}` : '–';
+          const note = hasScore ? '' : '<span class="score-note">Noch kein Ergebnis</span>';
+          return `<tr${hasScore ? '' : ' class="score-row-empty"'}>` +
+            `<td class="score-col-index">Fall ${idx+1}</td>` +
+            `<td class="score-col-name">${L.name}</td>` +
+            `<td class="score-col-rank"><span class="score-rank ${rankClass}">${rank}</span>${note}</td>` +
+            `<td class="score-col-time">${timeLabel}</td>` +
+            `<td class="score-col-tries">${triesLabel}</td>` +
+            `<td class="score-col-score">${scoreLabel}</td>` +
+          `</tr>`;
+        }).join('');
+        const subtitle = 'Deine besten Ergebnisse pro Szenario';
+        const html = `
+          <div class="score-table-wrap">
+            <table class="score-table" role="table">
+              <thead>
+                <tr>
+                  <th scope="col" class="score-col-index">Fall</th>
+                  <th scope="col" class="score-col-name">Szenario</th>
+                  <th scope="col" class="score-col-rank">Rang</th>
+                  <th scope="col" class="score-col-time">Zeit</th>
+                  <th scope="col" class="score-col-tries">Schritte</th>
+                  <th scope="col" class="score-col-score">Score</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>`;
+        openTopModal({ title: '', subtitle, html });
+      };
+      scoreButtons.forEach(btn => btn.addEventListener('click', handleScoreClick));
+    }
     // Move footer buttons into the statusbar (right side)
     (function(){
       const statusBar = document.querySelector('.statusbar');

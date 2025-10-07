@@ -35,11 +35,57 @@ header{display:flex;gap:16px;align-items:center;justify-content:space-between;ma
 /* Header controls: icon-only circles and compact nav */
 :root{ --ctrl-size: 44px; }
 header .btn{border-radius:999px;width:var(--ctrl-size);height:var(--ctrl-size);padding:0;display:inline-grid;place-items:center}
-/* Allow score button to expand for label */
-#scoreBtn{width:auto;padding:0 14px}
+/* Allow score buttons to expand for label */
+#scoreBtn,
+#hubScoreBtn{width:auto;padding:0 18px}
+/* Hub badges & score chip share same styling */
+#hubView .hub-info .badge,
+#hubView #hubScoreBtn{
+  padding:8px 22px;
+  border-radius:999px;
+  background:linear-gradient(135deg, rgba(96,165,250,.18), rgba(34,211,238,.1));
+  border:1px solid rgba(148,163,184,.22);
+  color:var(--ink);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  height:auto;
+  min-height:32px;
+  box-shadow:none;
+  font-size:12px;
+  font-weight:500;
+  letter-spacing:.01em;
+  line-height:1;
+}
+header .controls #scoreBtn{
+  border-radius:999px;
+  padding:8px 22px;
+  min-height:32px;
+  height:auto;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  border:1px solid rgba(148,163,184,.22);
+  background:linear-gradient(135deg, rgba(96,165,250,.18), rgba(34,211,238,.1));
+  color:var(--ink);
+  box-shadow:none;
+  font-size:12px;
+  font-weight:500;
+  letter-spacing:.01em;
+  line-height:1;
+}
+#hubView #hubScoreBtn:hover,
+header .controls #scoreBtn:hover{
+  background:linear-gradient(135deg, rgba(96,165,250,.24), rgba(34,211,238,.16));
+}
+#hubView #hubScoreBtn:hover{
+  background:linear-gradient(135deg, rgba(96,165,250,.24), rgba(34,211,238,.16));
+}
 /* Level navigation group as button group (no gaps) */
 .level-nav{display:flex;align-items:stretch;gap:0}
-.level-nav .btn{width:var(--ctrl-size);height:var(--ctrl-size);padding:0}
+.level-nav .btn{display:none;width:var(--ctrl-size);height:var(--ctrl-size);padding:0}
 /* Ensure nav buttons match badge height exactly */
 .level-nav .btn, #levelTag.badge{height:var(--ctrl-size);box-sizing:border-box}
 /* Merge borders between neighbors */
@@ -51,6 +97,7 @@ header .btn{border-radius:999px;width:var(--ctrl-size);height:var(--ctrl-size);p
 #levelNext{border-top-left-radius:0;border-bottom-left-radius:0;font-size:22px}
 header .controls{display:flex;gap:8px;align-items:center}
 .hub-info{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+#hubView .hub-info{gap:8px}
 .title{font-weight:800;font-size:clamp(22px,4vw,34px);letter-spacing:.2px}
 .badge{border:1px solid rgba(255,255,255,.12);padding:6px 10px;border-radius:999px;font-size:12px;color:var(--ink-dim)}
 .badge-action{cursor:pointer;user-select:none}
@@ -327,10 +374,51 @@ details[open].hintbox summary::before, details[open].didaktik summary::before{
 .action-message .mhead h3{margin:0;font-size:18px}
 .action-message .mbody{font-size:14px;color:var(--ink-dim);grid-column:1;grid-row:2}
 .action-message .mfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+.action-message.top-modal{position:fixed;top:48px;left:50%;transform:translateX(-50%);max-width:720px;width:calc(100% - 48px);z-index:999;background:linear-gradient(180deg,#101c38,#0b1223);border-color:#1f2937;box-shadow:0 18px 40px rgba(15,23,42,.6);padding:18px 24px 24px}
+.action-message.top-modal.open{display:grid;grid-template-columns:1fr;grid-template-rows:auto 1fr auto;row-gap:10px}
+.action-message.top-modal .mhead{grid-column:1;grid-row:1;margin-bottom:4px;display:flex;align-items:center;gap:12px}
+.action-message.top-modal .modal-title-main{font-size:18px;font-weight:700;color:var(--ink)}
+.action-message.top-modal .modal-title-sub{font-size:.95rem;color:var(--ink-dim);font-weight:500;margin-left:auto;text-align:right;padding-left:24px}
+.action-message.top-modal .modal-title-sub.only{margin-left:0;padding-left:0;text-align:left}
+.action-message.top-modal .mbody{grid-column:1;grid-row:2;margin-top:0}
+.action-message.top-modal .mbody > :first-child{margin-top:0}
+.action-message.top-modal .mfoot{grid-column:1;grid-row:3;margin-top:20px}
+.action-message.top-modal.open .mfoot{display:block}
+.action-message.top-modal.open .mfoot .btn{display:block;width:100%;padding:12px 0;height:auto}
+body.top-modal-open::after{
+  content:'';
+  position:fixed;
+  inset:0;
+  background:rgba(10,15,28,.68);
+  backdrop-filter:blur(4px);
+  z-index:998;
+}
+body.top-modal-open .wrap{pointer-events:none}
+body.top-modal-open #hubView > section,
+body.top-modal-open #scenarioView > section{display:none}
+.score-table-wrap{margin-top:8px;overflow-x:auto;border-radius:12px;border:1px solid rgba(148,163,184,.16);background:rgba(15,23,42,.55)}
+.score-table{width:100%;border-collapse:collapse;font-size:.92rem}
+.score-table thead th{font-size:.75rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-dim);padding:12px 14px;background:rgba(15,23,42,.75);text-align:left}
+.score-table thead th.score-col-time,
+.score-table thead th.score-col-tries,
+.score-table thead th.score-col-score{text-align:right}
+.score-table tbody td{padding:12px 14px;border-top:1px solid rgba(148,163,184,.14);color:var(--ink)}
+.score-table tbody tr:first-child td{border-top:none}
+.score-table tbody tr.score-row-empty td{color:var(--ink-dim)}
+.score-table tbody tr:nth-child(odd) td{background:rgba(27,43,84,.55)}
+.score-table tbody tr:nth-child(even) td{background:rgba(21,32,63,.45)}
+.score-table tbody tr:hover td{background:rgba(96,165,250,.08)}
+.score-col-time,.score-col-tries,.score-col-score{text-align:right;font-variant-numeric:tabular-nums}
+.score-rank{display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:4px 12px;border-radius:999px;border:1px solid rgba(148,163,184,.3);background:rgba(148,163,184,.15);color:var(--ink)}
+.score-rank.rank-gold{color:var(--gold);border-color:rgba(251,191,36,.5);background:rgba(251,191,36,.12)}
+.score-rank.rank-silber{color:var(--silver);border-color:rgba(203,213,225,.45);background:rgba(203,213,225,.12)}
+.score-rank.rank-bronze{color:var(--bronze);border-color:rgba(217,119,6,.45);background:rgba(217,119,6,.12)}
+.score-rank.rank-none{color:var(--ink-dim);border-color:rgba(148,163,184,.24);background:rgba(148,163,184,.08)}
+.score-note{display:block;margin-top:6px;font-size:.78rem;color:var(--ink-dim)}
 /* Place the primary action as a tall side button matching modal height */
-/* apply to all open modals so the Schliessen button spans full height */
-.action-message.open .mfoot{grid-column:2;grid-row:1 / span 2;margin-top:0;align-items:stretch}
-.action-message.open .mfoot .btn{height:100%;width:100%;display:flex;align-items:center;justify-content:center}
+/* apply only to in-card modal; top modal uses its own layout */
+.action-message.open:not(.top-modal) .mfoot{grid-column:2;grid-row:1 / span 2;margin-top:0;align-items:stretch}
+.action-message.open:not(.top-modal) .mfoot .btn{height:100%;width:100%;display:flex;align-items:center;justify-content:center}
 .scene.mini svg{max-height:160px}
 .scene.mini{margin-top:10px}
 
