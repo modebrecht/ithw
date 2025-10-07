@@ -3,477 +3,498 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>PC-Troubleshooter v2.6</title>
+  <title>PC-Troubleshooter v3.2</title>
   <style>
-    :root{
-      --bg:#0f172a;           /* slate-900 */
-      --card:#0b1223;         /* darker card */
-      --ink:#e5e7eb;          /* gray-200 */
-      --ink-dim:#b6c1d4;
-      --accent:#60a5fa;       /* blue-400 */
-      --accent-2:#22d3ee;     /* cyan-400 */
-      --good:#22c55e;         /* green-500 */
-      --warn:#f59e0b;         /* amber-500 */
-      --bad:#ef4444;          /* red-500 */
-      --muted:#94a3b8;        /* slate-400 */
-      --shadow:0 18px 40px -18px rgba(0,0,0,.55);
-      --radius:16px;
-      --gold:#fbbf24;         /* amber-400 */
-      --silver:#cbd5e1;       /* slate-300 */
-      --bronze:#d97706;       /* orange-600 */
-    }
+:root{
+  --bg:#0f172a;           /* slate-900 */
+  --card:#0b1223;         /* darker card */
+  --ink:#e5e7eb;          /* gray-200 */
+  --ink-dim:#b6c1d4;
+  --accent:#60a5fa;       /* blue-400 */
+  --accent-2:#22d3ee;     /* cyan-400 */
+  --good:#22c55e;         /* green-500 */
+  --warn:#f59e0b;         /* amber-500 */
+  --bad:#ef4444;          /* red-500 */
+  --muted:#94a3b8;        /* slate-400 */
+  --shadow:0 18px 40px -18px rgba(0,0,0,.55);
+  --radius:16px;
+  --gold:#fbbf24;         /* amber-400 */
+  --silver:#cbd5e1;       /* slate-300 */
+  --bronze:#d97706;       /* orange-600 */
+}
 
-    html,body{min-height:100%}
-    body{
-      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,"Helvetica Neue",Arial,"Noto Sans","Apple Color Emoji","Segoe UI Emoji";
-      color:var(--ink);
-      background:
-        radial-gradient(1200px 600px at 10% -10%, rgba(96,165,250,.15), transparent 50%),
-        radial-gradient(1200px 600px at 90% 0%, rgba(34,211,238,.12), transparent 50%),
-        var(--bg);
-      background-repeat: no-repeat, no-repeat, no-repeat;
-      background-attachment: fixed, fixed, fixed;
-    }
+html,body{min-height:100%}
+body{
+  margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,"Helvetica Neue",Arial,"Noto Sans","Apple Color Emoji","Segoe UI Emoji";
+  color:var(--ink);
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(96,165,250,.15), transparent 50%),
+    radial-gradient(1200px 600px at 90% 0%, rgba(34,211,238,.12), transparent 50%),
+    var(--bg);
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-attachment: fixed, fixed, fixed;
+}
 
-    .wrap{max-width:1000px;margin:clamp(16px,3vw,40px) auto;padding:0 16px}
-    .hidden{display:none!important}
-    header{display:flex;gap:16px;align-items:center;justify-content:space-between;margin-bottom:20px}
-    #levelTag{margin-left:auto}
-    /* Header controls: icon-only circles and compact nav */
-    :root{ --ctrl-size: 44px; }
-    header .btn{border-radius:999px;width:var(--ctrl-size);height:var(--ctrl-size);padding:0;display:inline-grid;place-items:center}
-    /* Allow score buttons to expand for label */
-    #scoreBtn,
-    #hubScoreBtn{width:auto;padding:0 18px}
-    /* Hub badges & score chip share same styling */
-    #hubView .hub-info .badge,
-    #hubView #hubScoreBtn{
-      padding:12px 10px;
-      border-radius:999px;
-      background:linear-gradient(135deg, rgba(96,165,250,.18), rgba(34,211,238,.1));
-      border:1px solid rgba(148,163,184,.22);
-      color:var(--ink);
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:6px;
-      height:auto;
-      min-height:32px;
-      box-shadow:none;
-      font-size:12px;
-      font-weight:500;
-      letter-spacing:.01em;
-      line-height:1;
-    }
-    #hubView .hub-info .badge-button{
-      pointer-events:none;
-      cursor:default;
-    }
-    #hubView .hub-info .badge-button:focus-visible{
-      outline:none;
-    }
-    #hubView .hub-info .badge-button:disabled{
-      opacity:1;
-    }
-    header .controls #scoreBtn{
-      border-radius:999px;
-      padding:12px 10px;
-      min-height:32px;
-      height:auto;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:6px;
-      border:1px solid rgba(148,163,184,.22);
-      background:linear-gradient(135deg, rgba(96,165,250,.18), rgba(34,211,238,.1));
-      color:var(--ink);
-      box-shadow:none;
-      font-size:12px;
-      font-weight:500;
-      letter-spacing:.01em;
-      line-height:1;
-    }
-    #hubView #hubScoreBtn:hover,
-    header .controls #scoreBtn:hover{
-      background:linear-gradient(135deg, rgba(96,165,250,.24), rgba(34,211,238,.16));
-    }
-    #hubView #hubScoreBtn:hover{
-      background:linear-gradient(135deg, rgba(96,165,250,.24), rgba(34,211,238,.16));
-    }
-    /* Level navigation group as button group (no gaps) */
-    .level-nav{display:flex;align-items:stretch;gap:0}
-    .level-nav .btn{display:none;width:var(--ctrl-size);height:var(--ctrl-size);padding:0}
-    /* Ensure nav buttons match badge height exactly */
-    .level-nav .btn, #levelTag.badge{height:var(--ctrl-size);box-sizing:border-box}
-    /* Merge borders between neighbors */
-    .level-nav > *:not(:first-child){ margin-left:-1px }
-    /* Rounded outside corners only */
-    #levelTag{margin-left:0}
-    #levelTag.badge{height:var(--ctrl-size);padding:0 12px;font-size:14px;display:flex;align-items:center;border-radius:0}
-    #levelPrev{border-top-right-radius:0;border-bottom-right-radius:0;font-size:22px}
-    #levelNext{border-top-left-radius:0;border-bottom-left-radius:0;font-size:22px}
-    header .controls{display:flex;gap:8px;align-items:center}
-    .hub-info{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-    #hubView .hub-info{gap:8px}
-    .title{font-weight:800;font-size:clamp(22px,4vw,34px);letter-spacing:.2px}
-    .badge{border:1px solid rgba(255,255,255,.12);padding:6px 10px;border-radius:999px;font-size:12px;color:var(--ink-dim)}
-    .badge-action{cursor:pointer;user-select:none}
-    .badge-action:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-    /* Make level tag match nav button height */
-    #levelTag.badge{height:var(--ctrl-size);padding:0 12px;font-size:14px;display:flex;align-items:center}
+.wrap{max-width:1000px;margin:clamp(16px,3vw,40px) auto;padding:0 16px}
+.hidden{display:none!important}
+header{display:flex;gap:16px;align-items:center;justify-content:space-between;margin-bottom:20px}
+#levelTag{margin-left:0}
+/* Header controls */
+:root{ --ctrl-size: 44px; }
+header .btn{border-radius:999px;width:var(--ctrl-size);height:var(--ctrl-size);padding:0;display:inline-grid;place-items:center}
+/* Allow pill buttons to expand for label */
+#scoreBtn,
+#hubBtn,
+#hubScoreBtn{width:auto;padding:0 18px}
+/* Hub badges & score chip share same styling */
+#hubView .hub-info .badge,
+#hubView #hubScoreBtn{
+  padding:12px 10px;
+  border-radius:999px;
+  background:linear-gradient(135deg, rgba(96,165,250,.18), rgba(34,211,238,.1));
+  border:1px solid rgba(148,163,184,.22);
+  color:var(--ink);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  height:auto;
+  min-height:32px;
+  box-shadow:none;
+  font-size:12px;
+  font-weight:500;
+  letter-spacing:.01em;
+  line-height:1;
+}
+#hubView .hub-info .badge-button{pointer-events:none;cursor:default;}
+#hubView .hub-info .badge-button:focus-visible{outline:none;}
+#hubView .hub-info .badge-button:disabled{opacity:1;}
 
-    .hub-card .inner > .hint{margin-bottom:16px}
-    .hub-grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
-      gap:20px;
-      margin-top:20px;
-      counter-reset: hub; /* für Nummernkreise */
-    }
+header .controls{display:flex;gap:8px;align-items:center}
+.level-nav{display:flex;align-items:center;gap:8px}
+.level-nav .btn{display:none;width:36px;height:36px;padding:0;border-radius:50%}
+#levelPrev{font-size:20px}
+#levelNext{font-size:20px}
 
-    .hub-item{
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:16px;
-      padding:18px 20px;
-      background:
-        radial-gradient(600px 200px at 10% -20%, rgba(96,165,250,.10), transparent 60%),
-        radial-gradient(600px 200px at 90% -10%, rgba(34,211,238,.10), transparent 60%),
-        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      min-height:210px;
-      box-shadow:0 14px 36px rgba(15,23,42,.28);
-    }
+#levelTag,
+header .controls #scoreBtn,
+header .controls #hubBtn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  height:36px;
+  padding:0 16px;
+  border-radius:999px;
+  border:1px solid rgba(148,163,184,.22);
+  background:linear-gradient(135deg, rgba(96,165,250,.18), rgba(34,211,238,.1));
+  color:var(--ink);
+  font-size:12px;
+  font-weight:500;
+  letter-spacing:.01em;
+  line-height:1;
+  box-shadow:none;
+}
+#levelTag{margin-left:0}
 
-    .hub-item-header{
-      display:grid;
-      grid-template-columns:auto 1fr auto; /* Nummerkreis | Titelblock | Medaille */
-      gap:12px;
-      align-items:center;
-    }
+#hubView #hubScoreBtn:hover,
+header .controls #scoreBtn:hover,
+header .controls #hubBtn:hover,
+#levelTag:hover{
+  background:linear-gradient(135deg, rgba(96,165,250,.24), rgba(34,211,238,.16));
+}
 
-    /* Titel und Einzeilige Darstellung wie im Shot */
-    .hub-item h3{
-      margin:2px 0 0 0;
-      font-size:1.12rem;
-      color:var(--ink);
-      overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-    }
+.hub-info{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+#hubView .hub-info{gap:8px}
+.title{font-weight:800;font-size:clamp(22px,4vw,34px);letter-spacing:.2px}
+.badge{border:1px solid rgba(255,255,255,.12);padding:6px 10px;border-radius:999px;font-size:12px;color:var(--ink-dim)}
+.badge-action{cursor:pointer;user-select:none}
+.badge-action:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
-    /* Beschreibung / Status unter dem Label ausrichten */
-    .hub-status{
-      margin:2px 0 0 56px; /* bündig unter Labeltext */
-      font-size:.95rem;
-      color:var(--ink-dim);
-      line-height:1.45;
-    }
+.hub-card .inner > .hint{margin-bottom:16px}
+.hub-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:20px;
+  margin-top:20px;
+  counter-reset: hub; /* für Nummernkreise */
+}
 
-    /* Bestleistung dezenter darunter */
-    .hub-best{
-      margin:0 0 0 56px;
-      font-size:.92rem;
-      color:var(--ink-dim);
-    }
+.hub-item{
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:16px;
+  padding:18px 20px;
+  background:
+    radial-gradient(600px 200px at 10% -20%, rgba(96,165,250,.10), transparent 60%),
+    radial-gradient(600px 200px at 90% -10%, rgba(34,211,238,.10), transparent 60%),
+    linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  min-height:210px;
+  box-shadow:0 14px 36px rgba(15,23,42,.28);
+}
 
-    /* großer, breiter CTA */
-    .hub-item button{
-      margin-top:auto;
-      width:100%;
-      height:44px;
-      font-weight:700;
-      border-radius:12px;
-    }
+.hub-item-header{
+  display:grid;
+  grid-template-columns:auto 1fr auto; /* Nummerkreis | Titelblock | Medaille */
+  gap:12px;
+  align-items:center;
+}
 
-    .hub-item.locked{opacity:.85}
-    .hub-item.locked button{cursor:not-allowed}
-    .hub-item.placeholder{opacity:.65}
-    .hub-lock{font-weight:600}
+/* Titel und Einzeilige Darstellung wie im Shot */
+.hub-item h3{
+  margin:2px 0 0 0;
+  font-size:1.12rem;
+  color:var(--ink);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
 
-    /* Completed cards use medal-coloured frame */
-    .hub-item.completed{border-width:2px}
-    .hub-item.completed.rank-gold{border-color:rgba(251,191,36,.75)}
-    .hub-item.completed.rank-silber{border-color:rgba(203,213,225,.70)}
-    .hub-item.completed.rank-bronze{border-color:rgba(217,119,6,.70)}
-    .hub-item.completed.rank-none{border-color:rgba(148,163,184,.45)}
+/* Beschreibung / Status unter dem Label ausrichten */
+.hub-status{
+  text-align:left;
+  margin:2px 0 0 0;
+  font-size:.95rem;
+  color:var(--ink-dim);
+  line-height:1.45;
+}
+
+/* Bestleistung dezenter darunter */
+.hub-best{
+  margin:0;
+  font-size:.92rem;
+  color:var(--ink-dim);
+  text-align:left;
+}
+
+/* großer, breiter CTA */
+.hub-item button{
+  margin-top:auto;
+  width:100%;
+  height:44px;
+  font-weight:700;
+  border-radius:12px;
+}
+
+.hub-item.locked{opacity:.85}
+.hub-item.locked button{cursor:not-allowed}
+.hub-item.placeholder{opacity:.65}
+.hub-lock{font-weight:600}
+
+/* Completed cards use medal-coloured frame */
+.hub-item.completed{border-width:2px}
+.hub-item.completed.rank-gold{border-color:rgba(251,191,36,.75)}
+.hub-item.completed.rank-silber{border-color:rgba(203,213,225,.70)}
+.hub-item.completed.rank-bronze{border-color:rgba(217,119,6,.70)}
+.hub-item.completed.rank-none{border-color:rgba(148,163,184,.45)}
 
 
-    /* Medaillen stärker wie im Screenshot */
-    .hub-medal{
-      grid-column:3;
-      justify-self:end;
-      display:inline-flex;align-items:center;justify-content:center;gap:4px;
-      height:38px;padding:0 16px;border-radius:999px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.05);
-      font-size:12px;font-weight:700;color:var(--ink);white-space:nowrap
-    }
-    .hub-medal.gold{background:rgba(251,191,36,.16);border-color:rgba(251,191,36,.55);color:var(--gold)}
-    .hub-medal.silver{background:rgba(203,213,225,.16);border-color:rgba(203,213,225,.50);color:var(--silver)}
-    .hub-medal.bronze{background:rgba(217,119,6,.16);border-color:rgba(217,119,6,.50);color:var(--bronze)}
-    .hub-medal.none{opacity:.6}
+/* Medaillen stärker wie im Screenshot */
+.hub-medal{
+  grid-column:3;
+  justify-self:end;
+  display:inline-flex;align-items:center;justify-content:center;gap:4px;
+  height:38px;padding:0 16px;border-radius:999px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.05);
+  font-size:12px;font-weight:700;color:var(--ink);white-space:nowrap
+}
+.hub-medal.gold{background:rgba(251,191,36,.16);border-color:rgba(251,191,36,.55);color:var(--gold)}
+.hub-medal.silver{background:rgba(203,213,225,.16);border-color:rgba(203,213,225,.50);color:var(--silver)}
+.hub-medal.bronze{background:rgba(217,119,6,.16);border-color:rgba(217,119,6,.50);color:var(--bronze)}
+.hub-medal.none{opacity:.6}
 
-    /* ====== Restliche (bestehende) Styles ====== */
+/* ====== Restliche (bestehende) Styles ====== */
 
-    .card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);box-shadow:var(--shadow);}
-    .card .inner{padding:clamp(16px,2.6vw,24px)}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);box-shadow:var(--shadow);}
+.card .inner{padding:clamp(16px,2.6vw,24px)}
 
-    .story h2{margin:0 0 8px 0;font-size:clamp(18px,2.6vw,22px)}
-    .story p{margin:.35rem 0;color:var(--ink-dim);line-height:1.5}
+.story h2{margin:0 0 8px 0;font-size:clamp(18px,2.6vw,22px)}
+.story p{margin:.35rem 0;color:var(--ink-dim);line-height:1.5}
 
-    .statusbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;align-items:center}
-    .status-actions{margin-left:auto;display:flex;gap:10px;align-items:center}
-    .status-actions .btn{padding:8px 12px}
-    .chip{background-color:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);padding:8px 10px;border-radius:10px;font-size:13px;color:var(--ink-dim)}
-    .chip strong{color:var(--ink)}
+.statusbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;align-items:center}
+.status-actions{margin-left:auto;display:flex;gap:10px;align-items:center}
+.status-actions .btn{padding:8px 12px}
+.chip{background-color:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);padding:8px 10px;border-radius:10px;font-size:13px;color:var(--ink-dim)}
+.chip strong{color:var(--ink)}
 
-    .actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
-    .action-set-label{grid-column:1/-1;font-size:.85rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:rgba(226,232,240,.82);margin-bottom:4px}
-    @media (max-width:640px){.actions{grid-template-columns:1fr}}
-    button.action{
-      appearance:none; border:none; cursor:pointer; padding:16px 18px; border-radius:12px; text-align:left; color:var(--ink);
-      background:linear-gradient(180deg,rgba(96,165,250,.16),rgba(34,211,238,.10));
-      border:1px solid rgba(96,165,250,.35);
-      transition: transform .06s ease, box-shadow .15s ease, border-color .2s ease;
-      box-shadow:0 10px 25px rgba(34,211,238,.08);
-      position:relative; display:flex; align-items:center; gap:10px; overflow:hidden;
-      min-height:64px;
-    }
-    button.action .label{position:relative; z-index:1; font-weight:600}
-    button.action::after{
-      content: attr(data-key);
-      position:absolute; right:14px; top:50%; transform:translateY(-50%);
-      font-weight:800; font-size:clamp(34px,6vw,56px); line-height:1;
-      color:var(--ink-dim); opacity:.12; pointer-events:none; user-select:none;
-    }
-    button.action:hover{transform: translateY(-1px); box-shadow:0 14px 30px rgba(34,211,238,.14)}
-    button.action:active{transform: translateY(0)}
-    /* old .k marker removed in favor of big number badge */
-    .legend{margin-top:8px;font-size:12px;color:var(--muted)}
+.actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
+.action-set-label{grid-column:1/-1;font-size:.85rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:rgba(226,232,240,.82);margin-bottom:4px}
+@media (max-width:860px){.actions{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.actions{grid-template-columns:1fr}}
+button.action{
+  appearance:none; border:none; cursor:pointer; padding:16px 18px; border-radius:12px; text-align:left; color:var(--ink);
+  background:linear-gradient(180deg,rgba(96,165,250,.16),rgba(34,211,238,.10));
+  border:1px solid rgba(96,165,250,.35);
+  transition: transform .06s ease, box-shadow .15s ease, border-color .2s ease;
+  box-shadow:0 10px 25px rgba(34,211,238,.08);
+  position:relative; display:flex; align-items:center; gap:10px; overflow:hidden;
+  min-height:64px;
+}
+button.action .label{position:relative; z-index:1; font-weight:600}
+button.action::after{
+  content: attr(data-key);
+  position:absolute; right:14px; top:50%; transform:translateY(-50%);
+  font-weight:800; font-size:clamp(34px,6vw,56px); line-height:1;
+  color:var(--ink-dim); opacity:.12; pointer-events:none; user-select:none;
+}
+button.action:hover{transform: translateY(-1px); box-shadow:0 14px 30px rgba(34,211,238,.14)}
+button.action:active{transform: translateY(0)}
+/* old .k marker removed in favor of big number badge */
+.legend{margin-top:8px;font-size:12px;color:var(--muted)}
 
-    .legend{margin-top:8px;font-size:12px;color:var(--muted)}
+.legend{margin-top:8px;font-size:12px;color:var(--muted)}
 
-    .feedback{min-height:72px;margin-top:10px;
-        grid-template-columns:1fr 96px;gap:12px;align-items:stretch}
-    .feedback .mbody{color:var(--ink-dim)}
-    .feedback .mhead{display:flex;align-items:center;justify-content:space-between;margin:0}
-    .feedback .mhead h3{margin:0;font-size:18px}
-    .feedback .scene.mini svg{max-height:96px}
-    .summary .legend{margin-top:2px}
+.feedback{min-height:72px;margin-top:10px;
+    grid-template-columns:1fr 96px;gap:12px;align-items:stretch}
+.feedback .mbody{color:var(--ink-dim)}
+.feedback .mhead{display:flex;align-items:center;justify-content:space-between;margin:0}
+.feedback .mhead h3{margin:0;font-size:18px}
+.feedback .scene.mini svg{max-height:96px}
+.summary .legend{margin-top:2px}
 
-    .tools{margin:10px 0 0 0}
-    .tools .tool{display:inline-flex;align-items:center;gap:8px;margin:0 10px 10px 0;padding:8px 10px;background:transparent;border:1px dashed rgba(255,255,255,.2);border-radius:12px;color:var(--ink-dim)}
-    .tools .tool .icon{display:inline-block;background:var(--ink-dim);width:24px;height:24px;border-radius:6px}
-    .tools .tool .icon.status{position:relative}
-    .tools .tool .icon.status::after{content:"";position:absolute;right:-2px;bottom:-2px;width:10px;height:10px;border-radius:999px;background:var(--warn);border:2px solid var(--card)}
-    .tools .tool .icon.on{background:var(--good)}
-    .tools .tool .icon.ok{background:var(--good)}
-    .tools .tool .icon.off{background:var(--bad)}
-    .tools .tool .icon.dim{opacity:.4}
+.tools{margin:10px 0 0 0}
+.tools .tool{display:inline-flex;align-items:center;gap:8px;margin:0 10px 10px 0;padding:8px 10px;background:transparent;border:1px dashed rgba(255,255,255,.2);border-radius:12px;color:var(--ink-dim)}
+.tools .tool .icon{display:inline-block;background:var(--ink-dim);width:24px;height:24px;border-radius:6px}
+.tools .tool .icon.status{position:relative}
+.tools .tool .icon.status::after{content:"";position:absolute;right:-2px;bottom:-2px;width:10px;height:10px;border-radius:999px;background:var(--warn);border:2px solid var(--card)}
+.tools .tool .icon.on{background:var(--good)}
+.tools .tool .icon.ok{background:var(--good)}
+.tools .tool .icon.off{background:var(--bad)}
+.tools .tool .icon.dim{opacity:.4}
 
-    .footer{margin-top:12px;display:flex;justify-content:flex-end;gap:8px}
+.footer{margin-top:12px;display:flex;justify-content:flex-end;gap:8px}
 
-    .btn{appearance:none;border:1px solid rgba(255,255,255,.16);background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));border-radius:10px;padding:10px 12px;color:var(--ink);cursor:pointer;transition:transform .06s ease, box-shadow .15s ease, border-color .2s ease}
-    .btn:hover{transform: translateY(-1px); box-shadow:0 8px 20px rgba(34,211,238,.12)}
-    .btn:active{transform: translateY(0)}
-    .btn.primary{border-color:rgba(96,165,250,.35);background:linear-gradient(180deg,rgba(96,165,250,.22),rgba(34,211,238,.12));box-shadow:0 10px 24px rgba(34,211,238,.06)}
-    .btn[disabled]{opacity:.6;cursor:not-allowed}
+.btn{appearance:none;border:1px solid rgba(255,255,255,.16);background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));border-radius:10px;padding:10px 12px;color:var(--ink);cursor:pointer;transition:transform .06s ease, box-shadow .15s ease, border-color .2s ease}
+.btn:hover{transform: translateY(-1px); box-shadow:0 8px 20px rgba(34,211,238,.12)}
+.btn:active{transform: translateY(0)}
+.btn.primary{border-color:rgba(96,165,250,.35);background:linear-gradient(180deg,rgba(96,165,250,.22),rgba(34,211,238,.12));box-shadow:0 10px 24px rgba(34,211,238,.06)}
+.btn[disabled]{opacity:.6;cursor:not-allowed}
+header .controls .btn,
+#levelTag{
+  padding:0 16px;
+  min-height:36px;
+  height:36px;
+  line-height:1;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+}
 
-    .status{display:flex;align-items:center;gap:10px}
-    /* generic rating dot */
-    .score{display:flex;align-items:center;gap:10px}
-    .dot{display:inline-block;width:14px;height:14px;border-radius:999px;border:2px solid rgba(255,255,255,.22)}
-    .s-good{background:var(--good)}
-    .s-warn{background:var(--warn)}
-    .s-bad{background:var(--bad)}
-    .s-unk{background:var(--muted)}
-    .meters{display:flex;align-items:center;gap:10px}
-    .meter{display:flex;align-items:center;color:var(--ink-dim)}
-    .meter .bar{width:130px;height:8px;border-radius:999px;background:rgba(255,255,255,.1);margin:0 8px;position:relative;overflow:hidden}
-    .meter .bar .fill{display:block;position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,var(--good),#a3e635);border-radius:999px;transition:width .3s ease}
-    .meter .bar .fill.orange{background:linear-gradient(90deg,var(--warn),#fcd34d)}
-    .meter .bar .fill.red{background:linear-gradient(90deg,var(--bad),#f87171)}
+.status{display:flex;align-items:center;gap:10px}
+/* generic rating dot */
+.score{display:flex;align-items:center;gap:10px}
+.dot{display:inline-block;width:14px;height:14px;border-radius:999px;border:2px solid rgba(255,255,255,.22)}
+.s-good{background:var(--good)}
+.s-warn{background:var(--warn)}
+.s-bad{background:var(--bad)}
+.s-unk{background:var(--muted)}
+.meters{display:flex;align-items:center;gap:10px}
+.meter{display:flex;align-items:center;color:var(--ink-dim)}
+.meter .bar{width:130px;height:8px;border-radius:999px;background:rgba(255,255,255,.1);margin:0 8px;position:relative;overflow:hidden}
+.meter .bar .fill{display:block;position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,var(--good),#a3e635);border-radius:999px;transition:width .3s ease}
+.meter .bar .fill.orange{background:linear-gradient(90deg,var(--warn),#fcd34d)}
+.meter .bar .fill.red{background:linear-gradient(90deg,var(--bad),#f87171)}
 
-    .card .grid{display:grid;grid-template-columns: 1.2fr 1fr;gap:18px;align-items:start}
-    @media (max-width:840px){.card .grid{grid-template-columns: 1fr}}
+.card .grid{display:grid;grid-template-columns: 1.2fr 1fr;gap:18px;align-items:start}
+@media (max-width:840px){.card .grid{grid-template-columns: 1fr}}
 
-    .hint{color:var(--ink-dim)}
+.hint{color:var(--ink-dim)}
 
-    .goal{margin:10px 0}
-    .goal h3{margin:0 0 8px 0}
-    .goal ul{margin:0;padding-left:16px}
-    .goal li{margin:.2rem 0}
+.goal{margin:10px 0}
+.goal h3{margin:0 0 8px 0}
+.goal ul{margin:0;padding-left:16px}
+.goal li{margin:.2rem 0}
 
-    .lp21 table{width:100%;border-collapse:collapse}
-    .lp21 th,.lp21 td{border:1px solid rgba(255,255,255,.1);padding:10px;text-align:left}
-    .lp21 th{background:rgba(255,255,255,.06)}
-    .lp21 td small{display:block;color:var(--ink-dim);font-size:12px;margin-top:4px}
+.lp21 table{width:100%;border-collapse:collapse}
+.lp21 th,.lp21 td{border:1px solid rgba(255,255,255,.1);padding:10px;text-align:left}
+.lp21 th{background:rgba(255,255,255,.06)}
+.lp21 td small{display:block;color:var(--ink-dim);font-size:12px;margin-top:4px}
 
-    .analysis{margin-top:10px}
-    .analysis textarea{width:100%;min-height:120px;resize:vertical}
+.analysis{margin-top:10px}
+.analysis textarea{width:100%;min-height:120px;resize:vertical}
 
-    .summary{display:none}
-    .summary.active{display:block}
+.summary{display:none}
+.summary.active{display:block}
 
-    .step-log{margin-top:8px;padding-left:18px;color:var(--ink-dim)}
-    .step-log li{margin:.25rem 0}
+.step-log{margin-top:8px;padding-left:18px;color:var(--ink-dim)}
+.step-log li{margin:.25rem 0}
 
-    details.didaktik{margin-top:14px}
+details.didaktik{margin-top:14px}
 
-    details.hintbox{margin:0 0 10px 0}
-    details.hintbox summary{cursor:pointer}
-    details.hintbox[open] summary, details.didaktik[open] summary{margin-bottom:6px}
+details.hintbox{margin:0 0 10px 0}
+details.hintbox summary{cursor:pointer}
+details.hintbox[open] summary, details.didaktik[open] summary{margin-bottom:6px}
 
-    /* Grössere, schöne Aufklapp-Symbole (Chevron SVG) */
-    details summary{list-style:none}
-    details summary::-webkit-details-marker{display:none}
-    details.hintbox summary::before, details.didaktik summary::before{
-      content:""; display:inline-block; width:24px; height:24px; margin-right:10px;
-      background-color: var(--ink-dim);
-      -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M9 6l6 6-6 6"/></svg>') no-repeat center / 100% 100%;
-              mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M9 6l6 6-6 6"/></svg>') no-repeat center / 100% 100%;
-      transition: transform .2s ease, background-color .2s ease;
-      vertical-align:-4px;
-    }
-    details[open].hintbox summary::before, details[open].didaktik summary::before{
-      transform: rotate(90deg);
-      background-color: var(--ink);
-    }
+/* Grössere, schöne Aufklapp-Symbole (Chevron SVG) */
+details summary{list-style:none}
+details summary::-webkit-details-marker{display:none}
+details.hintbox summary::before, details.didaktik summary::before{
+  content:""; display:inline-block; width:24px; height:24px; margin-right:10px;
+  background-color: var(--ink-dim);
+  -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M9 6l6 6-6 6"/></svg>') no-repeat center / 100% 100%;
+          mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M9 6l6 6-6 6"/></svg>') no-repeat center / 100% 100%;
+  transition: transform .2s ease, background-color .2s ease;
+  vertical-align:-4px;
+}
+details[open].hintbox summary::before, details[open].didaktik summary::before{
+  transform: rotate(90deg);
+  background-color: var(--ink);
+}
 
-    /* Dünner Trenner zwischen LP21 und Auswertung */
-    .divider{border:0;border-top:1px dashed rgba(255,255,255,.14);margin:10px 0 12px 0}
+/* Dünner Trenner zwischen LP21 und Auswertung */
+.divider{border:0;border-top:1px dashed rgba(255,255,255,.14);margin:10px 0 12px 0}
 
-    /* Szene: Illustration */
-    .scene{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px;margin:10px 0 6px}
-    .scene svg{width:100%;height:auto;display:block}
-    .scene .mut{stroke:rgba(229,231,235,.45)}
-    .scene .mutfill{fill:rgba(255,255,255,.04)}
-    .scene .no-signal{display:none}
-    .scene.nosig .no-signal{display:block}
-    .scene .booterr,.scene .bootmenu{display:none}
-    .scene.booterr .booterr{display:block}
-    .scene.bootmenu .bootmenu{display:block}
-    .scene .login{display:none}
-    .scene.login .login{display:block}
-    .scene.login .login-domain-error{display:none}
-    .scene.login.domain-error .login-domain-error{display:block}
-    .scene.login.domain-error .login-default{display:none}
-    .scene .desktop-screen{display:none}
-    .scene.desktop .login-default,
-    .scene.desktop .login-domain-error{display:none}
-    .scene.desktop .desktop-screen{display:block}
-    .scene.power-on .led{stroke: var(--good); fill: var(--good)}
-    /* Screen nur sichtbar, wenn Monitor "an" (No-Signal oder Login) */
-    .scene .screen{display:none}
-    .scene.nosig .screen, .scene.login .screen, .scene.booterr .screen, .scene.bootmenu .screen{display:block}
-    .scene.bootmenu .bootmenu-bg{fill:rgba(15,23,42,.94);stroke:rgba(148,163,184,.45);stroke-width:1}
-    .scene .fan-unit{display:none}
-    .scene.fan-visible .fan-unit{display:inline}
-    .scene .fan-unit .fan-ring{stroke:rgba(148,163,184,.55);fill:rgba(148,163,184,.10)}
-    .scene .fan-unit .fan-blade{stroke:rgba(148,163,184,.4);stroke-width:2;stroke-linecap:round}
-    .scene .fan-unit .fan-hub{fill:rgba(148,163,184,.6)}
-    .scene .fan-blocker,.scene .heat,.scene .cool-air{display:none}
-    .scene .fan-blocker line{stroke:rgba(248,113,113,.7);stroke-width:4;stroke-linecap:round}
-    .scene.fan-blocked .fan-blocker{display:block}
-    .scene.fan-blocked .fan-unit .fan-ring{stroke:var(--warn);fill:rgba(245,158,11,.12)}
-    .scene.fan-clean .fan-unit .fan-ring{stroke:var(--good);fill:rgba(34,197,94,.15)}
-    .scene.fan-clean .fan-unit .fan-hub{fill:var(--good)}
-    .scene.overheat .heat{display:block}
-    .scene.fan-clean .cool-air{display:block}
-    .scene.overheat .cool-air{display:none}
-    .scene .heat path{stroke:rgba(239,68,68,.65);stroke-width:2.5;fill:none;stroke-linecap:round}
-    .scene .cool-air path{stroke:rgba(56,189,248,.75);stroke-width:2.5;fill:none;stroke-linecap:round;opacity:.85}
+/* Szene: Illustration */
+.scene{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px;margin:10px 0 6px}
+.scene svg{width:100%;height:auto;display:block}
+.scene .mut{stroke:rgba(229,231,235,.45)}
+.scene .mutfill{fill:rgba(255,255,255,.04)}
+.scene .no-signal{display:none}
+.scene.nosig .no-signal{display:block}
+.scene .booterr,.scene .bootmenu{display:none}
+.scene.booterr .booterr{display:block}
+.scene.bootmenu .bootmenu{display:block}
+.scene .login{display:none}
+.scene.login .login{display:block}
+.scene.login .login-domain-error{display:none}
+.scene.login.domain-error .login-domain-error{display:block}
+.scene.login.domain-error .login-default{display:none}
+.scene .desktop-screen{display:none}
+.scene.desktop .login-default,
+.scene.desktop .login-domain-error{display:none}
+.scene.desktop .desktop-screen{display:block}
+.scene.power-on .led{stroke: var(--good); fill: var(--good)}
+/* Screen nur sichtbar, wenn Monitor "an" (No-Signal oder Login) */
+.scene .screen{display:none}
+.scene.nosig .screen, .scene.login .screen, .scene.booterr .screen, .scene.bootmenu .screen{display:block}
+.scene.bootmenu .bootmenu-bg{fill:rgba(15,23,42,.94);stroke:rgba(148,163,184,.45);stroke-width:1}
+.scene .fan-unit{display:none}
+.scene.fan-visible .fan-unit{display:inline}
+.scene .fan-unit .fan-ring{stroke:rgba(148,163,184,.55);fill:rgba(148,163,184,.10)}
+.scene .fan-unit .fan-blade{stroke:rgba(148,163,184,.4);stroke-width:2;stroke-linecap:round}
+.scene .fan-unit .fan-hub{fill:rgba(148,163,184,.6)}
+.scene .fan-blocker,.scene .heat,.scene .cool-air{display:none}
+.scene .fan-blocker line{stroke:rgba(248,113,113,.7);stroke-width:4;stroke-linecap:round}
+.scene.fan-blocked .fan-blocker{display:block}
+.scene.fan-blocked .fan-unit .fan-ring{stroke:var(--warn);fill:rgba(245,158,11,.12)}
+.scene.fan-clean .fan-unit .fan-ring{stroke:var(--good);fill:rgba(34,197,94,.15)}
+.scene.fan-clean .fan-unit .fan-hub{fill:var(--good)}
+.scene.overheat .heat{display:block}
+.scene.fan-clean .cool-air{display:block}
+.scene.overheat .cool-air{display:none}
+.scene .heat path{stroke:rgba(239,68,68,.65);stroke-width:2.5;fill:none;stroke-linecap:round}
+.scene .cool-air path{stroke:rgba(56,189,248,.75);stroke-width:2.5;fill:none;stroke-linecap:round;opacity:.85}
 
-    /* Action message */
-    .action-message{display:none;margin-top:12px;background:var(--card);border:1px solid rgba(255,255,255,.16);border-radius:16px;box-shadow:var(--shadow);padding:18px}
-    .action-message.open{display:grid;grid-template-columns:1fr 130px;grid-template-rows:auto 1fr;gap:12px;align-items:stretch}
-    .action-message .mhead{display:flex;align-items:center;justify-content:space-between;margin:0}
-    .action-message .mhead h3{margin:0;font-size:18px}
-    .action-message .mbody{font-size:14px;color:var(--ink-dim);grid-column:1;grid-row:2}
-    .action-message .mfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
-    .action-message.top-modal{position:fixed;top:48px;left:50%;transform:translateX(-50%);max-width:720px;width:calc(100% - 48px);z-index:999;background:linear-gradient(180deg,#101c38,#0b1223);border-color:#1f2937;box-shadow:0 18px 40px rgba(15,23,42,.6);padding:18px 24px 24px}
-    .action-message.top-modal.open{display:grid;grid-template-columns:1fr;grid-template-rows:auto 1fr auto;row-gap:10px}
-    .action-message.top-modal .mhead{grid-column:1;grid-row:1;margin-bottom:4px;display:flex;align-items:center;gap:12px}
-    .action-message.top-modal .modal-title-main{font-size:18px;font-weight:700;color:var(--ink)}
-    .action-message.top-modal .modal-title-sub{font-size:.95rem;color:var(--ink-dim);font-weight:500;margin-left:auto;text-align:right;padding-left:24px}
-    .action-message.top-modal .modal-title-sub.only{margin-left:0;padding-left:0;text-align:left}
-    .action-message.top-modal .mbody{grid-column:1;grid-row:2;margin-top:0}
-    .action-message.top-modal .mbody > :first-child{margin-top:0}
-    .action-message.top-modal .mfoot{grid-column:1;grid-row:3;margin-top:20px}
-    .action-message.top-modal.open .mfoot{display:block}
-    .action-message.top-modal.open .mfoot .btn{display:block;width:100%;padding:12px 0;height:auto}
-    body.top-modal-open::after{
-      content:'';
-      position:fixed;
-      inset:0;
-      background:rgba(10,15,28,.68);
-      backdrop-filter:blur(4px);
-      z-index:998;
-    }
-    body.top-modal-open .wrap{pointer-events:none}
-    body.top-modal-open #hubView > section,
-    body.top-modal-open #scenarioView > section{display:none}
-    .score-table-wrap{margin-top:8px;overflow-x:auto;border-radius:12px;border:1px solid rgba(148,163,184,.16);background:rgba(15,23,42,.55)}
-    .score-table{width:100%;border-collapse:collapse;font-size:.92rem}
-    .score-table thead th{font-size:.75rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-dim);padding:12px 14px;background:rgba(15,23,42,.75);text-align:left}
-    .score-table thead th.score-col-time,
-    .score-table thead th.score-col-tries,
-    .score-table thead th.score-col-score{text-align:right}
-    .score-table tbody td{padding:12px 14px;border-top:1px solid rgba(148,163,184,.14);color:var(--ink)}
-    .score-table tbody tr:first-child td{border-top:none}
-    .score-table tbody tr.score-row-empty td{color:var(--ink-dim)}
-    .score-table tbody tr:nth-child(odd) td{background:rgba(27,43,84,.55)}
-    .score-table tbody tr:nth-child(even) td{background:rgba(21,32,63,.45)}
-    .score-table tbody tr:hover td{background:rgba(96,165,250,.08)}
-    .score-col-time,.score-col-tries,.score-col-score{text-align:right;font-variant-numeric:tabular-nums}
-    .score-rank{display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:4px 12px;border-radius:999px;border:1px solid rgba(148,163,184,.3);background:rgba(148,163,184,.15);color:var(--ink)}
-    .score-rank.rank-gold{color:var(--gold);border-color:rgba(251,191,36,.5);background:rgba(251,191,36,.12)}
-    .score-rank.rank-silber{color:var(--silver);border-color:rgba(203,213,225,.45);background:rgba(203,213,225,.12)}
-    .score-rank.rank-bronze{color:var(--bronze);border-color:rgba(217,119,6,.45);background:rgba(217,119,6,.12)}
-    .score-rank.rank-none{color:var(--ink-dim);border-color:rgba(148,163,184,.24);background:rgba(148,163,184,.08)}
-    .score-note{display:block;margin-top:6px;font-size:.78rem;color:var(--ink-dim)}
-    /* Place the primary action as a tall side button matching modal height */
-    /* apply only to in-card modal; top modal uses its own layout */
-    .action-message.open:not(.top-modal) .mfoot{grid-column:2;grid-row:1 / span 2;margin-top:0;align-items:stretch}
-    .action-message.open:not(.top-modal) .mfoot .btn{height:100%;width:100%;display:flex;align-items:center;justify-content:center}
-    .scene.mini svg{max-height:160px}
-    .scene.mini{margin-top:10px}
+/* Action message */
+.action-message{display:none;margin-top:12px;background:var(--card);border:1px solid rgba(255,255,255,.16);border-radius:16px;box-shadow:var(--shadow);padding:18px}
+.action-message.open{display:grid;grid-template-columns:1fr 130px;grid-template-rows:auto 1fr;gap:12px;align-items:stretch}
+.action-message .mhead{display:flex;align-items:center;justify-content:space-between;margin:0}
+.action-message .mhead h3{margin:0;font-size:18px}
+.action-message .mbody{font-size:14px;color:var(--ink-dim);grid-column:1;grid-row:2}
+.action-message .mfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+.action-message.top-modal{position:fixed;top:48px;left:50%;transform:translateX(-50%);max-width:720px;width:calc(100% - 48px);z-index:999;background:linear-gradient(180deg,#101c38,#0b1223);border-color:#1f2937;box-shadow:0 18px 40px rgba(15,23,42,.6);padding:18px 24px 24px}
+.action-message.top-modal.open{display:grid;grid-template-columns:1fr;grid-template-rows:auto 1fr auto;row-gap:10px}
+.action-message.top-modal .mhead{grid-column:1;grid-row:1;margin-bottom:4px;display:flex;align-items:center;gap:12px}
+.modal-close{
+  margin-left:auto;
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  border:1px solid rgba(148,163,184,.28);
+  background:linear-gradient(135deg, rgba(15,23,42,.9), rgba(30,64,175,.6));
+  color:var(--ink);
+  font-size:20px;
+  line-height:1;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+.modal-close:hover{
+  background:linear-gradient(135deg, rgba(59,130,246,.4), rgba(14,116,144,.4));
+}
+.action-message.top-modal .modal-title-main{font-size:18px;font-weight:700;color:var(--ink)}
+.action-message.top-modal .modal-title-sub{font-size:.95rem;color:var(--ink-dim);font-weight:500;margin-left:auto;text-align:right;padding-left:24px}
+.action-message.top-modal .modal-title-sub.only{margin-left:0;padding-left:0;text-align:left}
+.action-message.top-modal .mbody{grid-column:1;grid-row:2;margin-top:0}
+.action-message.top-modal .mbody > :first-child{margin-top:0}
+.action-message.top-modal .mfoot{grid-column:1;grid-row:3;margin-top:20px}
+.action-message.top-modal.open .mfoot{display:block}
+.action-message.top-modal.open .mfoot .btn{display:block;width:100%;padding:12px 0;height:auto}
+body.top-modal-open::after{
+  content:'';
+  position:fixed;
+  inset:0;
+  background:rgba(10,15,28,.68);
+  backdrop-filter:blur(4px);
+  z-index:998;
+}
+body.top-modal-open .wrap{pointer-events:none}
+body.top-modal-open #hubView > section,
+body.top-modal-open #scenarioView > section{display:none}
+.score-table-wrap{margin-top:8px;overflow-x:auto;border-radius:12px;border:1px solid rgba(148,163,184,.16);background:rgba(15,23,42,.55)}
+.score-table{width:100%;border-collapse:collapse;font-size:.92rem}
+.score-table thead th{font-size:.75rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-dim);padding:12px 14px;background:rgba(15,23,42,.75);text-align:left}
+.score-table thead th.score-col-time,
+.score-table thead th.score-col-tries,
+.score-table thead th.score-col-score{text-align:right}
+.score-table tbody td{padding:12px 14px;border-top:1px solid rgba(148,163,184,.14);color:var(--ink)}
+.score-table tbody tr:first-child td{border-top:none}
+.score-table tbody tr.score-row-empty td{color:var(--ink-dim)}
+.score-table tbody tr:nth-child(odd) td{background:rgba(27,43,84,.55)}
+.score-table tbody tr:nth-child(even) td{background:rgba(21,32,63,.45)}
+.score-table tbody tr:hover td{background:rgba(96,165,250,.08)}
+.score-col-time,.score-col-tries,.score-col-score{text-align:right;font-variant-numeric:tabular-nums}
+.score-rank{display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:4px 12px;border-radius:999px;border:1px solid rgba(148,163,184,.3);background:rgba(148,163,184,.15);color:var(--ink)}
+.score-rank.rank-gold{color:var(--gold);border-color:rgba(251,191,36,.5);background:rgba(251,191,36,.12)}
+.score-rank.rank-silber{color:var(--silver);border-color:rgba(203,213,225,.45);background:rgba(203,213,225,.12)}
+.score-rank.rank-bronze{color:var(--bronze);border-color:rgba(217,119,6,.45);background:rgba(217,119,6,.12)}
+.score-rank.rank-none{color:var(--ink-dim);border-color:rgba(148,163,184,.24);background:rgba(148,163,184,.08)}
+.score-note{display:block;margin-top:6px;font-size:.78rem;color:var(--ink-dim)}
+/* Place the primary action as a tall side button matching modal height */
+/* apply only to in-card modal; top modal uses its own layout */
+.action-message.open:not(.top-modal) .mfoot{grid-column:2;grid-row:1 / span 2;margin-top:0;align-items:stretch}
+.action-message.open:not(.top-modal) .mfoot .btn{height:100%;width:100%;display:flex;align-items:center;justify-content:center}
+.scene.mini svg{max-height:160px}
+.scene.mini{margin-top:10px}
 
-    /* Celebration animation */
-    .confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:1000;}
-    .confetti-piece{position:absolute;width:8px;height:8px;background:var(--accent);animation:drop 3s linear forwards;}
-    @keyframes drop{to{transform:translateY(100vh) rotate(720deg);opacity:0;}}
+/* Celebration animation */
+.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:1000;}
+.confetti-piece{position:absolute;width:8px;height:8px;background:var(--accent);animation:drop 3s linear forwards;}
+@keyframes drop{to{transform:translateY(100vh) rotate(720deg);opacity:0;}}
 
-    /* Card transition animations */
-    @keyframes slideOutLeft{from{transform:translateX(0);opacity:1} to{transform:translateX(-360px);opacity:0}}
-    @keyframes slideInRight{from{transform:translateX(60px);opacity:0} to{transform:translateX(0);opacity:1}}
-    .card.transition-out{animation:slideOutLeft .28s ease both}
-    .card.transition-in{animation:slideInRight .32s ease both}
-    .card.transitioning{pointer-events:none}
+/* Card transition animations */
+@keyframes slideOutLeft{from{transform:translateX(0);opacity:1} to{transform:translateX(-360px);opacity:0}}
+@keyframes slideInRight{from{transform:translateX(60px);opacity:0} to{transform:translateX(0);opacity:1}}
+.card.transition-out{animation:slideOutLeft .28s ease both}
+.card.transition-in{animation:slideInRight .32s ease both}
+.card.transitioning{pointer-events:none}
 
-    /* Restart cue: quick shrink/fade out then pop in + optional overlay */
-    @keyframes restartOut{from{transform:scale(1);opacity:1;filter:none}to{transform:scale(.98);opacity:0;filter:blur(2px)}}
-    @keyframes restartIn{from{transform:scale(1.02);opacity:0}to{transform:scale(1);opacity:1}}
-    .card.restart-out{animation:restartOut .22s ease both}
-    .card.restart-in{animation:restartIn .26s ease both}
-    .restart-overlay{position:fixed;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.35);backdrop-filter:blur(2px);z-index:900;pointer-events:none;opacity:0;animation:overlayFade .38s ease forwards}
-    .restart-indicator{display:inline-flex;gap:10px;align-items:center;padding:10px 14px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);box-shadow:var(--shadow);font-weight:700;color:var(--ink)}
-    .restart-indicator .icon{display:inline-block;transform-origin:50% 50%;animation:spin .6s ease 1}
-    @keyframes overlayFade{from{opacity:0}to{opacity:1}}
-    @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+/* Restart cue: quick shrink/fade out then pop in + optional overlay */
+@keyframes restartOut{from{transform:scale(1);opacity:1;filter:none}to{transform:scale(.98);opacity:0;filter:blur(2px)}}
+@keyframes restartIn{from{transform:scale(1.02);opacity:0}to{transform:scale(1);opacity:1}}
+.card.restart-out{animation:restartOut .22s ease both}
+.card.restart-in{animation:restartIn .26s ease both}
+.restart-overlay{position:fixed;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.35);backdrop-filter:blur(2px);z-index:900;pointer-events:none;opacity:0;animation:overlayFade .38s ease forwards}
+.restart-indicator{display:inline-flex;gap:10px;align-items:center;padding:10px 14px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);box-shadow:var(--shadow);font-weight:700;color:var(--ink)}
+.restart-indicator .icon{display:inline-block;transform-origin:50% 50%;animation:spin .6s ease 1}
+@keyframes overlayFade{from{opacity:0}to{opacity:1}}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 
-    /* Accessibility helpers */
-    [aria-live]{outline:none}
-    @media (prefers-reduced-motion: reduce){
-      *{transition:none !important;animation:none !important}
-    }
-  </style>
+/* Accessibility helpers */
+[aria-live]{outline:none}
+@media (prefers-reduced-motion: reduce){
+  *{transition:none !important;animation:none !important}
+}
+</style>
   <link rel="icon" type="image/svg+xml" href="code/favicon.svg" />
 </head>
 <body>
   <div class="wrap hub-view" id="hubView">
     <header class="hub-header">
-      <div class="title">PC-Troubleshooter <span class="badge" id="hubVerTag">v2.6</span></div>
+      <div class="title">PC-Troubleshooter <span class="badge" id="hubVerTag">v3.2</span></div>
       <div class="hub-info" id="hubInfo"></div>
     </header>
     <section class="hub-card" aria-labelledby="hubTitle">
@@ -487,9 +508,9 @@
 
   <div class="wrap hidden" id="scenarioView">
     <header>
-      <div class="title">PC-Troubleshooter <span class="badge" id="verTag">v2.6</span></div>
+      <div class="title">PC-Troubleshooter <span class="badge" id="verTag">v3.2</span></div>
       <div class="controls">
-        <div class="badge" id="levelTag" aria-live="polite">Fall 1/5 • <b>Einfach</b></div>
+        <div class="badge" id="levelTag" aria-live="polite">Fall</div>
         <button class="btn" type="button" id="scoreBtn" title="Score anzeigen" aria-label="Score anzeigen">🏆 Score</button>
         <button class="btn" type="button" id="hubBtn" title="Zurück zum Hub" aria-label="Zurück zum Hub">🏠 Hub</button>
       </div>
@@ -499,6 +520,7 @@
     <div class="action-message" id="actionMessageTop" aria-hidden="true">
       <header class="mhead">
         <h3 id="messageTitleTop">Aktion</h3>
+        <button class="modal-close" type="button" id="messageCloseTop" aria-label="Schliessen" hidden>×</button>
       </header>
       <div class="mbody" id="messageBodyTop"></div>
       <div class="mfoot">
@@ -642,7 +664,6 @@
             <div class="chip">Zeit: <strong id="time">0</strong> Min</div>
             <div class="chip">Schritte: <strong id="tries">0</strong></div>
             <div class="chip">Status: <strong id="status">Unbekannt</strong></div>
-            
           </div>
 
           <div class="actions" id="actions" aria-label="Verfügbare Aktionen"></div>
@@ -685,149 +706,144 @@
 
   <script type="module">
     const scenario1 = {
-      id: 'L0',
-      name: 'Der PC startet nicht',
-      storyTitle: 'Szenario: Der PC, der nicht starten will',
-      storyText: 'Du sitzt im Informatikraum und dein PC reagiert nicht: Du drückst den Power‑Knopf, aber es passiert nichts. Dein Ziel: In möglichst <b>wenigen Schritten</b> die Ursache finden.',
-      hints: {
-        h1: 'Was kannst du prüfen, <b>ohne den PC zu öffnen</b>?',
-        h2: '<ul class="hint"><li><b>Stromversorgung:</b> Kabel/Leiste/Netzschalter prüfen.</li><li><b>Anzeige:</b> Monitor einschalten / richtigen Eingang wählen.</li></ul>'
-      },
-      start: { pcOn: false, monitorOn: false, signalOk: true }
-    };
-
+  id: 'L0',
+  name: 'Der PC startet nicht',
+  storyTitle: 'Szenario: Der PC, der nicht starten will',
+  storyText: 'Du sitzt im Informatikraum und dein PC reagiert nicht: Du drückst den Power‑Knopf, aber es passiert nichts. Dein Ziel: In möglichst <b>wenigen Schritten</b> die Ursache finden.',
+  hints: {
+    h1: 'Was kannst du prüfen, <b>ohne den PC zu öffnen</b>?',
+    h2: '<ul class="hint"><li><b>Stromversorgung:</b> Kabel/Leiste/Netzschalter prüfen.</li><li><b>Anzeige:</b> Monitor einschalten / richtigen Eingang wählen.</li></ul>'
+  },
+  start: { pcOn: false, monitorOn: false, signalOk: true }
+};
     const scenario2 = {
-      id: 'E1',
-      name: 'Kein Signal',
-      storyTitle: 'Szenario: PC läuft, kein Bild',
-      storyText: 'Der PC läuft (Lüfter/LED), aber wir haben kein Bild. <b>Was überprüfst du als Erstes?</b>',
-      hints: {
-        h1: 'Was beeinflusst das <b>Bild</b>, ohne den PC zu öffnen?',
-        h2: '<ul class="hint"><li><b>Anzeige:</b> Monitor einschalten.</li><li><b>Quelle/Kabel:</b> HDMI/DP richtig wählen oder Kabel fest einstecken.</li></ul>'
-      },
-      start: { pcOn: true, monitorOn: false, signalOk: false }
-    };
-
+  id: 'E1',
+  name: 'Kein Signal',
+  storyTitle: 'Szenario: PC läuft, kein Bild',
+  storyText: 'Der PC läuft (Lüfter/LED), aber wir haben kein Bild. <b>Was überprüfst du als Erstes?</b>',
+  hints: {
+    h1: 'Was beeinflusst das <b>Bild</b>, ohne den PC zu öffnen?',
+    h2: '<ul class="hint"><li><b>Anzeige:</b> Monitor einschalten.</li><li><b>Quelle/Kabel:</b> HDMI/DP richtig wählen oder Kabel fest einstecken.</li></ul>'
+  },
+  start: { pcOn: true, monitorOn: false, signalOk: false }
+};
     const scenario3 = {
-      id: 'M3',
-      name: 'Kein Bild trotz Start',
-      storyTitle: 'Szenario: Kein Bild trotz Start',
-      storyText: 'Der PC läuft (Lüfter/LED), der Monitor ist an – doch es erscheint <i>kein Bild</i> (No Signal). <b>Was prüfst du als Nächstes?</b>',
-      hints: {
-        h1: 'Vor dem Bild passiert der <b>POST</b>. Was verraten <b>Pieptöne/LEDs</b>?',
-        h2: '<ul class="hint"><li><b>POST-Hinweise lesen:</b> DRAM-LED an? Beepcode für Speicher?</li><li><b>RAM prüfen:</b> Riegel korrekt eindrücken/einzeln testen.</li><li><b>Anzeige nur sekundär:</b> Monitor kann an sein, aber ohne POST gibt es kein Signal.</li></ul>'
-      },
-      start: { pcOn: true, monitorOn: true, signalOk: false }
-    };
-
+  id: 'M3',
+  name: 'Kein Bild trotz Start',
+  storyTitle: 'Szenario: Kein Bild trotz Start',
+  storyText: 'Der PC läuft (Lüfter/LED), der Monitor ist an – doch es erscheint <i>kein Bild</i> (No Signal). <b>Was prüfst du als Nächstes?</b>',
+  hints: {
+    h1: 'Vor dem Bild passiert der <b>POST</b>. Was verraten <b>Pieptöne/LEDs</b>?',
+    h2: '<ul class="hint"><li><b>POST-Hinweise lesen:</b> DRAM-LED an? Beepcode für Speicher?</li><li><b>RAM prüfen:</b> Riegel korrekt eindrücken/einzeln testen.</li><li><b>Anzeige nur sekundär:</b> Monitor kann an sein, aber ohne POST gibt es kein Signal.</li></ul>'
+  },
+  start: { pcOn: true, monitorOn: true, signalOk: false }
+};
     const scenario4 = {
-      id: 'K1',
-      name: 'Tastatur reagiert nicht',
-      storyTitle: 'Szenario: Tastatur reagiert nicht',
-      storyText:
-        'Der PC ist gestartet, doch deine Tastatur reagiert nicht: Du willst dich anmelden, aber keine Taste wird erkannt. ' +
-        'Finde den schnellen Weg, damit die Tastatur wieder reagiert.',
-      hints: {
-        h1: 'Welche Schritte brauchst du, bevor du Hardware austauschst?',
-        h2:
-          '<ul class="hint">' +
-          '<li><b>Kabel pruefen:</b> Steckt der USB-Stecker fest oder hilft ein anderer Port?</li>' +
-          '<li><b>Andere Geraete?</b> Maus funktioniert, Anzeige steht stabil.</li>' +
-          '<li><b>Software-Reset:</b> Ein sauberer Neustart initialisiert die Eingabegeraete neu.</li>' +
-          '</ul>'
-      },
-      start: {
-        pcOn: true,
-        monitorOn: true,
-        signalOk: true,
-        keyboardResponsive: false
-      }
-    };
-
+  id: 'K1',
+  name: 'Tastatur reagiert nicht',
+  storyTitle: 'Szenario: Tastatur reagiert nicht',
+  storyText:
+    'Der PC ist gestartet, doch deine Tastatur reagiert nicht: Du willst dich anmelden, aber keine Taste wird erkannt. ' +
+    'Finde den schnellen Weg, damit die Tastatur wieder reagiert.',
+  hints: {
+    h1: 'Welche Schritte brauchst du, bevor du Hardware austauschst?',
+    h2:
+      '<ul class="hint">' +
+      '<li><b>Kabel pruefen:</b> Steckt der USB-Stecker fest oder hilft ein anderer Port?</li>' +
+      '<li><b>Andere Geraete?</b> Maus funktioniert, Anzeige steht stabil.</li>' +
+      '<li><b>Software-Reset:</b> Ein sauberer Neustart initialisiert die Eingabegeraete neu.</li>' +
+      '</ul>'
+  },
+  start: {
+    pcOn: true,
+    monitorOn: true,
+    signalOk: true,
+    keyboardResponsive: false
+  }
+};
     const scenario5 = {
-      id: 'S2',
-      name: 'Überhitzung / Lüfter blockiert',
-      storyTitle: 'Szenario: Überhitzung unter Last',
-      storyText:
-        'Der PC startet normal und bleibt im Idle stabil. Doch sobald du ihn forderst, ' +
-        'tritt nach kurzer Zeit <b>Throttling oder ein Abschalten</b> auf. ' +
-        'Finde die Ursache und stelle den stabilen Betrieb wieder her.',
-      hints: {
-        h1: 'Thermik-Frage: <b>Passiert der Fehler sofort oder nach einiger Zeit unter Last?</b>',
-        h2:
-          '<ul class="hint">' +
-          '<li><b>Frage klären:</b> „Passiert der Fehler sofort oder nach einiger Zeit unter Last?“ → deutet stark auf Thermik.</li>' +
-          '<li><b>Symptome beobachten:</b> Lasttest laufen lassen und auf Temperatur-/Lüfterverhalten achten.</li>' +
-          '<li><b>Lüfter blockiert?</b> Seitenwand öffnen, Kabel oder Staub entfernen, Lüfter frei drehen lassen.</li>' +
-          '<li><b>Nach der Reinigung:</b> Temperaturen mit Monitoring prüfen; Wärmeleitpaste nur bei Bedarf als Zusatz erwähnen.</li>' +
-          '</ul>'
-      },
-      start: {
-        pcOn: true,
-        monitorOn: true,
-        signalOk: true,
-        fanBlocked: true,
-        dustCleared: false,
-        tempsStable: true,
-        overheatObserved: false
-      }
-    };
-
+  id: 'S2',
+  name: 'Überhitzung / Lüfter blockiert',
+  storyTitle: 'Szenario: Überhitzung unter Last',
+  storyText:
+    'Der PC startet normal und bleibt im Idle stabil. Doch sobald du ihn forderst, ' +
+    'tritt nach kurzer Zeit <b>Throttling oder ein Abschalten</b> auf. ' +
+    'Finde die Ursache und stelle den stabilen Betrieb wieder her.',
+  hints: {
+    h1: 'Thermik-Frage: <b>Passiert der Fehler sofort oder nach einiger Zeit unter Last?</b>',
+    h2:
+      '<ul class="hint">' +
+      '<li><b>Frage klären:</b> „Passiert der Fehler sofort oder nach einiger Zeit unter Last?“ → deutet stark auf Thermik.</li>' +
+      '<li><b>Symptome beobachten:</b> Lasttest laufen lassen und auf Temperatur-/Lüfterverhalten achten.</li>' +
+      '<li><b>Lüfter blockiert?</b> Seitenwand öffnen, Kabel oder Staub entfernen, Lüfter frei drehen lassen.</li>' +
+      '<li><b>Nach der Reinigung:</b> Temperaturen mit Monitoring prüfen; Wärmeleitpaste nur bei Bedarf als Zusatz erwähnen.</li>' +
+      '</ul>'
+  },
+  start: {
+    pcOn: true,
+    monitorOn: true,
+    signalOk: true,
+    fanBlocked: true,
+    dustCleared: false,
+    tempsStable: true,
+    overheatObserved: false
+  }
+};
     const scenario6 = {
-      id: 'N1',
-      name: 'Netzwerk/Login-Spezial (Mittel)',
-      storyTitle: 'Szenario: Domänen-Login scheitert',
-      storyText:
-        'Der PC ist gestartet, der Login-Bildschirm erscheint – doch dein Domänenkonto meldet: ' +
-        '"<b>Profil nicht verfügbar / Server nicht erreichbar</b>". ' +
-        'Finde die Ursache und ermögliche den Login.',
-      hints: {
-        h1: 'Domänen-Login schlägt fehl – was sagt das über die <b>Netzwerkverbindung</b>?',
-        h2:
-          '<ul class="hint">' +
-          '<li><b>LAN-Kabel verfolgen:</b> Steckt es richtig? Link-LED am Switch leuchtet?</li>' +
-          '<li><b>Domäne braucht Netzwerk:</b> Ohne Verbindung klappt nur ein <b>lokales Konto</b> (Notlösung).</li>' +
-          '<li><b>Hardware-Overkill vermeiden:</b> BIOS, CPU oder RAM helfen hier nicht – Fokus auf Netzwerk.</li>' +
-          '</ul>'
-      },
-      start: {
-        pcOn: true,
-        monitorOn: true,
-        signalOk: true,
-        lanConnected: false,
-        switchLedOn: false
-      }
-    };
-
+  id: 'N1',
+  name: 'Netzwerk/Login-Spezial',
+  storyTitle: 'Szenario: Domänen-Login scheitert',
+  storyText:
+    'Der PC ist gestartet, der Login-Bildschirm erscheint – doch dein Domänenkonto meldet: ' +
+    '"<b>Profil nicht verfügbar / Server nicht erreichbar</b>". ' +
+    'Finde die Ursache und ermögliche den Login.',
+  hints: {
+    h1: 'Domänen-Login schlägt fehl – was sagt das über die <b>Netzwerkverbindung</b>?',
+    h2:
+      '<ul class="hint">' +
+      '<li><b>LAN-Kabel verfolgen:</b> Steckt es richtig? Link-LED am Switch leuchtet?</li>' +
+      '<li><b>Domäne braucht Netzwerk:</b> Ohne Verbindung klappt nur ein <b>lokales Konto</b> (Notlösung).</li>' +
+      '<li><b>Hardware-Overkill vermeiden:</b> BIOS, CPU oder RAM helfen hier nicht – Fokus auf Netzwerk.</li>' +
+      '</ul>'
+  },
+  start: {
+    pcOn: true,
+    monitorOn: true,
+    signalOk: true,
+    lanConnected: false,
+    switchLedOn: false
+  }
+};
     const scenario7 = {
-      id: 'S4',
-      name: 'No bootable device (Bootfehler)',
-      storyTitle: 'Szenario: "No bootable device"',
-      storyText:
-        'Der PC startet, Monitor und Signal sind aktiv – doch statt Windows erscheint sofort <b>NO BOOTABLE DEVICE</b>. ' +
-        'Finde den Fehler und bringe das System wieder bis zum Login.',
-      hints: {
-        h1: '<b>Externes Medium?</b> Bootet der PC vielleicht vom falschen Gerät (USB-Stick)?',
-        h2:
-          '<ul class="hint">' +
-          '<li><b>Boot-Menü nutzen:</b> Mit F12 das richtige Startlaufwerk (SSD) wählen – reversibel und schnell.</li>' +
-          '<li><b>USB-Geräte entfernen:</b> Sticks können die Bootreihenfolge überlagern. Danach <b>neu starten</b>.</li>' +
-          '<li><b>Nur wenn nötig:</b> Bootreihenfolge im BIOS dauerhaft ändern und speichern.</li>' +
-          '</ul>'
-      },
-      start: {
-        pcOn: true,
-        monitorOn: true,
-        signalOk: true,
-        bootError: true,
-        activeSet: 'A',
-        bootMenuOpen: false,
-        usbPresent: true,
-        bootOrderChanged: false,
-        bootOrderPersisted: false
-      }
-    };
+  id: 'S4',
+  name: 'No bootable device (Bootfehler)',
+  storyTitle: 'Szenario: "No bootable device"',
+  storyText:
+    'Der PC startet, Monitor und Signal sind aktiv – doch statt Windows erscheint sofort <b>NO BOOTABLE DEVICE</b>. ' +
+    'Finde den Fehler und bringe das System wieder bis zum Login.',
+  hints: {
+    h1: '<b>Externes Medium?</b> Bootet der PC vielleicht vom falschen Gerät (USB-Stick)?',
+    h2:
+      '<ul class="hint">' +
+      '<li><b>Boot-Menü nutzen:</b> Mit F12 das richtige Startlaufwerk (SSD) wählen – reversibel und schnell.</li>' +
+      '<li><b>USB-Geräte entfernen:</b> Sticks können die Bootreihenfolge überlagern. Danach <b>neu starten</b>.</li>' +
+      '<li><b>Nur wenn nötig:</b> Bootreihenfolge im BIOS dauerhaft ändern und speichern.</li>' +
+      '</ul>'
+  },
+  start: {
+    pcOn: true,
+    monitorOn: true,
+    signalOk: true,
+    bootError: true,
+    activeSet: 'A',
+    bootMenuOpen: false,
+    usbPresent: true,
+    bootOrderChanged: false,
+    bootOrderPersisted: false
+  }
+};
     const levels = [scenario1, scenario2, scenario3, scenario4, scenario5, scenario6, scenario7];
+    const topModalCloseEl = document.getElementById('messageCloseTop');
     // --- Persistence ---
     const STORAGE_KEY = 'pctrouble_best_v2';
     const SCORES_KEY = 'pctrouble_scores_v2';
@@ -1081,7 +1097,7 @@
         if(unlocked){
           status.textContent = completed ? 'Status: Abgeschlossen' : 'Status: Freigeschaltet';
         } else {
-          const req = entry.number > 1 ? ` – Schließe Szenario ${entry.number - 1} ab.` : '';
+          const req = entry.number > 1 ? ` – Schliesse Szenario ${entry.number - 1} ab.` : '';
           status.innerHTML = `Status: <span class="hub-lock">🔒 Gesperrt</span>${req}`;
         }
         item.appendChild(status);
@@ -1093,7 +1109,7 @@
           const rankLabel = score.rank || '—';
           const timeLabel = typeof score.time === 'number' ? `${score.time} Min` : '— Min';
           const triesLabel = typeof score.tries === 'number' ? `${score.tries} Schritte` : '— Schritte';
-          best.innerHTML = `Bestes Ergebnis: <b>${rankLabel}</b> · ${timeLabel} / ${triesLabel}`;
+          best.innerHTML = `Bestes Ergebnis:<br/><b>${rankLabel}</b> &middot; ${timeLabel} / ${triesLabel}`;
         } else {
           best.textContent = 'Noch keine Medaille.';
         }
@@ -1220,12 +1236,14 @@
         modalBodyEl.innerHTML = html;
         modalEl.classList.remove('completion');
       }
-      if(modalOkEl) modalOkEl.textContent = okLabel;
+      if(modalOkEl){
+        modalOkEl.textContent = okLabel;
+        modalOkEl.removeAttribute('tabindex');
+      }
       if(title === 'Aufgabe abgeschlossen' && modalOkEl){ modalOkEl.textContent = 'Zurück zum Hub'; }
       modalEl.classList.add('open');
       modalEl.setAttribute('aria-hidden','false');
       lastFocusEl = document.activeElement;
-      if(modalOkEl) modalOkEl.focus();
       // remember the key that opened this modal and reset the pending one
       modalOpenKey = lastHotkey;
       lastHotkey = null;
@@ -1248,11 +1266,13 @@
         }
       }
       if(topModalBodyEl) topModalBodyEl.innerHTML = html;
-      if(topModalOkEl) topModalOkEl.textContent = okLabel;
+      if(topModalOkEl){
+        topModalOkEl.textContent = okLabel;
+        topModalOkEl.removeAttribute('tabindex');
+      }
       topModalEl.classList.add('open');
       topModalEl.setAttribute('aria-hidden','false');
       lastFocusEl = document.activeElement;
-      if(topModalOkEl) topModalOkEl.focus();
       modalOpenKey = lastHotkey;
       lastHotkey = null;
     }
@@ -1264,8 +1284,8 @@
       modalEl.setAttribute('aria-hidden','true');
       document.body.classList.remove('top-modal-open');
       actionsEl.style.display = '';
-      if(lastFocusEl) lastFocusEl.focus();
       hideCelebration();
+      if(modalOkEl){ modalOkEl.setAttribute('tabindex','-1'); }
       modalOpenKey = null;
     }
     function closeTopModal(){
@@ -1275,8 +1295,9 @@
       topModalEl.setAttribute('aria-hidden','true');
       document.body.classList.remove('top-modal-open');
       actionsEl.style.display = '';
-      if(lastFocusEl) lastFocusEl.focus();
+      if(topModalOkEl){ topModalOkEl.setAttribute('tabindex','-1'); }
       modalOpenKey = null;
+      if(topModalCloseEl){ topModalCloseEl.hidden = true; }
     }
     function showCelebration(){
       if(celebrationEl) return;
@@ -1484,7 +1505,6 @@
         });
     }
 
-    
 function evalRankAndScore(t, n){
   var medal = 'Bronze';
   var long = 'Bronze - geloest, aber umstaendlich';
@@ -2730,7 +2750,7 @@ function finish(success, detail){
 
       // Badge text
       const tag = document.getElementById('levelTag');
-      if(tag){ tag.innerHTML = `Fall ${idx+1}/${levels.length} - <b>Einfach</b>`; }
+      if(tag){ tag.textContent = `Fall ${idx+1}/${levels.length}`; }
 
       showBest();
     }
@@ -2777,6 +2797,10 @@ function finish(success, detail){
     })();
 
     // Score-Modal oeffnen
+    if(topModalCloseEl){
+      topModalCloseEl.addEventListener('click', ()=>{ closeTopModal(); });
+      topModalCloseEl.hidden = true;
+    }
     if(scoreButtons.length){
       const handleScoreClick = ()=>{
         const scores = loadScores();
@@ -2816,6 +2840,7 @@ function finish(success, detail){
             </table>
           </div>`;
         openTopModal({ title: '', subtitle, html });
+        if(topModalCloseEl){ topModalCloseEl.hidden = false; }
       };
       scoreButtons.forEach(btn => btn.addEventListener('click', handleScoreClick));
     }
@@ -2877,4 +2902,17 @@ function finish(success, detail){
   </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
 
