@@ -303,6 +303,8 @@ details[open].hintbox summary::before, details[open].didaktik summary::before{
 .scene .screen{display:none}
 .scene.nosig .screen, .scene.login .screen, .scene.booterr .screen, .scene.bootmenu .screen{display:block}
 .scene.bootmenu .bootmenu-bg{fill:rgba(15,23,42,.94);stroke:rgba(148,163,184,.45);stroke-width:1}
+.scene .fan-unit{display:none}
+.scene.fan-visible .fan-unit{display:inline}
 .scene .fan-unit .fan-ring{stroke:rgba(148,163,184,.55);fill:rgba(148,163,184,.10)}
 .scene .fan-unit .fan-blade{stroke:rgba(148,163,184,.4);stroke-width:2;stroke-linecap:round}
 .scene .fan-unit .fan-hub{fill:rgba(148,163,184,.6)}

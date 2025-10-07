@@ -813,7 +813,7 @@
     function updateScene(){
       const scene = document.querySelector('.scene');
       if(!scene) return;
-      scene.classList.remove('nosig','power-on','login','booterr','bootmenu','domain-error','desktop','overheat','fan-blocked','fan-clean');
+      scene.classList.remove('nosig','power-on','login','booterr','bootmenu','domain-error','desktop','overheat','fan-blocked','fan-clean','fan-visible');
       if(state.pcOn) scene.classList.add('power-on');
       const L = levels && levels[state.levelIdx];
       if(L && L.id === 'S4'){
@@ -836,6 +836,7 @@
           }
           if(L && L.id === 'S2'){
             scene.classList.add('desktop');
+            scene.classList.add('fan-visible');
             if(state.fanBlocked){ scene.classList.add('fan-blocked'); }
             if(!state.tempsStable){ scene.classList.add('overheat'); }
             if(!state.fanBlocked && state.dustCleared){ scene.classList.add('fan-clean'); }
