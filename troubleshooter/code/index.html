@@ -884,9 +884,9 @@
 
 function evalRankAndScore(t, n){
   var medal = 'Bronze';
-  var long = 'Bronze - geloest, aber umstaendlich';
+  var long = 'Bronze - gel&ouml;st, aber umst&auml;ndlich';
   var color = 'var(--bronze)';
-  if (t <= 3 && n <= 2){ medal = 'Gold'; long = 'Gold - exzellent (praezise & schnell)'; color = 'var(--gold)'; }
+  if (t <= 3 && n <= 2){ medal = 'Gold'; long = 'Gold - exzellent (pr&auml;zise & schnell)'; color = 'var(--gold)'; }
   else if (t <= 6 && n <= 3){ medal = 'Silber'; long = 'Silber - gut & systematisch'; color = 'var(--silver)'; }
   var score = medal === 'Gold' ? 100 : (medal === 'Silber' ? 70 : 40);
   return { medal: medal, long: long, color: color, score: score };
@@ -1003,7 +1003,7 @@ function finish(success, detail){
       }catch(e){}
       state.solved = true;
       showCelebration();
-      setStatus('Geloest');
+      setStatus('Gel&ouml;st');
       say(`<span class="good">Problem behoben.</span> ${detail} Der PC startet, du kannst weiterarbeiten.`);
       // Hinweis: Reset bleibt jederzeit möglich
 
@@ -1113,7 +1113,7 @@ function finish(success, detail){
             state.time += this.delta; state.tries++;
             setStatus('Nicht relevant');
             pushLog(this.label, '+1 Min');
-            say('<span class="warn">Kein Einfluss aufs Einschalten.</span> Nützlich bei Internet-/Anmeldeproblemen. Hier zuerst <b>Strom</b> und <b>Monitor</b> klären.');
+            say('<span class="warn">Kein Einfluss aufs Einschalten.</span> Nützlich bei Internet-/Anmeldeproblemen.');
           }
         },
         // Shared
@@ -1164,6 +1164,11 @@ function finish(success, detail){
             state.time += this.delta; state.tries++;
             setStatus('Nicht zielfuehrend');
             pushLog(this.label, '+1 Min');
+            const currentLevel = levels && levels[state.levelIdx];
+            if(currentLevel && currentLevel.id === 'L0'){
+              say('<span class="warn">Dies hat keinen Einfluss aufs Einschalten des PCs.</span> Zuerst externe Checks machen (Strom, Monitor).');
+              return;
+            }
             if(!state.pcOn){
               say(`<span class="bad">Das geht (noch) nicht.</span> Solange der PC <i>gar nicht</i> startet, kommst du nicht ins BIOS. Erst muss <b>Strom</b> vorhanden sein.`);
             } else {
@@ -1992,7 +1997,7 @@ function finish(success, detail){
             if(state.solved) return;
             state.time += this.delta; state.tries++;
             pushLog(this.label, `+${this.delta} Min`);
-            setStatus('Noch nicht geloest');
+            setStatus('Noch nicht gel&ouml;st');
             say('<span class="warn">Hardwaretausch voreilig.</span> Pruefe zuerst einfache Softwareloesungen.');
             openModal({
               title: this.label,
