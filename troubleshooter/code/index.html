@@ -2237,7 +2237,8 @@ function finish(success, detail){
         statusBar.appendChild(actions);
         footer.remove();
       }
-    })();    document.getElementById('resetBtn').addEventListener('click', reset);    if(goalBtn){ goalBtn.addEventListener('click', () => openModal({title:'Ziele & LP21-Bezug', html: goalHtml})); }
+    })();    document.getElementById('resetBtn').addEventListener('click', reset);    
+    if(goalBtn){ goalBtn.addEventListener('click', () => openModal({title:'Ziele & LP21-Bezug', html: goalHtml})); }
 
     // Hotkeys 1-6 + R
     window.addEventListener('keydown', (e)=>{
