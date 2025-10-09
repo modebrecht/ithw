@@ -680,7 +680,6 @@ body.top-modal-open #scenarioView > section{display:none}
 
           <div class="footer">
             <button class="btn" id="resetBtn" title="Szenario zurücksetzen (R)" aria-keyshortcuts="R">Neustart</button>
-            <button class="btn" id="hint1Btn">Hinweis</button>
             <button class="btn" id="goalBtn">Ziel</button>
           </div>
 
@@ -1000,7 +999,6 @@ body.top-modal-open #scenarioView > section{display:none}
     const hubInfoEl = document.getElementById('hubInfo');
     const hubBtn = document.getElementById('hubBtn');
     const scoreBtn = document.getElementById('scoreBtn');
-    const hint1Btn = document.getElementById('hint1Btn');
     const goalBtn = document.getElementById('goalBtn');
     const hubScoreBtn = (() => {
       if(!hubInfoEl) return null;
@@ -1195,8 +1193,6 @@ body.top-modal-open #scenarioView > section{display:none}
       window.alert('Fortschritt wurde zurückgesetzt.');
     }
 
-    const hint1Html = 'Was kannst du prüfen, <b>ohne den PC zu öffnen</b>?';
-    const hint2Html = `<ul class="hint"><li><b>Stromversorgung:</b> Steckdosenleiste an? Netzkabel fest am PC und an der Leiste/Steckdose? Netzteil‑Schalter (I/O) auf <b>I</b> (falls vorhanden)?</li><li><b>Anzeige/Signal:</b> Monitor eingeschaltet? Richtigen Eingang (HDMI/DP) gewählt? Kabel steckt fest? Falls möglich, anderen Port/Kabel testen.</li><li>Wenn der PC weiterhin <i>gar nicht</i> reagiert, wären interne Ursachen der nächste Schritt – in diesem Level bleiben wir bei externen Checks.</li></ul>`;
     const goalHtml = `<ul class="hint"><li><b>Du übst:</b> strukturiert Fehler finden (erst extern, dann intern), Entscheidungen begründen und deine Schritte protokollieren.</li><li><b>LP21:</b> MI 3.3 «Fehler systematisch suchen &amp; beheben», MI 2.2 «Geräte zweckmässig einsetzen» — genau das trainierst du hier im Szenario.</li><li><b>Tipps fürs Szenario:</b> formuliere deine Vermutung laut, notiere jeden Schritt (Zeit/Schritte siehst du links) und vergleiche danach mit deiner Bestleistung.</li></ul>`;
 
     // Message helpers
@@ -2856,14 +2852,7 @@ function finish(success, detail){
         footer.remove();
       }
     })();
-    // Reveal hint
     document.getElementById('resetBtn').addEventListener('click', reset);
-    if(hint1Btn){
-      hint1Btn.addEventListener('click', () => {
-        const bothHints = `${hint1Html}<div class="more-hints open" id="moreHints"><hr class="divider" aria-hidden="true" /><div class="hint">${hint2Html}</div></div>`;
-        openModal({title:'Hinweise', html: bothHints});
-      });
-    }
     if(goalBtn){ goalBtn.addEventListener('click', () => openModal({title:'Ziele & LP21-Bezug', html: goalHtml})); }
 
     // Hotkeys 1-6 + R
@@ -2902,17 +2891,3 @@ function finish(success, detail){
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
