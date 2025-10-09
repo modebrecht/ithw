@@ -809,7 +809,7 @@
           const didMonitor = !!state.performed['monitor'];
           const isSourceNow = state.currentActionId === 'source';
           if(!state.solved && didMonitor && isSourceNow && state.monitorOn){
-            finish(true, 'Quelle korrekt, Signal wiederhergestellt.');
+            finish(true, 'Der Monitor ist an und zeigt die korrekte Quelle. Login Bildschirm erscheint.');
             openModal({ title: 'Aufgabe abgeschlossen', html: completionIntroHtml(), okLabel: 'Zurück zum Hub' });
             return true;
           }
@@ -1203,7 +1203,7 @@ function finish(success, detail){
             state.pcOn = true;
             updateScene();
             const html = wasOn
-              ? '<p>Du prüfst die Stromkette – sie war bereits <b>in Ordnung</b>. Der PC hat Strom.</p><p>Falls noch kein Bild zu sehen ist: <b>Monitor einschalten</b> oder <b>Signal prüfen</b>.</p>'
+              ? '<p>Du prüfst die Stromkette – sie war bereits <b>in Ordnung</b>. Der PC hat Strom.</p>'
               : '<p>Du verfolgst das Netzkabel bis zur Steckdose. Am Netzteil war das Kabel <b>locker</b> – du steckst es fest ein. Die PC‑LED leuchtet jetzt <b>grün</b>.</p><p>Der Monitor bleibt noch schwarz.</p>';
             openModal({ title: 'Stromkette geprüft', html });
             if(state.monitorOn && state.signalOk){
@@ -1226,7 +1226,7 @@ function finish(success, detail){
             // Szenario 2 (E1): Kabel war bereits korrekt eingesteckt -> keine Aenderung
             const cur = levels && levels[state.levelIdx];
             if(cur && cur.id === 'E1'){
-              say('<span class="info">Kabel war bereits <b>korrekt eingesteckt</b>.</span> Pruefe jetzt die <b>Quelle (HDMI/DP)</b>.');
+              say('<span class="info">Das Kabel war bereits <b>korrekt eingesteckt</b>.</span>.');
               return;
             }
             state.signalOk = true; updateScene();
