@@ -207,7 +207,7 @@ header .controls #hubBtn:hover,
 
 .statusbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;align-items:center}
 .status-actions{margin-left:auto;display:flex;gap:10px;align-items:center}
-.status-actions .btn{padding:8px 12px}
+.status-actions .btn:not(.chip){padding:8px 12px}
 .chip{background-color:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);padding:8px 10px;border-radius:10px;font-size:13px;color:var(--ink-dim)}
 .chip strong{color:var(--ink)}
 
@@ -263,6 +263,14 @@ button.action:active{transform: translateY(0)}
 .btn:active{transform: translateY(0)}
 .btn.primary{border-color:rgba(96,165,250,.35);background:linear-gradient(180deg,rgba(96,165,250,.22),rgba(34,211,238,.12));box-shadow:0 10px 24px rgba(34,211,238,.06)}
 .btn[disabled]{opacity:.6;cursor:not-allowed}
+.btn.chip{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.09);
+  box-shadow:none;
+  color:var(--ink-dim);
+  font-size:13px;
+  padding:8px 10px;
+}
 header .controls .btn,
 #levelTag{
   padding:0 16px;
