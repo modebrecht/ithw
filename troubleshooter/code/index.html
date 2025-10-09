@@ -1432,17 +1432,17 @@ function finish(success, detail){
             return;
           }
           if(!state.powerUnplugged){
-            setStatus('Strom verbunden');
-            say('<span class="warn">Der PC hängt noch am Strom.</span> Ziehe das <b>Stromkabel</b>, bevor du die RAM-Module prüfst.');
+            setStatus('Strom an');
+            say('<span class="warn">Der PC hängt noch am Strom.</span> Ziehe das <b>Stromkabel</b>, bevor du die RAM-Module anfässt.');
             return;
           }
           if(state.ramChecked){
-            setStatus('RAM geprüft');
+            setStatus('RAM bereits geprüft');
             say('<span class="info">Die RAM-Module sitzen bereits korrekt.</span> Stecke den Strom wieder an und starte den PC.');
             return;
           }
           state.ramChecked = true;
-          setStatus('RAM sitzt');
+          setStatus('RAM korrekt eingesetzt');
           say('<span class="good">Eines der RAM-Module war nicht richtig eingerastet. Du drückst es besser hinen und hörst ein Klicken, welches dich zufrieden stellt. Die RAM-Riegel sitzen jetzt korrekt.</span>');
         }
       };
