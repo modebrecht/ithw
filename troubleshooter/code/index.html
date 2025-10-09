@@ -362,6 +362,55 @@
       return startIdx;
     }
 
+    function findNextPlayableIndex({ afterCurrent = false } = {}){
+      if(!levels || !levels.length) return null;
+      progress = normalizeProgress(progress);
+
+      if(afterCurrent && typeof state.levelIdx === 'number'){
+        const startIdx = state.levelIdx;
+        let idx = startIdx;
+        for(let i = 0; i < levels.length; i++){
+          idx = (idx + 1) % levels.length;
+          if(idx === startIdx) break;
+          if(isLevelUnlocked(idx)){
+            const level = levels[idx];
+            if(!progress.completed[level.id]) return idx;
+          }
+        }
+      }
+
+      let highestCompleted = -1;
+      levels.forEach((level, idx) => {
+        if(progress.completed[level.id]) highestCompleted = Math.max(highestCompleted, idx);
+      });
+
+      const candidate = highestCompleted + 1;
+      if(candidate < levels.length){
+        const level = levels[candidate];
+        if(isLevelUnlocked(candidate) && !progress.completed[level.id]) return candidate;
+      }
+
+      for(let i = 0; i < levels.length; i++){
+        const level = levels[i];
+        if(isLevelUnlocked(i) && !progress.completed[level.id]) return i;
+      }
+
+      const fallback = findUnlockedIndex(typeof state.levelIdx === 'number' ? state.levelIdx : 0, 1);
+      if(fallback !== undefined && fallback !== null){
+        return fallback;
+      }
+      return findFirstUnlockedIndex();
+    }
+
+    function startNextUnlockedScenario({ afterCurrent = false } = {}){
+      const nextIdx = findNextPlayableIndex({ afterCurrent });
+      if(typeof nextIdx !== 'number') return false;
+      if(modalOpen) closeModal();
+      hideCelebration();
+      startScenario(nextIdx);
+      return true;
+    }
+
     // --- DOM helpers ---
     const $ = sel => document.querySelector(sel);
     const timeEl = $('#time');
@@ -2458,6 +2507,29 @@ function finish(success, detail){
     // Hotkeys 1-6 + R
     window.addEventListener('keydown', (e)=>{
       const k = e.key.toLowerCase();
+      if(k === 'n'){
+        if(modalOpen){
+          if(state.solved){
+            if(startNextUnlockedScenario({ afterCurrent: true })){
+              e.preventDefault();
+            }
+          }
+          return;
+        }
+        if(!scenarioActive){
+          if(startNextUnlockedScenario()){
+            e.preventDefault();
+          }
+          return;
+        }
+        if(scenarioActive && state.solved){
+          if(startNextUnlockedScenario({ afterCurrent: true })){
+            e.preventDefault();
+          }
+          return;
+        }
+        return;
+      }
       // Neustart (R) ist immer erlaubt, selbst wenn ein Modal offen ist
       if(k==='r'){ if(scenarioActive) reset(); return; }
       // While a modal is open, allow ESC or same opener key to close, unless solved
