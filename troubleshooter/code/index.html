@@ -180,6 +180,7 @@
             <div class="chip">Zeit: <strong id="time">0</strong> Min</div>
             <div class="chip">Schritte: <strong id="tries">0</strong></div>
             <div class="chip">Status: <strong id="status">Unbekannt</strong></div>
+            <button class="btn chip" id="resetBtn" title="Szenario zurücksetzen (R)" aria-keyshortcuts="R">⟳ Neustart</button>
           </div>
 
           <div class="actions" id="actions" aria-label="Verfügbare Aktionen"></div>
@@ -193,12 +194,6 @@
             </div>
           </div>
           <div class="legend" aria-hidden="true">Tasten: [1–6] Aktionen · [R] Neustart</div>
-
-          <div class="footer">
-            <button class="btn chip" id="resetBtn" title="Szenario zurücksetzen (R)" aria-keyshortcuts="R">Neustart</button>
-            <button class="btn chip" id="goalBtn">Ziel</button>
-          </div>
-
           <div class="feedback" aria-live="polite">
             <p class="msg" id="feedbackMsg">Wähle deinen ersten Schritt.</p>
             <ol class="step-log" id="stepLog" aria-label="Protokoll deiner Schritte"></ol>
@@ -2226,18 +2221,7 @@ function finish(success, detail){
       };
       scoreButtons.forEach(btn => btn.addEventListener('click', handleScoreClick));
     }
-    // Move footer buttons into the statusbar (right side)
-    (function(){
-      const statusBar = document.querySelector('.statusbar');
-      const footer = document.querySelector('.footer');
-      if(statusBar && footer){
-        const actions = document.createElement('div');
-        actions.className = 'status-actions';
-        while(footer.firstChild){ actions.appendChild(footer.firstChild); }
-        statusBar.appendChild(actions);
-        footer.remove();
-      }
-    })();    document.getElementById('resetBtn').addEventListener('click', reset);    
+    document.getElementById('resetBtn').addEventListener('click', reset);    
     if(goalBtn){ goalBtn.addEventListener('click', () => openModal({title:'Ziele & LP21-Bezug', html: goalHtml})); }
 
     // Hotkeys 1-6 + R
