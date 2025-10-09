@@ -266,7 +266,8 @@ button.action:active{transform: translateY(0)}
 
 .footer{margin-top:12px;display:flex;justify-content:flex-end;gap:8px}
 
-.btn{appearance:none;border:1px solid rgba(255,255,255,.16);background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));border-radius:10px;padding:10px 12px;color:var(--ink);cursor:pointer;transition:transform .06s ease, box-shadow .15s ease, border-color .2s ease}
+.btn{appearance:none;border:1px solid rgba(255,255,255,.16);background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));border-radius:10px;padding:10px 12px;color:var(--ink);cursor:pointer;transition:transform .06s ease, box-shadow .15s ease, border-color .2s ease;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:14px;text-align:center}
+#messageOk{min-height:100px}
 .btn:hover{transform: translateY(-1px); box-shadow:0 8px 20px rgba(34,211,238,.12)}
 .btn:active{transform: translateY(0)}
 .btn.primary{border-color:rgba(96,165,250,.35);background:linear-gradient(180deg,rgba(96,165,250,.22),rgba(34,211,238,.12));box-shadow:0 10px 24px rgba(34,211,238,.06)}
@@ -278,6 +279,17 @@ button.action:active{transform: translateY(0)}
   color:var(--ink-dim);
   font-size:13px;
   padding:9px 10px;
+}
+.emoji{
+  font-size:15px;
+  line-height:1;
+  display:inline-flex;
+  align-items:center;
+}
+.btn .text{
+  display:inline-flex;
+  align-items:center;
+  font-size:14px;
 }
 header .controls .btn,
 #levelTag{

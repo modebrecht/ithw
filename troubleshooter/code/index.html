@@ -27,8 +27,8 @@
       <div class="title">PC-Troubleshooter <span class="badge" id="verTag">v3.2</span></div>
       <div class="controls">
         <div class="badge" id="levelTag" aria-live="polite">Fall</div>
-        <button class="btn" type="button" id="scoreBtn" title="Score anzeigen" aria-label="Score anzeigen">🏆 Score</button>
-        <button class="btn" type="button" id="hubBtn" title="Zurück zum Hub" aria-label="Zurück zum Hub">🏠 Hub</button>
+        <button class="btn" type="button" id="scoreBtn" title="Score anzeigen" aria-label="Score anzeigen"><span class="emoji" aria-hidden="true">🏆</span><span class="text">Score</span></button>
+        <button class="btn" type="button" id="hubBtn" title="Zurück zum Hub" aria-label="Zurück zum Hub"><span class="emoji" aria-hidden="true">🏠</span><span class="text">Hub</span></button>
       </div>
     </header>
 
@@ -180,7 +180,7 @@
             <div class="chip">Zeit: <strong id="time">0</strong> Min</div>
             <div class="chip">Schritte: <strong id="tries">0</strong></div>
             <div class="chip">Status: <strong id="status">Unbekannt</strong></div>
-            <button class="btn chip" id="resetBtn" title="Szenario zurücksetzen (R)" aria-keyshortcuts="R">⟳ Neustart</button>
+            <button class="btn chip" id="resetBtn" title="Szenario zurücksetzen (R)" aria-keyshortcuts="R"><span class="emoji" aria-hidden="true">⟳</span><span class="text">Neustart</span></button>
           </div>
 
           <div class="actions" id="actions" aria-label="Verfügbare Aktionen"></div>
@@ -442,7 +442,7 @@
       btn.id = 'hubScoreBtn';
       btn.title = 'Score anzeigen';
       btn.setAttribute('aria-label','Score anzeigen');
-      btn.textContent = scoreBtn ? scoreBtn.textContent : 'Score';
+      btn.innerHTML = '<span class="emoji" aria-hidden="true">🏆</span><span class="text">Score</span>';
       hubInfoEl.appendChild(btn);
       return btn;
     })();
@@ -475,13 +475,26 @@
     function createMedalBadge(rank){
       const span = document.createElement('span');
       span.className = 'hub-medal';
-      let text = '—';
       let variant = 'none';
-      if(rank === 'Gold'){ text = '🥇 Gold'; variant = 'gold'; }
-      else if(rank === 'Silber'){ text = '🥈 Silber'; variant = 'silver'; }
-      else if(rank === 'Bronze'){ text = '🥉 Bronze'; variant = 'bronze'; }
+      let emoji = '';
+      let text = '—';
+      if(rank === 'Gold'){ emoji = '🥇'; text = 'Gold'; variant = 'gold'; }
+      else if(rank === 'Silber'){ emoji = '🥈'; text = 'Silber'; variant = 'silver'; }
+      else if(rank === 'Bronze'){ emoji = '🥉'; text = 'Bronze'; variant = 'bronze'; }
       span.classList.add(variant);
-      span.textContent = text;
+      if(emoji){
+        const emojiEl = document.createElement('span');
+        emojiEl.className = 'emoji';
+        emojiEl.setAttribute('aria-hidden','true');
+        emojiEl.textContent = emoji;
+        const textEl = document.createElement('span');
+        textEl.className = 'text';
+        textEl.textContent = text;
+        span.appendChild(emojiEl);
+        span.appendChild(textEl);
+      } else {
+        span.appendChild(document.createTextNode(text));
+      }
       span.setAttribute('aria-label', `Abzeichen: ${rank || 'keines'}`);
       return span;
     }
