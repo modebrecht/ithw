@@ -1,7 +1,7 @@
 export default {
   id: 'M3',
-  name: 'Kein Bild trotz Start',
-  storyTitle: 'Szenario: Kein Bild trotz Start',
+  name: 'PC-Upgrade',
+  storyTitle: 'Szenario: PC-Upgrade',
   storyText: 'Du hast kürzlich neue Komponenten in deinen PC integriert. Du schaltest den PC an und er läuft. Die Lüfter sind hörbar, LED leuchtet grün und der Monitor ist angeschaltet. Jedoch haben haben wir <i>kein Bild</i> (No Signal). Was ist ein häufig auftretender Fehler bei einem Komponenten-Upgrade? <b>Was prüfst du als Nächstes?</b>',
   hints: {
     h1: 'Vor dem Bild passiert der <b>POST</b>. Was verraten <b>Pieptöne/LEDs</b>?',

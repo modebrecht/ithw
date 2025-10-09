@@ -49,7 +49,7 @@
       <div class="inner">
           <h2 id="storyTitle">Szenario: Der PC, der nicht starten will</h2>
           <p id="storyText">
-            Du sitzt im Informatikraum und dein PC reagiert nicht: Du drückst den Power‑Knopf, aber es passiert nichts.
+            Du sitzt im Informatikraum und dein PC reagiert nicht: Du drückst den Power-Knopf, aber es passiert nichts.
             Dein Ziel: In möglichst <b>wenigen Schritten</b> die Ursache finden.
           </p>
 
@@ -300,6 +300,8 @@
       s4RemovedUsb: false,
       s4UsedBootMenu: false,
       s4ChangedBootOrder: false,
+      powerUnplugged: false,
+      ramChecked: false,
       lanConnected: true,
       switchLedOn: true,
       n1SolvedBy: null,
@@ -884,9 +886,9 @@
 
 function evalRankAndScore(t, n){
   var medal = 'Bronze';
-  var long = 'Bronze - gel&ouml;st, aber umst&auml;ndlich';
+  var long = 'Bronze - gelöst, aber umständlich';
   var color = 'var(--bronze)';
-  if (t <= 3 && n <= 2){ medal = 'Gold'; long = 'Gold - exzellent (pr&auml;zise & schnell)'; color = 'var(--gold)'; }
+  if (t <= 3 && n <= 2){ medal = 'Gold'; long = 'Gold - exzellent (präzise & schnell)'; color = 'var(--gold)'; }
   else if (t <= 6 && n <= 3){ medal = 'Silber'; long = 'Silber - gut & systematisch'; color = 'var(--silver)'; }
   var score = medal === 'Gold' ? 100 : (medal === 'Silber' ? 70 : 40);
   return { medal: medal, long: long, color: color, score: score };
@@ -895,6 +897,25 @@ function evaluateScenarioResult(){
       const t = state.time;
       const n = state.tries;
       const L = levels && levels[state.levelIdx];
+      if(L && L.id === 'M3'){
+        let medal = 'Bronze';
+        let long = 'Bronze - gelöst, aber umständlich';
+        let score = 40;
+        let detailText = 'Pfad: Sicher abgeschaltet, RAM geprüft.';
+        if(t <= 12 && n <= 7){
+          medal = 'Gold';
+          long = 'Gold - strukturiert & sicher gelöst';
+          score = 100;
+          detailText = 'Pfad: Shutdown → Strom trennen → RAM prüfen → Strom an → Start → Monitor.';
+        } else if(t <= 18 && n <= 9){
+          medal = 'Silber';
+          long = 'Silber - solide, aber mit Umwegen';
+          score = 70;
+          detailText = 'Pfad: Richtiger Ansatz, aber mit zusätzlichen Schritten.';
+        }
+        const color = medal === 'Gold' ? 'var(--gold)' : medal === 'Silber' ? 'var(--silver)' : 'var(--bronze)';
+        return { medal, long, color, score, detailText, time: t, tries: n };
+      }
       if(L && L.id === 'S4'){
         const seq = Array.isArray(state.actionSequence) ? state.actionSequence.slice() : [];
         const solvedBy = state.s4SolvedBy;
@@ -1003,7 +1024,7 @@ function finish(success, detail){
       }catch(e){}
       state.solved = true;
       showCelebration();
-      setStatus('Gel&ouml;st');
+      setStatus('Gelöst');
       say(`<span class="good">Problem behoben.</span> ${detail} Der PC startet, du kannst weiterarbeiten.`);
       // Hinweis: Reset bleibt jederzeit möglich
 
@@ -1144,6 +1165,10 @@ function finish(success, detail){
                   title: 'Bild vorhanden',
                   html: '<p>Der Monitor ist an und zeigt <b>Login</b>.</p><p>Gut gemacht!</p>'
                 });
+                const currentLevel = levels && levels[state.levelIdx];
+                if(currentLevel && currentLevel.id === 'M3' && state.ramChecked){
+                  finish(true, 'RAM sitzt korrekt - Anzeige ist wieder da.');
+                }
               } else {
                 say('<span class="warn">Monitor ist an.</span> Anzeige zeigt <b>NO SIGNAL</b>.');
                 openModal({
@@ -1204,7 +1229,7 @@ function finish(success, detail){
             updateScene();
             const html = wasOn
               ? '<p>Du prüfst die Stromkette – sie war bereits <b>in Ordnung</b>. Der PC hat Strom.</p>'
-              : '<p>Du verfolgst das Netzkabel bis zur Steckdose. Am Netzteil war das Kabel <b>locker</b> – du steckst es fest ein. Die PC‑LED leuchtet jetzt <b>grün</b>.</p><p>Der Monitor bleibt noch schwarz.</p>';
+              : '<p>Du verfolgst das Netzkabel bis zur Steckdose. Am Netzteil war das Kabel <b>locker</b> – du steckst es fest ein. Die PC-LED leuchtet jetzt <b>grün</b>.</p><p>Der Monitor bleibt noch schwarz.</p>';
             openModal({ title: 'Stromkette geprüft', html });
             if(state.monitorOn && state.signalOk){
               say('<span class="good">Stromversorgung hergestellt.</span> <b>Login</b> ist sichtbar.');
@@ -1299,7 +1324,7 @@ function finish(success, detail){
             state.time += this.delta; state.tries++;
             setStatus('Diagnose');
             pushLog(this.label, '+1 Min');
-            say('<span class="good">Hinweis:</span> Die <b>DRAM‑LED</b> leuchtet / Beepcode für Speicher. <b>Arbeitsspeicher (RAM) prüfen<\/b> (korrekt einsetzen).');
+            say('<span class="good">Hinweis:</span> Die <b>DRAM-LED</b> leuchtet / Beepcode für Speicher. <b>Arbeitsspeicher (RAM) prüfen<\/b> (korrekt einsetzen).');
           }
         },
         cmosReset: {
@@ -1312,11 +1337,210 @@ function finish(success, detail){
             state.time += this.delta; state.tries++;
             setStatus('Nicht zielfuehrend');
             pushLog(this.label, '+2 Min');
-            say('<span class="warn">Hier unwahrscheinlich.</span> CMOS‑Reset hilft bei BIOS‑Fehlkonfig. Der Hinweis zeigt eher auf <b>RAM</b> (POST).');
+            say('<span class="warn">Hier unwahrscheinlich.</span> CMOS-Reset hilft bei BIOS-Fehlkonfiguration. Der Hinweis zeigt eher auf <b>RAM</b> (POST).');
           }
         }
       };
     }
+    function makeScenario3Actions(base){
+      const post = Object.assign({}, base.postCheck, { hotkey: '1' });
+      const monitor = Object.assign({}, base.monitorToggle, {
+        hotkey: '2',
+        effect(){
+          if(state.solved) return;
+          if(state.powerUnplugged){
+            say('<span class="warn">Monitor hat keinen Strom.</span> Stecke zuerst die <b>Stromzufuhr</b> wieder ein.');
+            return;
+          }
+          const originalContext = this;
+          base.monitorToggle.effect.call(originalContext);
+          const currentLevel = levels && levels[state.levelIdx];
+          if(currentLevel && currentLevel.id === 'M3' && state.ramChecked && state.pcOn && state.signalOk && state.monitorOn){
+            setStatus('Gelöst');
+            finish(true, 'RAM sitzt korrekt - Anzeige ist wieder da.');
+            openModal({ title: 'Aufgabe abgeschlossen', html: completionIntroHtml() });
+          }
+        }
+      });
+      const ramInspect = {
+        id: 'ram-inspect',
+        label: 'RAM-Module prüfen',
+        hotkey: '3',
+        delta: 4,
+        effect(){
+          if(state.solved) return;
+          state.time += this.delta; state.tries++;
+          pushLog(this.label, `+${this.delta} Min`);
+          const cur = levels && levels[state.levelIdx];
+          if(!cur || cur.id !== 'M3'){
+            setStatus('Nicht erforderlich');
+            say('<span class="info">Diese Aktion wird hier nicht benötigt.</span>');
+            return;
+          }
+          if(state.pcOn){
+            setStatus('PC läuft');
+            say('<span class="warn">Der PC läuft noch.</span> Fahre ihn zuerst herunter & entferne den Strom, bevor du das RAM berührst.');
+            return;
+          }
+          if(!state.powerUnplugged){
+            setStatus('Strom verbunden');
+            say('<span class="warn">Der PC hängt noch am Strom.</span> Ziehe das <b>Stromkabel</b>, bevor du die RAM-Module prüfst.');
+            return;
+          }
+          if(state.ramChecked){
+            setStatus('RAM geprüft');
+            say('<span class="info">Die RAM-Module sitzen bereits korrekt.</span> Stecke den Strom wieder an und starte den PC.');
+            return;
+          }
+          state.ramChecked = true;
+          setStatus('RAM sitzt');
+          say('<span class="good">Eines der RAM-Module war nicht richtig eingerastet. Du drückst es besser hinen und hörst ein Klicken, welches dich zufrieden stellt. Die RAM-Riegel sitzen jetzt korrekt.</span>');
+        }
+      };
+      const shutdown = {
+        id: 'pc-shutdown',
+        label: 'PC herunterfahren',
+        hotkey: '4',
+        delta: 2,
+        effect(){
+          if(state.solved) return;
+          state.time += this.delta; state.tries++;
+          pushLog(this.label, `+${this.delta} Min`);
+          if(!state.pcOn){
+            setStatus('PC aus');
+            say('<span class="info">Der PC ist bereits ausgeschaltet.</span>');
+            return;
+          }
+          const monitorWasOn = state.monitorOn;
+          state.pcOn = false;
+          state.signalOk = false;
+          updateScene();
+          setStatus('PC ausgeschaltet');
+          if(monitorWasOn){
+            say('<span class="info">Du fährst den PC herunter.</span>');
+          } else {
+            say('<span class="info">Du fährst den PC herunter.</span>');
+          }
+        }
+      };
+      const start = {
+        id: 'pc-start',
+        label: 'PC starten',
+        hotkey: '5',
+        delta: 2,
+        effect(){
+          if(state.solved) return;
+          state.time += this.delta; state.tries++;
+          pushLog(this.label, `+${this.delta} Min`);
+          if(state.pcOn){
+            setStatus('PC läuft');
+            say('<span class="info">Der PC läuft bereits.</span>');
+            return;
+          }
+          if(state.powerUnplugged){
+            setStatus('Strom getrennt');
+            say('<span class="warn">Der PC ist noch vom Strom getrennt.</span> Stelle zuerst die <b>Stromzufuhr</b> wieder her.');
+            return;
+          }
+          state.powerUnplugged = false;
+          const ramFixed = !!state.ramChecked;
+          state.signalOk = ramFixed;
+          state.pcOn = true;
+          updateScene();
+          if(ramFixed){
+            if(state.monitorOn){
+              setStatus('Gelöst');
+              say('<span class="good">Der PC startet wieder mit Bild.</span> Ursache war das RAM-Modul.');
+              finish(true, 'RAM sitzt korrekt - Anzeige ist wieder da.');
+            } else {
+              setStatus('PC läuft');
+              say('<span class="good">Der PC startet wieder.</span> Schalte den Monitor ein, um das Bild zu prüfen.');
+            }
+          } else {
+            setStatus('PC läuft');
+            say('<span class="warn">Du startest den PC.</span>');
+          }
+        }
+      };
+      const biosWrong = {
+        id: 'bios-wrong',
+        label: 'Direkt ins BIOS starten',
+        hotkey: '6',
+        delta: 2,
+        effect(){
+          if(state.solved) return;
+          state.time += this.delta; state.tries++;
+          pushLog(this.label, `+${this.delta} Min`);
+          if(!state.pcOn){
+            setStatus('PC aus');
+            say('<span class="warn">Der PC ist aus.</span> Ohne Strom erreichst du das BIOS nicht. Prüfe zuerst RAM und Strom.');
+          } else {
+            setStatus('Nicht zielführend');
+            say('<span class="warn">BIOS hilft hier nicht.</span> Der Hinweis zeigt auf <b>RAM</b>. PC ausschalten, Strom trennen und Module prüfen.');
+          }
+        }
+      };
+      const unplug = {
+        id: 'power-unplug',
+        label: 'Strom entfernen',
+        hotkey: '7',
+        delta: 1,
+        effect(){
+          if(state.solved) return;
+          state.time += this.delta; state.tries++;
+          pushLog(this.label, `+${this.delta} Min`);
+          if(state.pcOn){
+            setStatus('PC läuft');
+            say('<span class="warn">Der PC läuft noch.</span> Fahre ihn zuerst herunter, bevor du das Stromkabel abziehst.');
+            return;
+          }
+          if(state.powerUnplugged){
+            setStatus('Strom getrennt');
+            say('<span class="info">Strom ist bereits getrennt.</span>');
+            return;
+          }
+          state.powerUnplugged = true;
+          state.monitorOn = false;
+          updateScene();
+          setStatus('Strom getrennt');
+          say('<span class="info">Du trennst PC und Monitor komplett vom Strom.</span>');
+        }
+      };
+      const restorePower = {
+        id: 'power-restore',
+        label: 'Stromzufuhr wiederherstellen',
+        hotkey: '8',
+        delta: 1,
+        effect(){
+          if(state.solved) return;
+          state.time += this.delta; state.tries++;
+          pushLog(this.label, `+${this.delta} Min`);
+          if(!state.powerUnplugged){
+            setStatus('Strom verbunden');
+            say('<span class="info">Strom ist bereits verbunden.</span> Starte nun den PC und prüfe das Bild.');
+            return;
+          }
+          state.powerUnplugged = false;
+          setStatus('Strom verbunden');
+          say('<span class="info">Du steckst Strom und Monitor wieder ein.</span> Starte jetzt den PC und schalte den Monitor ein.');
+        }
+      };
+      const cmosWrong = {
+        id: 'cmos-reset-wrong',
+        label: 'BIOS-Batterie entfernen',
+        hotkey: '9',
+        delta: 2,
+        effect(){
+          if(state.solved) return;
+          state.time += this.delta; state.tries++;
+          pushLog(this.label, `+${this.delta} Min`);
+          setStatus('Nicht zielführend');
+          say('<span class="warn">Hier nicht sinnvoll.</span> Das Entfernen der BIOS-Batterie (CMOS-Reset) hilft bei Fehlkonfigurationen, aber nicht bei lockerem RAM.');
+        }
+      };
+      return [post, monitor, ramInspect, shutdown, start, biosWrong, unplug, restorePower, cmosWrong];
+    }
+
     function makeScenario4Actions(){
       return [
         {
@@ -1997,7 +2221,7 @@ function finish(success, detail){
             if(state.solved) return;
             state.time += this.delta; state.tries++;
             pushLog(this.label, `+${this.delta} Min`);
-            setStatus('Noch nicht gel&ouml;st');
+            setStatus('Noch nicht gelöst');
             say('<span class="warn">Hardwaretausch voreilig.</span> Pruefe zuerst einfache Softwareloesungen.');
             openModal({
               title: this.label,
@@ -2016,7 +2240,7 @@ function finish(success, detail){
       } else if(levelId === 'E1'){
         return [A.monitorCable, A.monitorToggle, A.bios, A.cpu, A.power, A.source];
       } else if(levelId === 'M3'){
-        return [A.postCheck, A.monitorToggle, A.bios, A.ramFix, A.power, A.cmosReset];
+        return makeScenario3Actions(A);
       } else if(levelId === 'S4'){
         return makeScenario4Actions();
       } else if(levelId === 'N1'){
@@ -2055,6 +2279,8 @@ function finish(success, detail){
       state.s4RemovedUsb = false;
       state.s4UsedBootMenu = false;
       state.s4ChangedBootOrder = false;
+      state.powerUnplugged = 'powerUnplugged' in L.start ? !!L.start.powerUnplugged : false;
+      state.ramChecked = 'ramChecked' in L.start ? !!L.start.ramChecked : false;
       state.lanConnected = 'lanConnected' in L.start ? !!L.start.lanConnected : true;
       state.switchLedOn = 'switchLedOn' in L.start ? !!L.start.switchLedOn : state.lanConnected;
       state.n1SolvedBy = null;
