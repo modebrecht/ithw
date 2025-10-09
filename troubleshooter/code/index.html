@@ -1100,7 +1100,7 @@ function finish(success, detail){
             state.time += this.delta; state.tries++;
             setStatus('Intern - nicht zielfuehrend');
             pushLog(this.label, `+${this.delta} Min`);
-            say('<span class="bad">Overkill / nicht symptombezogen.</span> Bei "geht nicht an" zuerst externe Checks (Strom, Monitor).');
+            say('<span class="bad">Overkill!</span> Wenn der PC nicht angeht sollten wir zuerst externe Checks machen (Strom, Monitor).');
           }
         },
         network: {
@@ -1145,10 +1145,10 @@ function finish(success, detail){
                   html: '<p>Der Monitor ist an und zeigt <b>Login</b>.</p><p>Gut gemacht!</p>'
                 });
               } else {
-                say('<span class="warn">Monitor ist an.</span> Anzeige zeigt <b>NO SIGNAL</b>. Prüfe <b>Quelle (HDMI/DP)</b> oder <b>Monitorkabel</b>.');
+                say('<span class="warn">Monitor ist an.</span> Anzeige zeigt <b>NO SIGNAL</b>.');
                 openModal({
                   title: 'Monitor eingeschaltet',
-                  html: '<p>Der Monitor ist an.</p><p>Es wird <b>NO SIGNAL</b> angezeigt – prüfe <b>Quelle/Kabel</b>.</p>'
+                  html: '<p>Du hast den Monitor eingeschaltet.</p><p>Es wird <b>NO SIGNAL</b> angezeigt.</p>'
                 });
               }
             }
@@ -1165,7 +1165,7 @@ function finish(success, detail){
             setStatus('Nicht zielfuehrend');
             pushLog(this.label, '+1 Min');
             if(!state.pcOn){
-              say(`<span class="bad">Das geht (noch) nicht.</span> Solange der PC <i>gar nicht</i> startet, kommst du nicht ins BIOS. Erst muss <b>Strom</b> anliegen.`);
+              say(`<span class="bad">Das geht (noch) nicht.</span> Solange der PC <i>gar nicht</i> startet, kommst du nicht ins BIOS. Erst muss <b>Strom</b> vorhanden sein.`);
             } else {
               say(`<span class="warn">Nicht zielführend.</span> Das Problem betrifft <b>Anzeige/Signal</b>, nicht das BIOS. Prüfe Monitor <b>ein/aus</b>, <b>Quelle</b> oder <b>Kabel</b>.`);
             }
@@ -1181,7 +1181,7 @@ function finish(success, detail){
             state.time += this.delta; state.tries++;
             setStatus('Risiko hoch');
             pushLog(this.label, '+8 Min');
-            say(`<span class="bad">Overkill!</span> Das ist ein tiefer Eingriff mit Risiko. Zuerst immer die <b>einfachen</b> Dinge prüfen: Strom, Kabel, Schalter.`);
+            say(`<span class="bad">Overkill!</span> Das ist ein tiefer Eingriff mit Risiko. Zuerst immer die <b>einfachen</b> Dinge prüfen: Strom, Kabel, Netzschalter.`);
           }
         },
         power: {
@@ -1199,7 +1199,7 @@ function finish(success, detail){
             updateScene();
             const html = wasOn
               ? '<p>Du prüfst die Stromkette – sie war bereits <b>in Ordnung</b>. Der PC hat Strom.</p><p>Falls noch kein Bild zu sehen ist: <b>Monitor einschalten</b> oder <b>Signal prüfen</b>.</p>'
-              : '<p>Du verfolgst das Netzkabel bis zur Steckdose. Am Netzteil war das Kabel <b>locker</b> – du steckst es fest ein. Die PC‑LED leuchtet jetzt <b>grün</b>.</p><p>Der Monitor bleibt noch schwarz. Überlege: <b>Monitor einschalten</b> oder <b>Signal prüfen</b>?</p>';
+              : '<p>Du verfolgst das Netzkabel bis zur Steckdose. Am Netzteil war das Kabel <b>locker</b> – du steckst es fest ein. Die PC‑LED leuchtet jetzt <b>grün</b>.</p><p>Der Monitor bleibt noch schwarz.</p>';
             openModal({ title: 'Stromkette geprüft', html });
             if(state.monitorOn && state.signalOk){
               say('<span class="good">Stromversorgung hergestellt.</span> <b>Login</b> ist sichtbar.');
