@@ -1,7 +1,7 @@
 export default {
   id: 'N1',
   name: 'Netzwerk/Login-Spezial',
-  storyTitle: 'Szenario: Domänen-Login scheitert',
+  storyTitle: 'Szenario 6: Domänen-Login scheitert',
   storyText:
     'Der PC ist gestartet, der Login-Bildschirm erscheint – doch dein Domänenkonto meldet: ' +
     '"<b>Profil nicht verfügbar / Server nicht erreichbar</b>". ' +

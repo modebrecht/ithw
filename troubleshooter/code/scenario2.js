@@ -1,7 +1,7 @@
 export default {
   id: 'E1',
   name: 'Kein Signal',
-  storyTitle: 'Szenario: PC läuft, kein Bild',
+  storyTitle: 'Szenario 2: Kein Bild',
   storyText: 'Der PC ist angeschaltet. Lüfter hörbar, LED leuchtet grün, aber wir haben kein Bild. <b>Was überprüfst du als Erstes?</b>',
   hints: {
     h1: 'Was beeinflusst das <b>Bild</b>, ohne den PC zu öffnen?',

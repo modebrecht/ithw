@@ -1,7 +1,7 @@
 export default {
   id: 'K1',
   name: 'Tastatur reagiert nicht',
-  storyTitle: 'Szenario: Tastatur reagiert nicht',
+  storyTitle: 'Szenario 4: Tastatur reagiert nicht',
   storyText:
     'Der PC ist gestartet, doch deine Tastatur reagiert nicht: Du willst dich anmelden, aber keine Taste wird erkannt. ' +
     'Finde den schnellen Weg, damit die Tastatur wieder reagiert.',

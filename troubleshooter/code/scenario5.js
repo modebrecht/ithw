@@ -1,7 +1,7 @@
 export default {
   id: 'S2',
   name: 'Überhitzung / Lüfter blockiert',
-  storyTitle: 'Szenario: Überhitzung unter Last',
+  storyTitle: 'Szenario 5: Überhitzung unter Last',
   storyText:
     'Der PC startet normal und bleibt im Idle stabil. Doch sobald du ihn forderst, ' +
     'tritt nach kurzer Zeit <b>Throttling oder ein Abschalten</b> auf. ' +

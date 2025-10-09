@@ -1,7 +1,7 @@
 export default {
   id: 'L0',
   name: 'Der PC startet nicht',
-  storyTitle: 'Szenario: Der PC, der nicht starten will',
+  storyTitle: 'Szenario 1: Der PC, der nicht starten will',
   storyText: 'Du sitzt im Informatikraum und dein PC reagiert nicht: Du drückst den Power‑Knopf, aber es passiert nichts. Dein Ziel: In möglichst <b>wenigen Schritten</b> die Ursache finden.',
   hints: {
     h1: 'Was kannst du prüfen, <b>ohne den PC zu öffnen</b>?',
