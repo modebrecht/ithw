@@ -2,11 +2,11 @@
 
 craft new file index-new.html containing
 
-index.html
-favicon.svg inside HTML
-style.css
-*.js
-REMOVE ANY COMMENTS
+- inline content from index.html (preserve UTF-8 characters)
+- embed styles.css into a <style> block
+- embed all scenario*.js modules inline (replace exports with const definitions)
+- inline favicon.svg as base64 data URI
+- strip all HTML/CSS/JS comments before embedding
 
 Our Goal:
 We want to have just one file request per user!

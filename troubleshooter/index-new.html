@@ -1,0 +1,3226 @@
+﻿<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PC-Troubleshooter v3.3</title>
+  <style>
+:root{
+  --bg:#0f172a;           
+  --card:#0b1223;         
+  --ink:#e5e7eb;          
+  --ink-dim:#b6c1d4;
+  --accent:#60a5fa;       
+  --accent-2:#22d3ee;     
+  --good:#22c55e;         
+  --warn:#f59e0b;         
+  --bad:#ef4444;          
+  --muted:#94a3b8;        
+  --shadow:0 18px 40px -18px rgba(0,0,0,.55);
+  --radius:16px;
+  --gold:#fbbf24;         
+  --silver:#cbd5e1;       
+  --bronze:#d97706;       
+}
+
+html,body{min-height:100%}
+body{
+  margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,"Helvetica Neue",Arial,"Noto Sans","Apple Color Emoji","Segoe UI Emoji";
+  color:var(--ink);
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(96,165,250,.15), transparent 50%),
+    radial-gradient(1200px 600px at 90% 0%, rgba(34,211,238,.12), transparent 50%),
+    var(--bg);
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-attachment: fixed, fixed, fixed;
+}
+
+.wrap{max-width:1000px;margin:clamp(16px,3vw,40px) auto;padding:0 16px}
+.hidden{display:none!important}
+header{display:flex;gap:16px;align-items:center;justify-content:space-between;margin-bottom:20px}
+
+:root{ --ctrl-size: 44px; }
+header .btn{border-radius:999px;width:var(--ctrl-size);height:var(--ctrl-size);padding:0;display:inline-grid;place-items:center}
+
+#scoreBtn,
+#hubBtn,
+#hubScoreBtn{width:auto;padding:0 18px}
+
+#hubView .hub-info .badge,
+#hubView #hubScoreBtn{
+  padding:12px 10px;
+  border-radius:999px;
+  background:linear-gradient(135deg, rgba(96,165,250,.18), rgba(34,211,238,.1));
+  border:1px solid rgba(148,163,184,.22);
+  color:var(--ink);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  height:auto;
+  min-height:32px;
+  box-shadow:none;
+  font-size:12px;
+  font-weight:500;
+  letter-spacing:.01em;
+  line-height:1;
+}
+#hubView .hub-info .badge-button{pointer-events:none;cursor:default;}
+#hubView .hub-info .badge-button:focus-visible{outline:none;}
+#hubView .hub-info .badge-button:disabled{opacity:1;}
+
+header .controls{display:flex;gap:8px;align-items:center}
+.level-nav{display:flex;align-items:center;gap:8px; margin: 0 2px 0 0;}
+.level-nav .btn{display:none;width:36px;height:36px;padding:0;border-radius:50%}
+#levelPrev{font-size:20px}
+#levelNext{font-size:20px}
+
+header .controls #scoreBtn,
+header .controls #hubBtn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  height:36px;
+  padding:0 16px;
+  border-radius:999px;
+  border:1px solid rgba(148,163,184,.22);
+  background:linear-gradient(135deg, rgba(96,165,250,.18), rgba(34,211,238,.1));
+  color:var(--ink);
+  font-size:12px;
+  font-weight:500;
+  letter-spacing:.01em;
+  line-height:1;
+  box-shadow:none;
+}
+#levelTag{
+  border:1px solid rgba(255,255,255,.16);
+  background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));
+  border-radius:999px;
+  color:var(--ink);
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:.01em;
+  line-height:1;
+  margin-left:0;
+}
+
+#hubView #hubScoreBtn:hover,
+header .controls #scoreBtn:hover,
+header .controls #hubBtn:hover{
+  background:linear-gradient(135deg, rgba(96,165,250,.24), rgba(34,211,238,.16));
+}
+
+.hub-info{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+#hubView .hub-info{gap:8px}
+.title{font-weight:800;font-size:clamp(22px,4vw,34px);letter-spacing:.2px}
+.badge{border:1px solid rgba(255,255,255,.12);padding:6px 10px;border-radius:999px;font-size:12px;color:var(--ink-dim)}
+.badge-action{cursor:pointer;user-select:none}
+.badge-action:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.hub-card .inner > .hint{margin-bottom:16px}
+.hub-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:20px;
+  margin-top:20px;
+  counter-reset: hub; 
+}
+
+.hub-item{
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:16px;
+  padding:18px 20px;
+  background:
+    radial-gradient(600px 200px at 10% -20%, rgba(96,165,250,.10), transparent 60%),
+    radial-gradient(600px 200px at 90% -10%, rgba(34,211,238,.10), transparent 60%),
+    linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  min-height:210px;
+  box-shadow:0 14px 36px rgba(15,23,42,.28);
+}
+
+.hub-item-header{
+  display:grid;
+  grid-template-columns:auto 1fr auto; 
+  gap:12px;
+  align-items:center;
+}
+
+
+.hub-item h3{
+  margin:2px 0 0 0;
+  font-size:1.12rem;
+  color:var(--ink);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+
+
+.hub-status{
+  text-align:left;
+  margin:2px 0 0 0;
+  font-size:.95rem;
+  color:var(--ink-dim);
+  line-height:1.45;
+}
+
+
+.hub-best{
+  margin:0;
+  font-size:.92rem;
+  color:var(--ink-dim);
+  text-align:left;
+}
+
+
+.hub-item button{
+  margin-top:auto;
+  width:100%;
+  height:44px;
+  font-weight:700;
+  border-radius:12px;
+}
+
+.hub-item.locked{opacity:.85}
+.hub-item.locked button{cursor:not-allowed}
+.hub-item.placeholder{opacity:.65}
+.hub-lock{font-weight:600}
+
+
+.hub-item.completed{border-width:2px}
+.hub-item.completed.rank-gold{border-color:rgba(251,191,36,.75)}
+.hub-item.completed.rank-silber{border-color:rgba(203,213,225,.70)}
+.hub-item.completed.rank-bronze{border-color:rgba(217,119,6,.70)}
+.hub-item.completed.rank-none{border-color:rgba(148,163,184,.45)}
+
+
+
+.hub-medal{
+  grid-column:3;
+  justify-self:end;
+  display:inline-flex;align-items:center;justify-content:center;gap:4px;
+  height:38px;padding:0 16px;border-radius:999px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.05);
+  font-size:12px;font-weight:700;color:var(--ink);white-space:nowrap
+}
+.hub-medal.gold{background:rgba(251,191,36,.16);border-color:rgba(251,191,36,.55);color:var(--gold)}
+.hub-medal.silver{background:rgba(203,213,225,.16);border-color:rgba(203,213,225,.50);color:var(--silver)}
+.hub-medal.bronze{background:rgba(217,119,6,.16);border-color:rgba(217,119,6,.50);color:var(--bronze)}
+.hub-medal.none{opacity:.6}
+
+
+
+.card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);box-shadow:var(--shadow);}
+.card .inner{padding:clamp(16px,2.6vw,24px)}
+
+.story h2{margin:0 0 8px 0;font-size:clamp(18px,2.6vw,22px)}
+.story p{margin:.35rem 0;color:var(--ink-dim);line-height:1.5}
+
+.statusbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;align-items:center}
+.statusbar > button:first-of-type{margin-left:auto}
+.status-actions{margin-left:auto;display:flex;gap:10px;align-items:center}
+.status-actions .btn:not(.chip){padding:8px 12px}
+.chip{background-color:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);padding:8px 10px;border-radius:10px;font-size:13px;color:var(--ink-dim)}
+.chip strong{color:var(--ink)}
+
+.actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
+.action-set-label{grid-column:1/-1;font-size:.85rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:rgba(226,232,240,.82);margin-bottom:4px}
+@media (max-width:860px){.actions{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.actions{grid-template-columns:1fr}}
+button.action{
+  appearance:none; border:none; cursor:pointer; padding:16px 18px; border-radius:12px; text-align:left; color:var(--ink);
+  background:linear-gradient(180deg,rgba(96,165,250,.16),rgba(34,211,238,.10));
+  border:1px solid rgba(96,165,250,.35);
+  transition: transform .06s ease, box-shadow .15s ease, border-color .2s ease;
+  box-shadow:0 10px 25px rgba(34,211,238,.08);
+  position:relative; display:flex; align-items:center; gap:10px; overflow:hidden;
+  min-height:64px;
+}
+button.action .label{position:relative; z-index:1; font-weight:600}
+button.action::after{
+  content: attr(data-key);
+  position:absolute; right:14px; top:50%; transform:translateY(-50%);
+  font-weight:800; font-size:clamp(34px,6vw,56px); line-height:1;
+  color:var(--ink-dim); opacity:.12; pointer-events:none; user-select:none;
+}
+button.action:hover{transform: translateY(-1px); box-shadow:0 14px 30px rgba(34,211,238,.14)}
+button.action:active{transform: translateY(0)}
+
+.legend{margin-top:8px;font-size:12px;color:var(--muted)}
+
+.legend{margin-top:8px;font-size:12px;color:var(--muted)}
+
+.feedback{min-height:72px;margin-top:10px;
+    grid-template-columns:1fr 96px;gap:12px;align-items:stretch}
+.feedback .mbody{color:var(--ink-dim)}
+.feedback .mhead{display:flex;align-items:center;justify-content:space-between;margin:0}
+.feedback .mhead h3{margin:0;font-size:18px}
+.feedback .scene.mini svg{max-height:96px}
+.summary .legend{margin-top:2px}
+
+.tools{margin:10px 0 0 0}
+.tools .tool{display:inline-flex;align-items:center;gap:8px;margin:0 10px 10px 0;padding:8px 10px;background:transparent;border:1px dashed rgba(255,255,255,.2);border-radius:12px;color:var(--ink-dim)}
+.tools .tool .icon{display:inline-block;background:var(--ink-dim);width:24px;height:24px;border-radius:6px}
+.tools .tool .icon.status{position:relative}
+.tools .tool .icon.status::after{content:"";position:absolute;right:-2px;bottom:-2px;width:10px;height:10px;border-radius:999px;background:var(--warn);border:2px solid var(--card)}
+.tools .tool .icon.on{background:var(--good)}
+.tools .tool .icon.ok{background:var(--good)}
+.tools .tool .icon.off{background:var(--bad)}
+.tools .tool .icon.dim{opacity:.4}
+
+.footer{margin-top:12px;display:flex;justify-content:flex-end;gap:8px}
+
+.btn{appearance:none;border:1px solid rgba(255,255,255,.16);background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));border-radius:10px;padding:10px 12px;color:var(--ink);cursor:pointer;transition:transform .06s ease, box-shadow .15s ease, border-color .2s ease;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:14px;text-align:center}
+#messageOk{min-height:100px}
+.btn:hover{transform: translateY(-1px); box-shadow:0 8px 20px rgba(34,211,238,.12)}
+.btn:active{transform: translateY(0)}
+.btn.primary{border-color:rgba(96,165,250,.35);background:linear-gradient(180deg,rgba(96,165,250,.22),rgba(34,211,238,.12));box-shadow:0 10px 24px rgba(34,211,238,.06)}
+.btn[disabled]{opacity:.6;cursor:not-allowed}
+.btn.chip{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.09);
+  box-shadow:none;
+  color:var(--ink-dim);
+  font-size:13px;
+  padding:9px 10px;
+}
+.emoji{
+  font-size:15px;
+  line-height:1;
+  display:inline-flex;
+  align-items:center;
+}
+.btn .text{
+  display:inline-flex;
+  align-items:center;
+  font-size:14px;
+}
+header .controls .btn,
+#levelTag{
+  padding:0 16px;
+  min-height:36px;
+  height:36px;
+  line-height:1;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+}
+
+.status{display:flex;align-items:center;gap:10px}
+
+.score{display:flex;align-items:center;gap:10px}
+.dot{display:inline-block;width:14px;height:14px;border-radius:999px;border:2px solid rgba(255,255,255,.22)}
+.s-good{background:var(--good)}
+.s-warn{background:var(--warn)}
+.s-bad{background:var(--bad)}
+.s-unk{background:var(--muted)}
+.meters{display:flex;align-items:center;gap:10px}
+.meter{display:flex;align-items:center;color:var(--ink-dim)}
+.meter .bar{width:130px;height:8px;border-radius:999px;background:rgba(255,255,255,.1);margin:0 8px;position:relative;overflow:hidden}
+.meter .bar .fill{display:block;position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,var(--good),#a3e635);border-radius:999px;transition:width .3s ease}
+.meter .bar .fill.orange{background:linear-gradient(90deg,var(--warn),#fcd34d)}
+.meter .bar .fill.red{background:linear-gradient(90deg,var(--bad),#f87171)}
+
+.card .grid{display:grid;grid-template-columns: 1.2fr 1fr;gap:18px;align-items:start}
+@media (max-width:840px){.card .grid{grid-template-columns: 1fr}}
+
+.hint{color:var(--ink-dim)}
+
+.goal{margin:10px 0}
+.goal h3{margin:0 0 8px 0}
+.goal ul{margin:0;padding-left:16px}
+.goal li{margin:.2rem 0}
+
+.lp21 table{width:100%;border-collapse:collapse}
+.lp21 th,.lp21 td{border:1px solid rgba(255,255,255,.1);padding:10px;text-align:left}
+.lp21 th{background:rgba(255,255,255,.06)}
+.lp21 td small{display:block;color:var(--ink-dim);font-size:12px;margin-top:4px}
+
+.analysis{margin-top:10px}
+.analysis textarea{width:100%;min-height:120px;resize:vertical}
+
+.summary{display:none}
+.summary.active{display:block}
+
+.step-log{margin-top:8px;padding-left:18px;color:var(--ink-dim)}
+.step-log li{margin:.25rem 0}
+
+details.didaktik{margin-top:14px}
+
+details.hintbox{margin:0 0 10px 0}
+details.hintbox summary{cursor:pointer}
+details.hintbox[open] summary, details.didaktik[open] summary{margin-bottom:6px}
+
+
+details summary{list-style:none}
+details summary::-webkit-details-marker{display:none}
+details.hintbox summary::before, details.didaktik summary::before{
+  content:""; display:inline-block; width:24px; height:24px; margin-right:10px;
+  background-color: var(--ink-dim);
+  -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M9 6l6 6-6 6"/></svg>') no-repeat center / 100% 100%;
+          mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M9 6l6 6-6 6"/></svg>') no-repeat center / 100% 100%;
+  transition: transform .2s ease, background-color .2s ease;
+  vertical-align:-4px;
+}
+details[open].hintbox summary::before, details[open].didaktik summary::before{
+  transform: rotate(90deg);
+  background-color: var(--ink);
+}
+
+
+.divider{border:0;border-top:1px dashed rgba(255,255,255,.14);margin:10px 0 12px 0}
+
+
+.scene{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px;margin:10px 0 6px}
+.scene svg{width:100%;height:auto;display:block}
+.scene .mut{stroke:rgba(229,231,235,.45)}
+.scene .mutfill{fill:rgba(255,255,255,.04)}
+.scene .no-signal{display:none}
+.scene.nosig .no-signal{display:block}
+.scene .booterr,.scene .bootmenu{display:none}
+.scene.booterr .booterr{display:block}
+.scene.bootmenu .bootmenu{display:block}
+.scene .login{display:none}
+.scene.login .login{display:block}
+.scene.login .login-domain-error{display:none}
+.scene.login.domain-error .login-domain-error{display:block}
+.scene.login.domain-error .login-default{display:none}
+.scene .desktop-screen{display:none}
+.scene.desktop .login-default,
+.scene.desktop .login-domain-error{display:none}
+.scene.desktop .desktop-screen{display:block}
+.scene.power-on .led{stroke: var(--good); fill: var(--good)}
+
+.scene .screen{display:none}
+.scene.nosig .screen, .scene.login .screen, .scene.booterr .screen, .scene.bootmenu .screen{display:block}
+.scene.bootmenu .bootmenu-bg{fill:rgba(15,23,42,.94);stroke:rgba(148,163,184,.45);stroke-width:1}
+.scene .fan-unit{display:none}
+.scene.fan-visible .fan-unit{display:inline}
+.scene .fan-unit .fan-ring{stroke:rgba(148,163,184,.55);fill:rgba(148,163,184,.10)}
+.scene .fan-unit .fan-blade{stroke:rgba(148,163,184,.4);stroke-width:2;stroke-linecap:round}
+.scene .fan-unit .fan-hub{fill:rgba(148,163,184,.6)}
+.scene .fan-blocker,.scene .heat,.scene .cool-air{display:none}
+.scene .fan-blocker line{stroke:rgba(248,113,113,.7);stroke-width:4;stroke-linecap:round}
+.scene.fan-blocked .fan-blocker{display:block}
+.scene.fan-blocked .fan-unit .fan-ring{stroke:var(--warn);fill:rgba(245,158,11,.12)}
+.scene.fan-clean .fan-unit .fan-ring{stroke:var(--good);fill:rgba(34,197,94,.15)}
+.scene.fan-clean .fan-unit .fan-hub{fill:var(--good)}
+.scene.overheat .heat{display:block}
+.scene.fan-clean .cool-air{display:block}
+.scene.overheat .cool-air{display:none}
+.scene .heat path{stroke:rgba(239,68,68,.65);stroke-width:2.5;fill:none;stroke-linecap:round}
+.scene .cool-air path{stroke:rgba(56,189,248,.75);stroke-width:2.5;fill:none;stroke-linecap:round;opacity:.85}
+
+
+.action-message{display:none;margin-top:12px;background:var(--card);border:1px solid rgba(255,255,255,.16);border-radius:16px;box-shadow:var(--shadow);padding:18px}
+.action-message.open{display:grid;grid-template-columns:1fr 130px;grid-template-rows:auto 1fr;gap:12px;align-items:stretch}
+.action-message .mhead{display:flex;align-items:center;justify-content:space-between;margin:0}
+.action-message .mhead h3{margin:0;font-size:18px}
+.action-message .mbody{font-size:14px;color:var(--ink-dim);grid-column:1;grid-row:2}
+.action-message .mfoot{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+.action-message.top-modal{position:fixed;top:48px;left:50%;transform:translateX(-50%);max-width:720px;width:calc(100% - 48px);z-index:999;background:linear-gradient(180deg,#101c38,#0b1223);border-color:#1f2937;box-shadow:0 18px 40px rgba(15,23,42,.6);padding:18px 24px 24px}
+.action-message.top-modal.open{display:grid;grid-template-columns:1fr;grid-template-rows:auto 1fr auto;row-gap:10px}
+.action-message.top-modal .mhead{grid-column:1;grid-row:1;margin-bottom:4px;display:flex;align-items:center;gap:12px}
+.modal-close{
+  margin-left:auto;
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  border:1px solid rgba(148,163,184,.28);
+  background:linear-gradient(135deg, rgba(15,23,42,.9), rgba(30,64,175,.6));
+  color:var(--ink);
+  font-size:20px;
+  line-height:1;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+.modal-close:hover{
+  background:linear-gradient(135deg, rgba(59,130,246,.4), rgba(14,116,144,.4));
+}
+.action-message.top-modal .modal-title-main{font-size:18px;font-weight:700;color:var(--ink)}
+.action-message.top-modal .modal-title-sub{font-size:.95rem;color:var(--ink-dim);font-weight:500;margin-left:auto;text-align:right;padding-left:24px}
+.action-message.top-modal .modal-title-sub.only{margin-left:0;padding-left:0;text-align:left}
+.action-message.top-modal .mbody{grid-column:1;grid-row:2;margin-top:0}
+.action-message.top-modal .mbody > :first-child{margin-top:0}
+.action-message.top-modal .mfoot{grid-column:1;grid-row:3;margin-top:20px}
+.action-message.top-modal.open .mfoot{display:block}
+.action-message.top-modal.open .mfoot .btn{display:block;width:100%;padding:12px 0;height:auto}
+body.top-modal-open::after{
+  content:'';
+  position:fixed;
+  inset:0;
+  background:rgba(10,15,28,.68);
+  backdrop-filter:blur(4px);
+  z-index:998;
+}
+body.top-modal-open .wrap{pointer-events:none}
+body.top-modal-open #hubView > section,
+body.top-modal-open #scenarioView > section{display:none}
+.score-table-wrap{margin-top:8px;overflow-x:auto;border-radius:12px;border:1px solid rgba(148,163,184,.16);background:rgba(15,23,42,.55)}
+.score-table{width:100%;border-collapse:collapse;font-size:.92rem}
+.score-table thead th{font-size:.75rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-dim);padding:12px 14px;background:rgba(15,23,42,.75);text-align:left}
+.score-table thead th.score-col-time,
+.score-table thead th.score-col-tries,
+.score-table thead th.score-col-score{text-align:right}
+.score-table tbody td{padding:12px 14px;border-top:1px solid rgba(148,163,184,.14);color:var(--ink)}
+.score-table tbody tr:first-child td{border-top:none}
+.score-table tbody tr.score-row-empty td{color:var(--ink-dim)}
+.score-table tbody tr:nth-child(odd) td{background:rgba(27,43,84,.55)}
+.score-table tbody tr:nth-child(even) td{background:rgba(21,32,63,.45)}
+.score-table tbody tr:hover td{background:rgba(96,165,250,.08)}
+.score-col-time,.score-col-tries,.score-col-score{text-align:right;font-variant-numeric:tabular-nums}
+.score-rank{display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:4px 12px;border-radius:999px;border:1px solid rgba(148,163,184,.3);background:rgba(148,163,184,.15);color:var(--ink)}
+.score-rank.rank-gold{color:var(--gold);border-color:rgba(251,191,36,.5);background:rgba(251,191,36,.12)}
+.score-rank.rank-silber{color:var(--silver);border-color:rgba(203,213,225,.45);background:rgba(203,213,225,.12)}
+.score-rank.rank-bronze{color:var(--bronze);border-color:rgba(217,119,6,.45);background:rgba(217,119,6,.12)}
+.score-rank.rank-none{color:var(--ink-dim);border-color:rgba(148,163,184,.24);background:rgba(148,163,184,.08)}
+.score-note{display:block;margin-top:6px;font-size:.78rem;color:var(--ink-dim)}
+
+
+.action-message.open:not(.top-modal) .mfoot{grid-column:2;grid-row:1 / span 2;margin-top:0;align-items:stretch}
+.action-message.open:not(.top-modal) .mfoot .btn{height:100%;width:100%;display:flex;align-items:center;justify-content:center}
+.scene.mini svg{max-height:160px}
+.scene.mini{margin-top:10px}
+
+
+.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:1000;}
+.confetti-piece{position:absolute;width:8px;height:8px;background:var(--accent);animation:drop 3s linear forwards;}
+@keyframes drop{to{transform:translateY(100vh) rotate(720deg);opacity:0;}}
+
+
+@keyframes slideOutLeft{from{transform:translateX(0);opacity:1} to{transform:translateX(-360px);opacity:0}}
+@keyframes slideInRight{from{transform:translateX(60px);opacity:0} to{transform:translateX(0);opacity:1}}
+.card.transition-out{animation:slideOutLeft .28s ease both}
+.card.transition-in{animation:slideInRight .32s ease both}
+.card.transitioning{pointer-events:none}
+
+
+@keyframes restartOut{from{transform:scale(1);opacity:1;filter:none}to{transform:scale(.98);opacity:0;filter:blur(2px)}}
+@keyframes restartIn{from{transform:scale(1.02);opacity:0}to{transform:scale(1);opacity:1}}
+.card.restart-out{animation:restartOut .22s ease both}
+.card.restart-in{animation:restartIn .26s ease both}
+.restart-overlay{position:fixed;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.35);backdrop-filter:blur(2px);z-index:900;pointer-events:none;opacity:0;animation:overlayFade .38s ease forwards}
+.restart-indicator{display:inline-flex;gap:10px;align-items:center;padding:10px 14px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);box-shadow:var(--shadow);font-weight:700;color:var(--ink)}
+.restart-indicator .icon{display:inline-block;transform-origin:50% 50%;animation:spin .6s ease 1}
+@keyframes overlayFade{from{opacity:0}to{opacity:1}}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+
+[aria-live]{outline:none}
+@media (prefers-reduced-motion: reduce){
+  *{transition:none !important;animation:none !important}
+}
+</style>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzFkNGVkOCIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMwZjE3MmEiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgcng9IjE0IiBmaWxsPSJ1cmwoI2JnKSIvPgogIDxyZWN0IHg9IjE0IiB5PSIxNiIgd2lkdGg9IjM2IiBoZWlnaHQ9IjI0IiByeD0iNCIgZmlsbD0iI2RiZWFmZSIvPgogIDxyZWN0IHg9IjE0IiB5PSI0MiIgd2lkdGg9IjM2IiBoZWlnaHQ9IjQiIGZpbGw9IiMxZTI5M2IiLz4KICA8cmVjdCB4PSIyNiIgeT0iNDgiIHdpZHRoPSIxMiIgaGVpZ2h0PSI0IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPgo8L3N2Zz4K" />
+</head>
+<body>
+  <div class="wrap hub-view" id="hubView">
+    <header class="hub-header">
+      <div class="title">PC-Troubleshooter <span class="badge" id="hubVerTag">v3.3</span></div>
+      <div class="hub-info" id="hubInfo"></div>
+    </header>
+    <section class="hub-card" aria-labelledby="hubTitle">
+      <div class="inner">
+        
+        <div class="hub-grid" id="scenarioList" aria-live="polite"></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="wrap hidden" id="scenarioView">
+    <header>
+      <div class="title">PC-Troubleshooter <span class="badge" id="verTag">v3.3</span></div>
+      <div class="controls">
+        <div class="badge" id="levelTag" aria-live="polite">Fall</div>
+        <button class="btn" type="button" id="scoreBtn" title="Score anzeigen" aria-label="Score anzeigen"><span class="emoji" aria-hidden="true">🏆</span><span class="text">Score</span></button>
+        <button class="btn" type="button" id="hubBtn" title="Zurück zum Hub" aria-label="Zurück zum Hub"><span class="emoji" aria-hidden="true">🏠</span><span class="text">Hub</span></button>
+      </div>
+    </header>
+
+    
+    <div class="action-message" id="actionMessageTop" aria-hidden="true">
+      <header class="mhead">
+        <h3 id="messageTitleTop">Aktion</h3>
+        <button class="modal-close" type="button" id="messageCloseTop" aria-label="Schliessen" hidden>×</button>
+      </header>
+      <div class="mbody" id="messageBodyTop"></div>
+      <div class="mfoot">
+        <button class="btn primary" id="messageOkTop">Schliessen</button>
+      </div>
+    </div>
+
+    
+    <section class="card story" aria-labelledby="storyTitle">
+      <div class="inner">
+          <h2 id="storyTitle">Szenario: Der PC, der nicht starten will</h2>
+          <p id="storyText">
+            Du sitzt im Informatikraum und dein PC reagiert nicht: Du drückst den Power-Knopf, aber es passiert nichts.
+            Dein Ziel: In möglichst <b>wenigen Schritten</b> die Ursache finden.
+          </p>
+
+          <figure class="scene" role="img" aria-label="PC-Tower und Monitor auf einem Schreibtisch (neutrale Ausgangslage)">
+            <svg viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <defs>
+                <linearGradient id="desktopBg" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#1d4ed8" stop-opacity="0.95"/>
+                  <stop offset="55%" stop-color="#312e81" stop-opacity="0.98"/>
+                  <stop offset="100%" stop-color="#0f172a"/>
+                </linearGradient>
+                <linearGradient id="desktopAccent" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.85"/>
+                  <stop offset="100%" stop-color="#6366f1" stop-opacity="0.55"/>
+                </linearGradient>
+                <linearGradient id="taskbarBg" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#1f2937" stop-opacity="0.92"/>
+                  <stop offset="100%" stop-color="#111827" stop-opacity="0.92"/>
+                </linearGradient>
+              </defs>
+              
+              <rect x="20" y="194" width="760" height="8" rx="4" class="mutfill"/>
+              <rect x="20" y="194" width="760" height="8" rx="4" class="mut" fill="none"/>
+
+              <rect x="70" y="85" width="110" height="110" rx="8" class="mut" fill="none"/>
+              <circle cx="100" cy="105" r="6" class="mut led" fill="none"/>
+              <g class="fan-unit" aria-hidden="true">
+                <circle cx="125" cy="150" r="24" class="fan-ring"/>
+                <circle cx="125" cy="150" r="6" class="fan-hub"/>
+                <path d="M125 128 L125 172" class="fan-blade"/>
+                <path d="M108 141 L142 159" class="fan-blade"/>
+                <path d="M142 141 L108 159" class="fan-blade"/>
+              </g>
+              <g class="fan-blocker" aria-hidden="true">
+                <line x1="110" y1="135" x2="140" y2="165"/>
+                <line x1="110" y1="165" x2="140" y2="135"/>
+              </g>
+              <g class="heat" aria-hidden="true">
+                <path d="M92 96 C104 82, 114 82, 126 96"/>
+                <path d="M118 92 C130 78, 140 78, 152 92"/>
+              </g>
+              <g class="cool-air" aria-hidden="true">
+                <path d="M92 94 C104 82, 114 82, 126 94"/>
+                <path d="M118 90 C130 78, 140 78, 152 90"/>
+              </g>
+
+              
+              <rect x="240" y="12" width="270" height="160" rx="6" class="mut" fill="none"/>
+              <rect x="240" y="12" width="270" height="160" rx="6" class="mutfill screen"/>
+              <rect x="370" y="173" width="10" height="19" class="mut" fill="none"/>
+              <rect x="335" y="190" width="80" height="6" rx="3" class="mut" fill="none"/>
+              <g class="no-signal" aria-hidden="true">
+                <rect x="240" y="12" width="270" height="160" rx="6" fill="none"/>
+                <text x="375" y="92" font-size="24" text-anchor="middle" style="fill:rgba(229,231,235,.88);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;letter-spacing:2px">NO SIGNAL</text>
+              </g>
+              <g class="booterr" aria-hidden="true">
+                <rect x="240" y="12" width="270" height="160" rx="6" fill="none"/>
+                <text x="375" y="92" font-size="22" text-anchor="middle" style="fill:rgba(229,231,235,.9);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;letter-spacing:1.4px">NO BOOTABLE DEVICE</text>
+              </g>
+              <g class="bootmenu" aria-hidden="true">
+                <rect x="265" y="32" width="220" height="120" rx="10" class="bootmenu-bg"/>
+                <text x="375" y="58" font-size="16" text-anchor="middle" style="fill:rgba(229,231,235,.92);font-weight:600;letter-spacing:1px">BOOT MENU</text>
+                <text x="290" y="82" font-size="13" style="fill:rgba(229,231,235,.88);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;">▶ SSD (Windows)</text>
+                <text x="290" y="104" font-size="13" style="fill:rgba(229,231,235,.65);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;">  USB Device</text>
+                <text x="290" y="126" font-size="13" style="fill:rgba(229,231,235,.65);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;">  Network Boot</text>
+                <text x="375" y="148" font-size="11" text-anchor="middle" style="fill:rgba(229,231,235,.5);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;">ENTER = Start · ESC = Zurück</text>
+              </g>
+              <g class="login login-default" aria-hidden="true">
+                
+                <rect x="290" y="47" width="170" height="90" rx="8" class="mut" fill="none"/>
+                <text x="375" y="80" font-size="32" text-anchor="middle" style="fill:rgba(229,231,235,.95);font-weight:700">Login</text>
+                <rect x="310" y="96" width="130" height="12" rx="6" class="mut" fill="none"/>
+                <rect x="310" y="118" width="130" height="12" rx="6" class="mut" fill="none"/>
+              </g>
+              <g class="login login-domain-error" aria-hidden="true">
+                <rect x="262" y="47" width="230" height="90" rx="8" class="mut" fill="black"/>
+                <text x="375" y="82" font-size="18" text-anchor="middle" style="fill:rgba(229,231,235,.95);font-weight:700">Fehler:</text>
+                <text x="375" y="108" font-size="16" text-anchor="middle" style="fill:rgba(229,231,235,.9);font-weight:600">Domäne nicht verfügbar!</text>
+              </g>
+              <g class="desktop-screen" aria-hidden="true">
+                <rect x="240" y="12" width="270" height="160" rx="6" fill="url(#desktopBg)"/>
+                <ellipse cx="348" cy="78" rx="110" ry="62" fill="url(#desktopAccent)" opacity="0.8" transform="rotate(-8 348 78)"/>
+                <ellipse cx="442" cy="110" rx="68" ry="50" fill="#60a5fa" opacity="0.32" transform="rotate(6 442 110)"/>
+                <path d="M256 134 C296 112, 354 116, 398 140 C432 158, 480 154, 508 132 L508 150 C478 168, 424 170, 372 158 C322 148, 284 154, 256 164 Z" fill="#1d4ed8" opacity="0.32"/>
+                <g class="desktop-icons" aria-hidden="true">
+                  <g transform="translate(258 38)">
+                    <rect width="34" height="34" rx="8" fill="rgba(15,23,42,0.4)" stroke="rgba(248,250,252,0.18)" stroke-width="0.6"/>
+                    <rect x="3" y="3" width="28" height="28" rx="7" fill="#2563eb"/>
+                    <text x="17" y="23" font-size="14" text-anchor="middle" style="fill:#f8fafc;font-weight:700;font-family:'Segoe UI', 'Helvetica Neue', sans-serif">W</text>
+                    <text x="17" y="44" font-size="8" text-anchor="middle" style="fill:rgba(248,250,252,0.92);font-weight:500;font-family:'Segoe UI', 'Helvetica Neue', sans-serif">Word</text>
+                  </g>
+                  <g transform="translate(312 38)">
+                    <rect width="34" height="34" rx="8" fill="rgba(15,23,42,0.4)" stroke="rgba(248,250,252,0.18)" stroke-width="0.6"/>
+                    <rect x="3" y="3" width="28" height="28" rx="7" fill="#22c55e"/>
+                    <text x="17" y="23" font-size="14" text-anchor="middle" style="fill:#f8fafc;font-weight:700;font-family:'Segoe UI', 'Helvetica Neue', sans-serif">X</text>
+                    <text x="17" y="44" font-size="8" text-anchor="middle" style="fill:rgba(248,250,252,0.92);font-weight:500;font-family:'Segoe UI', 'Helvetica Neue', sans-serif">Excel</text>
+                  </g>
+                  <g transform="translate(366 38)">
+                    <rect width="34" height="34" rx="8" fill="rgba(15,23,42,0.4)" stroke="rgba(248,250,252,0.18)" stroke-width="0.6"/>
+                    <rect x="3" y="3" width="28" height="28" rx="7" fill="#f97316"/>
+                    <text x="17" y="23" font-size="14" text-anchor="middle" style="fill:#f8fafc;font-weight:700;font-family:'Segoe UI', 'Helvetica Neue', sans-serif">P</text>
+                    <text x="17" y="44" font-size="8" text-anchor="middle" style="fill:rgba(248,250,252,0.92);font-weight:500;font-family:'Segoe UI', 'Helvetica Neue', sans-serif">PowerPoint</text>
+                  </g>
+                </g>
+                <g class="taskbar" aria-hidden="true" transform="translate(250 150)">
+                  <rect width="250" height="16" rx="7" fill="url(#taskbarBg)" stroke="rgba(148,163,184,0.45)" stroke-width="0.6"/>
+                  <rect x="6" y="3" width="14" height="10" rx="3" fill="rgba(148,163,184,0.32)" stroke="rgba(248,250,252,0.16)" stroke-width="0.5"/>
+                  <rect x="8" y="4" width="4" height="3.5" rx="0.8" fill="#f8fafc"/>
+                  <rect x="13" y="4" width="4" height="3.5" rx="0.8" fill="#f8fafc"/>
+                  <rect x="8" y="8" width="4" height="3.5" rx="0.8" fill="#f8fafc"/>
+                  <rect x="13" y="8" width="4" height="3.5" rx="0.8" fill="#f8fafc"/>
+                  <rect x="26" y="3" width="72" height="10" rx="5" fill="rgba(148,163,184,0.24)" stroke="rgba(248,250,252,0.16)" stroke-width="0.5"/>
+                  <circle cx="36" cy="8" r="3" fill="none" stroke="rgba(248,250,252,0.65)" stroke-width="1"/>
+                  <line x1="38.5" y1="10.5" x2="41.5" y2="13.5" stroke="rgba(248,250,252,0.65)" stroke-width="1" stroke-linecap="round"/>
+                  <text x="52" y="11" font-size="7" text-anchor="middle" style="fill:rgba(226,232,240,0.86);font-family:'Segoe UI', 'Helvetica Neue', sans-serif;font-weight:500">Suchen</text>
+                  <circle cx="112" cy="8" r="4" fill="#38bdf8"/>
+                  <circle cx="132" cy="8" r="4" fill="#22c55e"/>
+                  <circle cx="152" cy="8" r="4" fill="#f97316"/>
+                  <rect x="180" y="3" width="60" height="10" rx="5" fill="rgba(148,163,184,0.24)" stroke="rgba(248,250,252,0.16)" stroke-width="0.5"/>
+                  <path d="M188 11 L192 6 L196 11 Z" fill="rgba(248,250,252,0.8)"/>
+                  <text x="225" y="11" font-size="7" text-anchor="end" style="fill:rgba(226,232,240,0.86);font-family:'Segoe UI', 'Helvetica Neue', sans-serif;font-weight:500">10:22</text>
+                </g>
+              </g>
+            </svg>
+          </figure>
+
+          <div class="statusbar" aria-live="polite">
+            <div class="chip">Zeit: <strong id="time">0</strong> Min</div>
+            <div class="chip">Schritte: <strong id="tries">0</strong></div>
+            <div class="chip">Status: <strong id="status">Unbekannt</strong></div>
+            <button class="btn chip" id="resetBtn" title="Szenario zurücksetzen (R)" aria-keyshortcuts="R"><span class="emoji" aria-hidden="true">⟳</span><span class="text">Neustart</span></button>
+          </div>
+
+          <div class="actions" id="actions" aria-label="Verfügbare Aktionen"></div>
+          <div class="action-message" id="actionMessage" aria-hidden="true">
+            <header class="mhead">
+              <h3 id="messageTitle">Aktion</h3>
+            </header>
+            <div class="mbody" id="messageBody"></div>
+            <div class="mfoot">
+              <button class="btn primary" id="messageOk">Schliessen</button>
+            </div>
+          </div>
+          <div class="legend" aria-hidden="true">Tasten: [1–6] Aktionen · [R] Neustart</div>
+          <div class="feedback" aria-live="polite">
+            <p class="msg" id="feedbackMsg">Wähle deinen ersten Schritt.</p>
+            <ol class="step-log" id="stepLog" aria-label="Protokoll deiner Schritte"></ol>
+          </div>
+
+          <hr class="divider" aria-hidden="true" />
+
+          <div class="summary" id="summary">
+            <h3>Auswertung</h3>
+            <p class="hint" id="resultText"></p>
+            <div class="score">
+              <span class="dot" id="rankDot" aria-hidden="true"></span>
+              <span id="rankText">Bewertung: —</span>
+            </div>
+            <div class="hint" id="bestRow" style="display:none;margin-top:8px">Bestleistung: <b id="bestText">—</b></div>
+          </div>
+        </div>
+    </section>
+  </div>
+
+  <script type="module">
+const scenario1 = {
+  id: 'L0',
+  name: 'Der PC startet nicht',
+  storyTitle: 'Szenario 1: Der PC, der nicht starten will',
+  storyText: 'Du sitzt im Informatikraum und dein PC reagiert nicht: Du drückst den Power‑Knopf, aber es passiert nichts. Dein Ziel: In möglichst <b>wenigen Schritten</b> die Ursache finden.',
+  hints: {
+    h1: 'Was kannst du prüfen, <b>ohne den PC zu öffnen</b>?',
+    h2: '<ul class="hint"><li><b>Stromversorgung:</b> Kabel/Leiste/Netzschalter prüfen.</li><li><b>Anzeige:</b> Monitor einschalten / richtigen Eingang wählen.</li></ul>'
+  },
+  start: { pcOn: false, monitorOn: false, signalOk: true }
+};
+
+const scenario2 = {
+  id: 'E1',
+  name: 'Kein Signal',
+  storyTitle: 'Szenario 2: Kein Bild',
+  storyText: 'Der PC ist angeschaltet. Lüfter hörbar, LED leuchtet grün, aber wir haben kein Bild. <b>Was überprüfst du als Erstes?</b>',
+  hints: {
+    h1: 'Was beeinflusst das <b>Bild</b>, ohne den PC zu öffnen?',
+    h2: '<ul class="hint"><li><b>Anzeige:</b> Monitor einschalten.</li><li><b>Quelle/Kabel:</b> HDMI/DP richtig wählen oder Kabel fest einstecken.</li></ul>'
+  },
+  start: { pcOn: true, monitorOn: false, signalOk: false }
+};
+
+const scenario3 = {
+  id: 'M3',
+  name: 'PC-Upgrade',
+  storyTitle: 'Szenario 3: PC-Upgrade',
+  storyText: 'Du hast kürzlich neue Komponenten in deinen PC integriert. Du schaltest den PC an und er läuft. Die Lüfter sind hörbar, LED leuchtet grün und der Monitor ist angeschaltet. Jedoch haben haben wir <i>kein Bild</i> (No Signal). Was ist ein häufig auftretender Fehler bei einem Komponenten-Upgrade? <b>Was prüfst du als Nächstes?</b>',
+  hints: {
+    h1: 'Vor dem Bild passiert der <b>POST</b>. Was verraten <b>Pieptöne/LEDs</b>?',
+    h2: '<ul class="hint"><li><b>POST-Hinweise lesen:</b> DRAM-LED an? Beepcode für Speicher?</li><li><b>RAM prüfen:</b> Riegel korrekt eindrücken/einzeln testen.</li><li><b>Anzeige nur sekundär:</b> Monitor kann an sein, aber ohne POST gibt es kein Signal.</li></ul>'
+  },
+  start: { pcOn: true, monitorOn: true, signalOk: false }
+};
+
+const scenario4 = {
+  id: 'K1',
+  name: 'Tastatur reagiert nicht',
+  storyTitle: 'Szenario 4: Tastatur reagiert nicht',
+  storyText:
+    'Der PC ist gestartet, doch deine Tastatur reagiert nicht: Du willst dich anmelden, aber keine Taste wird erkannt. ' +
+    'Finde den schnellen Weg, damit die Tastatur wieder reagiert.',
+  hints: {
+    h1: 'Welche Schritte brauchst du, bevor du Hardware austauschst?',
+    h2:
+      '<ul class="hint">' +
+      '<li><b>Kabel pruefen:</b> Steckt der USB-Stecker fest oder hilft ein anderer Port?</li>' +
+      '<li><b>Andere Geraete?</b> Maus funktioniert, Anzeige steht stabil.</li>' +
+      '<li><b>Software-Reset:</b> Ein sauberer Neustart initialisiert die Eingabegeraete neu.</li>' +
+      '</ul>'
+  },
+  start: {
+    pcOn: true,
+    monitorOn: true,
+    signalOk: true,
+    keyboardResponsive: false
+  }
+};
+
+const scenario5 = {
+  id: 'S2',
+  name: 'Überhitzung / Lüfter blockiert',
+  storyTitle: 'Szenario 5: Überhitzung unter Last',
+  storyText:
+    'Der PC startet normal und bleibt im Idle stabil. Doch sobald du ihn forderst, ' +
+    'tritt nach kurzer Zeit <b>Throttling oder ein Abschalten</b> auf. ' +
+    'Finde die Ursache und stelle den stabilen Betrieb wieder her.',
+  hints: {
+    h1: 'Thermik-Frage: <b>Passiert der Fehler sofort oder nach einiger Zeit unter Last?</b>',
+    h2:
+      '<ul class="hint">' +
+      '<li><b>Frage klären:</b> „Passiert der Fehler sofort oder nach einiger Zeit unter Last?“ → deutet stark auf Thermik.</li>' +
+      '<li><b>Symptome beobachten:</b> Lasttest laufen lassen und auf Temperatur-/Lüfterverhalten achten.</li>' +
+      '<li><b>Lüfter blockiert?</b> Seitenwand öffnen, Kabel oder Staub entfernen, Lüfter frei drehen lassen.</li>' +
+      '<li><b>Nach der Reinigung:</b> Temperaturen mit Monitoring prüfen; Wärmeleitpaste nur bei Bedarf als Zusatz erwähnen.</li>' +
+      '</ul>'
+  },
+  start: {
+    pcOn: true,
+    monitorOn: true,
+    signalOk: true,
+    fanBlocked: true,
+    dustCleared: false,
+    tempsStable: true,
+    overheatObserved: false
+  }
+};
+
+const scenario6 = {
+  id: 'N1',
+  name: 'Netzwerk/Login-Spezial',
+  storyTitle: 'Szenario 6: Domänen-Login scheitert',
+  storyText:
+    'Der PC ist gestartet, der Login-Bildschirm erscheint – doch dein Domänenkonto meldet: ' +
+    '"<b>Profil nicht verfügbar / Server nicht erreichbar</b>". ' +
+    'Finde die Ursache und ermögliche den Login.',
+  hints: {
+    h1: 'Domänen-Login schlägt fehl – was sagt das über die <b>Netzwerkverbindung</b>?',
+    h2:
+      '<ul class="hint">' +
+      '<li><b>LAN-Kabel verfolgen:</b> Steckt es richtig? Link-LED am Switch leuchtet?</li>' +
+      '<li><b>Domäne braucht Netzwerk:</b> Ohne Verbindung klappt nur ein <b>lokales Konto</b> (Notlösung).</li>' +
+      '<li><b>Hardware-Overkill vermeiden:</b> BIOS, CPU oder RAM helfen hier nicht – Fokus auf Netzwerk.</li>' +
+      '</ul>'
+  },
+  start: {
+    pcOn: true,
+    monitorOn: true,
+    signalOk: true,
+    lanConnected: false,
+    switchLedOn: false
+  }
+};
+
+const scenario7 = {
+  id: 'S4',
+  name: 'No bootable device (Bootfehler)',
+  storyTitle: 'Szenario 7: "No bootable device"',
+  storyText:
+    'Der PC startet, Monitor und Signal sind aktiv – doch statt Windows erscheint sofort <b>NO BOOTABLE DEVICE</b>. ' +
+    'Finde den Fehler und bringe das System wieder bis zum Login.',
+  hints: {
+    h1: '<b>Externes Medium?</b> Bootet der PC vielleicht vom falschen Gerät (USB-Stick)?',
+    h2:
+      '<ul class="hint">' +
+      '<li><b>Boot-Menü nutzen:</b> Mit F12 das richtige Startlaufwerk (SSD) wählen – reversibel und schnell.</li>' +
+      '<li><b>USB-Geräte entfernen:</b> Sticks können die Bootreihenfolge überlagern. Danach <b>neu starten</b>.</li>' +
+      '<li><b>Nur wenn nötig:</b> Bootreihenfolge im BIOS dauerhaft ändern und speichern.</li>' +
+      '</ul>'
+  },
+  start: {
+    pcOn: true,
+    monitorOn: true,
+    signalOk: true,
+    bootError: true,
+    activeSet: 'A',
+    bootMenuOpen: false,
+    usbPresent: true,
+    bootOrderChanged: false,
+    bootOrderPersisted: false
+  }
+};
+
+const levels = [scenario1, scenario2, scenario3, scenario4, scenario5, scenario6, scenario7];
+    const topModalCloseEl = document.getElementById('messageCloseTop');
+    
+    const STORAGE_KEY = 'pctrouble_best_v2';
+    const SCORES_KEY = 'pctrouble_scores_v2';
+    const PROGRESS_KEY = 'pctrouble_progress_v1';
+    function loadBest(){
+      try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); }catch{ return null; }
+    }
+    function saveBest(best){
+      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(best)); }catch{}
+    }
+    function loadScores(){
+      try{ return JSON.parse(localStorage.getItem(SCORES_KEY) || '{}'); }catch{ return {}; }
+    }
+    function saveScores(scores){
+      try{ localStorage.setItem(SCORES_KEY, JSON.stringify(scores)); }catch{}
+    }
+    function defaultProgress(){
+      const unlocked = {};
+      if(levels.length){ unlocked[levels[0].id] = true; }
+      return { unlocked, completed: {} };
+    }
+    function normalizeProgress(raw){
+      const base = defaultProgress();
+      if(raw && typeof raw === 'object'){
+        if(raw.unlocked && typeof raw.unlocked === 'object'){
+          for(const key of Object.keys(raw.unlocked)){
+            if(raw.unlocked[key]) base.unlocked[key] = true;
+          }
+        }
+        if(raw.completed && typeof raw.completed === 'object'){
+          for(const key of Object.keys(raw.completed)){
+            if(raw.completed[key]) base.completed[key] = true;
+          }
+        }
+      }
+      try{
+        const scores = loadScores();
+        levels.forEach((level, idx) => {
+          if(scores && scores[level.id]){
+            base.unlocked[level.id] = true;
+            base.completed[level.id] = true;
+            const next = levels[idx + 1];
+            if(next){ base.unlocked[next.id] = true; }
+          }
+        });
+      }catch(e){}
+      return base;
+    }
+    function loadProgress(){
+      try{
+        const stored = localStorage.getItem(PROGRESS_KEY);
+        if(!stored) return defaultProgress();
+        return normalizeProgress(JSON.parse(stored));
+      }catch{ return defaultProgress(); }
+    }
+    function saveProgress(data){
+      try{ localStorage.setItem(PROGRESS_KEY, JSON.stringify(data)); }catch{}
+    }
+
+    
+    const state = {
+      levelIdx: 0,
+      actions: [],
+      performed: {},
+      currentActionId: null,
+      activeSet: 'A',
+      bootMenuOpen: false,
+      bootError: false,
+      usbPresent: true,
+      bootOrderChanged: false,
+      bootOrderPersisted: false,
+      actionSequence: [],
+      s4SolvedBy: null,
+      s4RemovedUsb: false,
+      s4UsedBootMenu: false,
+      s4ChangedBootOrder: false,
+      powerUnplugged: false,
+      ramChecked: false,
+      lanConnected: true,
+      switchLedOn: true,
+      n1SolvedBy: null,
+      fanBlocked: false,
+      dustCleared: false,
+      tempsStable: true,
+      overheatObserved: false,
+      keyboardResponsive: true
+    };
+    let progress = loadProgress();
+    progress = normalizeProgress(progress);
+
+    function isLevelUnlocked(idx){
+      const level = levels[idx];
+      if(!level) return false;
+      progress = normalizeProgress(progress);
+      return !!progress.unlocked[level.id];
+    }
+    function isLevelCompleted(idx){
+      const level = levels[idx];
+      if(!level) return false;
+      progress = normalizeProgress(progress);
+      return !!progress.completed[level.id];
+    }
+    function updateProgressAfterCompletion(idx){
+      const level = levels[idx];
+      if(!level) return;
+      progress = normalizeProgress(progress);
+      progress.unlocked[level.id] = true;
+      progress.completed[level.id] = true;
+      const next = levels[idx + 1];
+      if(next){ progress.unlocked[next.id] = true; }
+      saveProgress(progress);
+    }
+    function unlockedCount(){
+      progress = normalizeProgress(progress);
+      return levels.reduce((sum, level) => sum + (progress.unlocked[level.id] ? 1 : 0), 0);
+    }
+    function completedCount(){
+      progress = normalizeProgress(progress);
+      return levels.reduce((sum, level) => sum + (progress.completed[level.id] ? 1 : 0), 0);
+    }
+    function findFirstUnlockedIndex(){
+      progress = normalizeProgress(progress);
+      for(let i=0;i<levels.length;i++){
+        if(isLevelUnlocked(i)) return i;
+      }
+      return 0;
+    }
+    function findUnlockedIndex(startIdx, direction){
+      progress = normalizeProgress(progress);
+      if(!levels.length) return startIdx;
+      let idx = startIdx;
+      for(let i=0;i<levels.length;i++){
+        idx = (idx + direction + levels.length) % levels.length;
+        if(isLevelUnlocked(idx)) return idx;
+      }
+      return startIdx;
+    }
+
+    function findNextPlayableIndex({ afterCurrent = false } = {}){
+      if(!levels || !levels.length) return null;
+      progress = normalizeProgress(progress);
+
+      if(afterCurrent && typeof state.levelIdx === 'number'){
+        const startIdx = state.levelIdx;
+        let idx = startIdx;
+        for(let i = 0; i < levels.length; i++){
+          idx = (idx + 1) % levels.length;
+          if(idx === startIdx) break;
+          if(isLevelUnlocked(idx)){
+            const level = levels[idx];
+            if(!progress.completed[level.id]) return idx;
+          }
+        }
+      }
+
+      let highestCompleted = -1;
+      levels.forEach((level, idx) => {
+        if(progress.completed[level.id]) highestCompleted = Math.max(highestCompleted, idx);
+      });
+
+      const candidate = highestCompleted + 1;
+      if(candidate < levels.length){
+        const level = levels[candidate];
+        if(isLevelUnlocked(candidate) && !progress.completed[level.id]) return candidate;
+      }
+
+      for(let i = 0; i < levels.length; i++){
+        const level = levels[i];
+        if(isLevelUnlocked(i) && !progress.completed[level.id]) return i;
+      }
+
+      const fallback = findUnlockedIndex(typeof state.levelIdx === 'number' ? state.levelIdx : 0, 1);
+      if(fallback !== undefined && fallback !== null){
+        return fallback;
+      }
+      return findFirstUnlockedIndex();
+    }
+
+    function startNextUnlockedScenario({ afterCurrent = false } = {}){
+      const nextIdx = findNextPlayableIndex({ afterCurrent });
+      if(typeof nextIdx !== 'number') return false;
+      if(modalOpen) closeModal();
+      hideCelebration();
+      startScenario(nextIdx);
+      return true;
+    }
+
+    
+    const $ = sel => document.querySelector(sel);
+    const timeEl = $('#time');
+    const triesEl = $('#tries');
+    const statusEl = $('#status');
+    const actionsEl = $('#actions');
+    const feedbackEl = $('#feedbackMsg');
+    const stepLogEl = $('#stepLog');
+    const summary = $('#summary');
+    const resultText = $('#resultText');
+    const rankText = $('#rankText');
+    const rankDot = $('#rankDot');
+    const bestRow = $('#bestRow');
+    const bestText = $('#bestText');
+    const hubView = document.getElementById('hubView');
+    const scenarioView = document.getElementById('scenarioView');
+    const scenarioListEl = document.getElementById('scenarioList');
+    const hubInfoEl = document.getElementById('hubInfo');
+    const hubBtn = document.getElementById('hubBtn');
+    const scoreBtn = document.getElementById('scoreBtn');
+        const goalBtn = document.getElementById('goalBtn');
+    const hubScoreBtn = (() => {
+      if(!hubInfoEl) return null;
+      const existing = document.getElementById('hubScoreBtn');
+      if(existing) return existing;
+      const btn = document.createElement('button');
+      btn.className = 'btn';
+      btn.type = 'button';
+      btn.id = 'hubScoreBtn';
+      btn.title = 'Score anzeigen';
+      btn.setAttribute('aria-label','Score anzeigen');
+      btn.innerHTML = '<span class="emoji" aria-hidden="true">🏆</span><span class="text">Score</span>';
+      hubInfoEl.appendChild(btn);
+      return btn;
+    })();
+    const scoreButtons = [scoreBtn, hubScoreBtn].filter(Boolean);
+    let scenarioActive = false;
+
+    const versionBadges = [document.getElementById('hubVerTag'), document.getElementById('verTag')];
+    versionBadges.forEach(badge => {
+      if(!badge) return;
+      badge.classList.add('badge-action');
+      badge.setAttribute('role','button');
+      badge.setAttribute('tabindex','0');
+      badge.setAttribute('title','Fortschritt zurücksetzen');
+      const label = badge.textContent ? badge.textContent.trim() : '';
+      if(label){
+        badge.setAttribute('aria-label', `Version ${label} – Fortschritt zurücksetzen`);
+      } else {
+        badge.setAttribute('aria-label', 'Fortschritt zurücksetzen');
+      }
+      const handleClick = () => resetAllProgress();
+      badge.addEventListener('click', handleClick);
+      badge.addEventListener('keydown', event => {
+        if(event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar'){
+          event.preventDefault();
+          badge.click();
+        }
+      });
+    });
+
+    function createMedalBadge(rank){
+      const span = document.createElement('span');
+      span.className = 'hub-medal';
+      let variant = 'none';
+      let emoji = '';
+      let text = '—';
+      if(rank === 'Gold'){ emoji = '🥇'; text = 'Gold'; variant = 'gold'; }
+      else if(rank === 'Silber'){ emoji = '🥈'; text = 'Silber'; variant = 'silver'; }
+      else if(rank === 'Bronze'){ emoji = '🥉'; text = 'Bronze'; variant = 'bronze'; }
+      span.classList.add(variant);
+      if(emoji){
+        const emojiEl = document.createElement('span');
+        emojiEl.className = 'emoji';
+        emojiEl.setAttribute('aria-hidden','true');
+        emojiEl.textContent = emoji;
+        const textEl = document.createElement('span');
+        textEl.className = 'text';
+        textEl.textContent = text;
+        span.appendChild(emojiEl);
+        span.appendChild(textEl);
+      } else {
+        span.appendChild(document.createTextNode(text));
+      }
+      span.setAttribute('aria-label', `Abzeichen: ${rank || 'keines'}`);
+      return span;
+    }
+
+    function renderHub(){
+      if(!scenarioListEl) return;
+      progress = normalizeProgress(progress);
+      const scores = loadScores();
+      scenarioListEl.innerHTML = '';
+      const entries = levels.map((level, idx) => ({
+        type: 'scenario',
+        level,
+        index: idx,
+        number: idx + 1
+      }));
+      entries.forEach(entry => {
+        const item = document.createElement('article');
+        item.className = 'hub-item';
+        const header = document.createElement('div');
+        header.className = 'hub-item-header';
+        const label = document.createElement('span');
+        label.className = 'hub-item-label';
+        label.textContent = `Szenario ${entry.number}`;
+        header.appendChild(label);
+        const rank = scores[entry.level.id]?.rank || null;
+
+        header.appendChild(createMedalBadge(rank));
+        item.appendChild(header);
+
+        const title = document.createElement('h3');
+        title.textContent = entry.level.name;
+
+        item.appendChild(title);
+
+
+        const unlocked = isLevelUnlocked(entry.index);
+        const completed = isLevelCompleted(entry.index);
+        if(!unlocked){ item.classList.add('locked'); }
+        if(completed){ item.classList.add('completed'); }
+
+        const status = document.createElement('p');
+        status.className = 'hub-status';
+        if(unlocked){
+          status.textContent = completed ? 'Status: Abgeschlossen' : 'Status: Freigeschaltet';
+        } else {
+          const req = entry.number > 1 ? ` – Schliesse Szenario ${entry.number - 1} ab.` : '';
+          status.innerHTML = `Status: <span class="hub-lock">🔒 Gesperrt</span>${req}`;
+        }
+        item.appendChild(status);
+
+        const best = document.createElement('p');
+        best.className = 'hub-best';
+        const score = scores[entry.level.id];
+        if(score){
+          const rankLabel = score.rank || '—';
+          const timeLabel = typeof score.time === 'number' ? `${score.time} Min` : '— Min';
+          const triesLabel = typeof score.tries === 'number' ? `${score.tries} Schritte` : '— Schritte';
+          best.innerHTML = `Bestes Ergebnis:<br/><b>${rankLabel}</b> &middot; ${timeLabel} / ${triesLabel}`;
+        } else {
+          best.textContent = 'Noch keine Medaille.';
+        }
+        item.appendChild(best);
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        if(unlocked){
+          btn.className = 'btn primary';
+          btn.textContent = 'Starten';
+          btn.addEventListener('click', () => startScenario(entry.index));
+        } else {
+          btn.className = 'btn';
+          btn.disabled = true;
+          btn.textContent = '🔒 Gesperrt';
+        }
+        item.appendChild(btn);
+
+        scenarioListEl.appendChild(item);
+      });
+
+      if(hubInfoEl){
+        hubInfoEl.innerHTML = '';
+        const completedBadge = document.createElement('button');
+        completedBadge.type = 'button';
+        completedBadge.className = 'badge badge-button';
+        completedBadge.setAttribute('aria-disabled', 'true');
+        completedBadge.tabIndex = -1;
+        completedBadge.textContent = `Abgeschlossen: ${completedCount()}/${levels.length}`;
+        hubInfoEl.appendChild(completedBadge);
+        if(hubScoreBtn){
+          hubInfoEl.appendChild(hubScoreBtn);
+        }
+      }
+    }
+
+    function showHub(){
+      progress = normalizeProgress(progress);
+      saveProgress(progress);
+      if(hubView) hubView.classList.remove('hidden');
+      if(scenarioView) scenarioView.classList.add('hidden');
+      scenarioActive = false;
+      renderHub();
+      if(document.body){ document.body.classList.add('hub-active'); }
+    }
+
+    function startScenario(idx){
+      if(!isLevelUnlocked(idx)) return;
+      if(hubView) hubView.classList.add('hidden');
+      if(scenarioView) scenarioView.classList.remove('hidden');
+      if(document.body){ document.body.classList.remove('hub-active'); }
+      scenarioActive = true;
+      try{ if(topModalEl && topModalEl.classList.contains('open')) closeTopModal(); }catch(e){}
+      try{ if(modalOpen) closeModal(); }catch(e){}
+      hideCelebration();
+      loadLevel(idx);
+      const firstAction = actionsEl ? actionsEl.querySelector('button.action') : null;
+      if(firstAction) firstAction.focus();
+    }
+
+    function returnToHub(options = {}){
+      const fromModal = options.fromModal === true;
+      if(!fromModal){
+        try{ if(modalOpen) closeModal(); }catch(e){}
+      }
+      try{ if(topModalEl && topModalEl.classList.contains('open')) closeTopModal(); }catch(e){}
+      hideCelebration();
+      showHub();
+      const focusTarget = scenarioListEl && scenarioListEl.querySelector('button:not([disabled])');
+      if(focusTarget) focusTarget.focus();
+    }
+
+    function resetAllProgress(){
+      const confirmed = window.confirm('Fortschritt wirklich löschen? Alle Freischaltungen, Scores und Bestleistungen werden entfernt.');
+      if(!confirmed) return;
+      try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+      try{ localStorage.removeItem(SCORES_KEY); }catch(e){}
+      try{ localStorage.removeItem(PROGRESS_KEY); }catch(e){}
+      progress = defaultProgress();
+      saveProgress(progress);
+      showBest();
+      returnToHub();
+      window.alert('Fortschritt wurde zurückgesetzt.');
+    }    
+    
+    const goalHtml = `<ul class="hint"><li><b>Du übst:</b> strukturiert Fehler finden (erst extern, dann intern), Entscheidungen begründen und deine Schritte protokollieren.</li><li><b>LP21:</b> MI 3.3 «Fehler systematisch suchen &amp; beheben», MI 2.2 «Geräte zweckmässig einsetzen» — genau das trainierst du hier im Szenario.</li><li><b>Tipps fürs Szenario:</b> formuliere deine Vermutung laut, notiere jeden Schritt (Zeit/Schritte siehst du links) und vergleiche danach mit deiner Bestleistung.</li></ul>`;
+
+    
+    let modalOpen = false, lastFocusEl = null;
+    
+    const modalEl = document.getElementById('actionMessage');
+    const modalTitleEl = document.getElementById('messageTitle');
+    const modalBodyEl = document.getElementById('messageBody');
+    const modalOkEl = document.getElementById('messageOk');
+    
+    const topModalEl = document.getElementById('actionMessageTop');
+    const topModalTitleEl = document.getElementById('messageTitleTop');
+    const topModalBodyEl = document.getElementById('messageBodyTop');
+    const topModalOkEl = document.getElementById('messageOkTop');
+    if(topModalEl && topModalEl.parentElement !== document.body){
+      topModalEl.classList.add('top-modal');
+      document.body.appendChild(topModalEl);
+    }
+    let celebrationEl = null;
+    let celebrationTimer = null;
+    
+    let lastHotkey = null;
+    let modalOpenKey = null;
+    function openModal({title='Hinweis', html='', okLabel='Schliessen'}){
+      if(!modalEl) return;
+      modalOpen = true;
+      actionsEl.style.display = 'none';
+      modalTitleEl.textContent = title;
+      
+      if(title === 'Aufgabe abgeschlossen'){
+        modalEl.classList.add('completion');
+        
+        const evalHtml = typeof buildEvaluationHtml === 'function' ? buildEvaluationHtml() : '';
+        const intro = (typeof completionIntroHtml === 'function') ? completionIntroHtml() : html;
+        modalBodyEl.innerHTML = intro + evalHtml;
+      } else {
+        modalBodyEl.innerHTML = html;
+        modalEl.classList.remove('completion');
+      }
+      if(modalOkEl){
+        modalOkEl.textContent = okLabel;
+        modalOkEl.removeAttribute('tabindex');
+      }
+      if(title === 'Aufgabe abgeschlossen' && modalOkEl){ modalOkEl.textContent = 'Zurück zum Hub'; }
+      modalEl.classList.add('open');
+      modalEl.setAttribute('aria-hidden','false');
+      lastFocusEl = document.activeElement;
+      
+      modalOpenKey = lastHotkey;
+      lastHotkey = null;
+      if(title === 'Aufgabe abgeschlossen') showCelebration();
+    }
+    function openTopModal({title='Score', subtitle='', html='', okLabel='Schliessen'}){
+      if(!topModalEl) return;
+      modalOpen = true;
+      document.body.classList.add('top-modal-open');
+      actionsEl.style.display = 'none';
+      if(topModalTitleEl){
+        if(subtitle){
+          if(title){
+            topModalTitleEl.innerHTML = `<span class="modal-title-main">${title}</span><span class="modal-title-sub">${subtitle}</span>`;
+          } else {
+            topModalTitleEl.innerHTML = `<span class="modal-title-sub only">${subtitle}</span>`;
+          }
+        } else {
+          topModalTitleEl.textContent = title;
+        }
+      }
+      if(topModalBodyEl) topModalBodyEl.innerHTML = html;
+      if(topModalOkEl){
+        topModalOkEl.textContent = okLabel;
+        topModalOkEl.removeAttribute('tabindex');
+      }
+      topModalEl.classList.add('open');
+      topModalEl.setAttribute('aria-hidden','false');
+      lastFocusEl = document.activeElement;
+      modalOpenKey = lastHotkey;
+      lastHotkey = null;
+    }
+    function closeModal(){
+      if(!modalEl) return;
+      modalOpen = false;
+      modalEl.classList.remove('open');
+      modalEl.classList.remove('completion');
+      modalEl.setAttribute('aria-hidden','true');
+      document.body.classList.remove('top-modal-open');
+      actionsEl.style.display = '';
+      hideCelebration();
+      if(modalOkEl){ modalOkEl.setAttribute('tabindex','-1'); }
+      modalOpenKey = null;
+    }
+    function closeTopModal(){
+      if(!topModalEl) return;
+      modalOpen = false;
+      topModalEl.classList.remove('open');
+      topModalEl.setAttribute('aria-hidden','true');
+      document.body.classList.remove('top-modal-open');
+      actionsEl.style.display = '';
+      if(topModalOkEl){ topModalOkEl.setAttribute('tabindex','-1'); }
+      modalOpenKey = null;
+      if(topModalCloseEl){ topModalCloseEl.hidden = true; }
+    }
+    function showCelebration(){
+      if(celebrationEl) return;
+      if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){ return; }
+      celebrationEl = document.createElement('div');
+      celebrationEl.className = 'confetti';
+      const colors = ['#fbbf24','#60a5fa','#22c55e','#ef4444'];
+      function spawn(n=12){
+        for(let i=0;i<n;i++){
+          const p = document.createElement('span');
+          p.className = 'confetti-piece';
+          p.style.left = Math.random()*100 + '%';
+          p.style.backgroundColor = colors[i % colors.length];
+          p.style.animationDelay = (Math.random()*0.8) + 's';
+          p.style.animationDuration = (2 + Math.random()*2) + 's';
+          p.addEventListener('animationend', ()=> p.remove());
+          celebrationEl.appendChild(p);
+        }
+      }
+      spawn(24);
+      document.body.appendChild(celebrationEl);
+      celebrationTimer = setInterval(()=> spawn(10), 600);
+    }
+    function hideCelebration(){
+      if(celebrationTimer){ clearInterval(celebrationTimer); celebrationTimer = null; }
+      if(celebrationEl){ celebrationEl.remove(); celebrationEl = null; }
+    }
+    
+    function animateToLevel(idx){
+      const card = document.querySelector('section.card.story');
+      if(!card){ loadLevel(idx); return; }
+      
+      if(card.classList.contains('transition-out') || card.classList.contains('transition-in')){
+        loadLevel(idx); return;
+      }
+      card.classList.add('transitioning','transition-out');
+      const onOutEnd = ()=>{
+        card.removeEventListener('animationend', onOutEnd);
+        loadLevel(idx);
+        
+        requestAnimationFrame(()=>{
+          card.classList.remove('transition-out');
+          card.classList.add('transition-in');
+          const onInEnd = ()=>{
+            card.removeEventListener('animationend', onInEnd);
+            card.classList.remove('transition-in','transitioning');
+          };
+          card.addEventListener('animationend', onInEnd, { once:true });
+        });
+      };
+      card.addEventListener('animationend', onOutEnd, { once:true });
+    }
+
+    if(modalOkEl) modalOkEl.addEventListener('click', () => {
+      if(modalTitleEl && modalTitleEl.textContent === 'Aufgabe abgeschlossen'){
+        closeModal();
+        hideCelebration();
+        returnToHub({ fromModal: true });
+      } else {
+        closeModal();
+      }
+    });
+    if(topModalOkEl) topModalOkEl.addEventListener('click', () => { closeTopModal(); });
+    if(hubBtn) hubBtn.addEventListener('click', () => returnToHub());
+
+    function setStatus(txt){ statusEl.textContent = txt; renderMeters(); }
+    function renderMeters(){ timeEl.textContent = state.time; triesEl.textContent = state.tries; }
+    function say(html){ feedbackEl.innerHTML = html; }
+    function pushLog(step, note=''){
+      state.log.push({step, note});
+      const li = document.createElement('li');
+      li.textContent = note ? `${step} (${note})` : step;
+      stepLogEl.appendChild(li);
+    }
+
+    function runAction(a){
+      if(!a || state.solved) return;
+      state.currentActionId = a.id || null;
+      if(a.id){
+        if(!Array.isArray(state.actionSequence)) state.actionSequence = [];
+        state.actionSequence.push(a.id);
+      }
+      a.effect.call(a);
+      if(a.id){ state.performed[a.id] = true; }
+      
+      
+      if(state.solved && !modalOpen){
+        openModal({
+          title: 'Aufgabe abgeschlossen',
+          html: completionIntroHtml(),
+          okLabel: 'Zurück zum Hub'
+        });
+        return;
+      }
+      if(checkSolvedPerScenario && checkSolvedPerScenario()) return;
+      const solvedCombo = false; 
+        
+        
+        
+      if(false){ 
+        finish(true, 'Stromversorgung und Monitor aktiviert.');
+        openModal({
+          title: 'Aufgabe abgeschlossen',
+          html: completionIntroHtml(),
+          okLabel: 'Zurück zum Hub'
+        });
+      } else if (!modalOpen){
+        const html = (feedbackEl && feedbackEl.innerHTML) ? feedbackEl.innerHTML : 'Aktion ausgeführt.';
+        openModal({
+          title: a.label,
+          html
+        });
+      }
+    }
+
+    function checkSolvedPerScenario(){
+      const L = levels && levels[state.levelIdx];
+      if(!L) return false;
+      switch(L.id){
+        case 'L0': {
+          const hasMonitor = !!state.performed['monitor'];
+          const hasPower = !!state.performed['power-cable'];
+          if(!state.solved && hasMonitor && hasPower && state.monitorOn){
+            finish(true, 'Stromversorgung und Monitor aktiviert.');
+            openModal({ title: 'Aufgabe abgeschlossen', html: completionIntroHtml(), okLabel: 'Zurück zum Hub' });
+            return true;
+          }
+          break;
+        }
+        case 'E1': {
+          
+          const didMonitor = !!state.performed['monitor'];
+          const isSourceNow = state.currentActionId === 'source';
+          if(!state.solved && didMonitor && isSourceNow && state.monitorOn){
+            finish(true, 'Der Monitor ist an und zeigt die korrekte Quelle. Login Bildschirm erscheint.');
+            openModal({ title: 'Aufgabe abgeschlossen', html: completionIntroHtml(), okLabel: 'Zurück zum Hub' });
+            return true;
+          }
+          break;
+        }
+        default:
+          break;
+      }
+      return false;
+    }
+
+    function updateScene(){
+      const scene = document.querySelector('.scene');
+      if(!scene) return;
+      scene.classList.remove('nosig','power-on','login','booterr','bootmenu','domain-error','desktop','overheat','fan-blocked','fan-clean','fan-visible');
+      if(state.pcOn) scene.classList.add('power-on');
+      const L = levels && levels[state.levelIdx];
+      if(L && L.id === 'S4'){
+        if(!state.monitorOn){
+          return;
+        }
+        if(!state.bootError){
+          scene.classList.add('login');
+        } else if(state.activeSet === 'B'){
+          scene.classList.add('bootmenu');
+        } else {
+          scene.classList.add('booterr');
+        }
+      } else {
+        if(state.monitorOn && (!state.pcOn || !state.signalOk)) scene.classList.add('nosig');
+        if(state.pcOn && state.monitorOn && state.signalOk){
+          scene.classList.add('login');
+          if(L && L.id === 'N1' && !state.lanConnected){
+            scene.classList.add('domain-error');
+          }
+          if(L && L.id === 'S2'){
+            scene.classList.add('desktop');
+            scene.classList.add('fan-visible');
+            if(state.fanBlocked){ scene.classList.add('fan-blocked'); }
+            if(!state.tempsStable){ scene.classList.add('overheat'); }
+            if(!state.fanBlocked && state.dustCleared){ scene.classList.add('fan-clean'); }
+          }
+        }
+      }
+    }
+
+    function renderActions(){
+      actionsEl.innerHTML = '';
+      const L = levels && levels[state.levelIdx];
+      const isS4 = !!(L && L.id === 'S4');
+      const activeSet = isS4 ? (state.activeSet || 'A') : null;
+      if(isS4){
+        const label = document.createElement('div');
+        label.className = 'action-set-label';
+        label.textContent = activeSet === 'A' ? 'Set A – Basis' : 'Set B – Setup/Boot';
+        actionsEl.appendChild(label);
+      }
+      [...state.actions]
+        .filter(a => !isS4 || !a.set || a.set === activeSet)
+        .sort((a,b)=>parseInt(a.hotkey)-parseInt(b.hotkey))
+        .forEach(a=>{
+          const btn = document.createElement('button');
+          btn.className = 'action';
+          btn.type = 'button';
+          btn.dataset.key = a.hotkey;
+          btn.innerHTML = `<span class="label">${a.label}</span>`;
+          btn.setAttribute('aria-label', a.label + ` Taste ${a.hotkey}`);
+          btn.addEventListener('click', () => { lastHotkey = a.hotkey; runAction(a); });
+          actionsEl.appendChild(btn);
+        });
+    }
+
+function evalRankAndScore(t, n){
+  var medal = 'Bronze';
+  var long = 'Bronze - gelöst, aber umständlich';
+  var color = 'var(--bronze)';
+  if (t <= 3 && n <= 2){ medal = 'Gold'; long = 'Gold - exzellent (präzise & schnell)'; color = 'var(--gold)'; }
+  else if (t <= 6 && n <= 3){ medal = 'Silber'; long = 'Silber - gut & systematisch'; color = 'var(--silver)'; }
+  var score = medal === 'Gold' ? 100 : (medal === 'Silber' ? 70 : 40);
+  return { medal: medal, long: long, color: color, score: score };
+}
+function evaluateScenarioResult(){
+      const t = state.time;
+      const n = state.tries;
+      const L = levels && levels[state.levelIdx];
+      if(L && L.id === 'M3'){
+        let medal = 'Bronze';
+        let long = 'Bronze - gelöst, aber umständlich';
+        let score = 40;
+        let detailText = 'Pfad: Sicher abgeschaltet, RAM geprüft.';
+        if(t <= 12 && n <= 7){
+          medal = 'Gold';
+          long = 'Gold - strukturiert & sicher gelöst';
+          score = 100;
+          detailText = 'Pfad: Shutdown → Strom trennen → RAM prüfen → Strom an → Start → Monitor.';
+        } else if(t <= 18 && n <= 9){
+          medal = 'Silber';
+          long = 'Silber - solide, aber mit Umwegen';
+          score = 70;
+          detailText = 'Pfad: Richtiger Ansatz, aber mit zusätzlichen Schritten.';
+        }
+        const color = medal === 'Gold' ? 'var(--gold)' : medal === 'Silber' ? 'var(--silver)' : 'var(--bronze)';
+        return { medal, long, color, score, detailText, time: t, tries: n };
+      }
+      if(L && L.id === 'S4'){
+        const seq = Array.isArray(state.actionSequence) ? state.actionSequence.slice() : [];
+        const solvedBy = state.s4SolvedBy;
+        const matches = expected => seq.length === expected.length && expected.every((id, idx) => seq[idx] === id);
+        let medal = 'Bronze';
+        let long = 'Bronze – Fehler behoben, aber mit Umwegen.';
+        let score = 40;
+        let detailText = '';
+        if(solvedBy === 'temp-ssd' && matches(['boot-menu','boot-ssd'])){
+          medal = 'Gold';
+          long = 'Gold – Boot-Menü genutzt und temporär von der SSD gestartet.';
+          score = 100;
+          detailText = 'Pfad: Boot-Menü → SSD (temporär).';
+        } else if(solvedBy === 'usb-restart' && matches(['remove-usb','s4-restart'])){
+          medal = 'Silber';
+          long = 'Silber – USB entfernt und sauber neu gestartet.';
+          score = 70;
+          detailText = 'Pfad: USB entfernen → Neustart.';
+        } else if(solvedBy === 'bootorder-save' && matches(['boot-menu','boot-order','save-changes'])){
+          medal = 'Silber';
+          long = 'Silber – Bootreihenfolge korrigiert und gespeichert.';
+          score = 70;
+          detailText = 'Pfad: Boot-Menü → Bootreihenfolge ändern → Speichern.';
+        } else if(solvedBy === 'temp-ssd'){
+          long = 'Bronze – Boot-Menü genutzt, aber mit Umwegen.';
+          detailText = 'Pfad: Boot-Menü / SSD mit Zusatzschritten.';
+        } else if(solvedBy === 'usb-restart'){
+          long = 'Bronze – USB-Lösung, aber mit Umwegen.';
+          detailText = 'Pfad: USB + Neustart (Umwege).';
+        } else if(solvedBy === 'bootorder-save'){
+          long = 'Bronze – BIOS-Anpassung mit Umwegen.';
+          detailText = 'Pfad: Bootreihenfolge angepasst (Umwege).';
+        } else {
+          detailText = 'Pfad: Problem behoben.';
+        }
+        const color = medal === 'Gold' ? 'var(--gold)' : medal === 'Silber' ? 'var(--silver)' : 'var(--bronze)';
+        return { medal, long, color, score, detailText, time: t, tries: n };
+      }
+      const ev = evalRankAndScore(t, n);
+      return { medal: ev.medal, long: ev.long, color: ev.color, score: ev.score, detailText: '', time: t, tries: n };
+    }
+function buildEvaluationHtml(){
+      const ev = evaluateScenarioResult();
+      const best = loadBest();
+      const bestHtml = best ? `<div class="hint" style="margin-top:8px">Bestleistung: <b>${best.time} Min / ${best.tries} Schritte</b></div>` : '';
+      const dotStyle = `background: linear-gradient(180deg, ${ev.color}, ${ev.color})`;
+      const detailHtml = ev.detailText ? `<p class="hint">${ev.detailText}</p>` : '';
+      return `
+        <hr class="divider" aria-hidden="true" />
+        <h3>AUSWERTUNG</h3>
+        ${detailHtml}
+        <p class="hint">Zeit: <b>${ev.time} Min</b> - Schritte: <b>${ev.tries}</b> - Punkte: <b>${ev.score}</b></p>
+        <div class="score">
+          <span class="dot" style="${dotStyle}" aria-hidden="true"></span>
+          <span>Bewertung: ${ev.long}</span>
+        </div>
+        ${bestHtml}
+      `;
+}
+function completionIntroHtml(){
+  const L = levels && levels[state.levelIdx];
+  if(!L) return '<p><b>Aufgabe geschafft.</b> PC und Monitor sind bereit.</p><p>Das <b>Login</b> ist sichtbar.</p>';
+  switch(L.id){
+    case 'L0':
+      return '<p><b>Aufgabe abgeschlossen.</b> PC hat Strom, Monitor ist an, Signal liegt an.</p><p>Das <b>Login</b> ist sichtbar.</p>';
+    case 'E1':
+      return '<p><b>Aufgabe abgeschlossen.</b> Quelle korrekt, Signal wiederhergestellt.</p><p>Das <b>Login</b> ist sichtbar.</p>';
+    case 'M3':
+      return '<p><b>Aufgabe abgeschlossen.</b> POST erfolgreich, Anzeige aktiv.</p><p>Das <b>Login</b> ist sichtbar.</p>';
+    case 'S2':
+      return '<p><b>Aufgabe abgeschlossen.</b> Lüfter gereinigt, Blockaden entfernt – die Kühlung arbeitet wieder zuverlässig.</p><p>Unter Last bleiben die Temperaturen stabil (Wärmeleitpaste nur bei Bedarf ansprechen).</p>';
+    case 'N1':
+      if(state.n1SolvedBy === 'network'){
+        return '<p><b>Aufgabe abgeschlossen.</b> Netzwerkkabel steckt wieder – die Domäne ist erreichbar.</p><p>Das <b>Login</b> funktioniert.</p>';
+      }
+      return '<p><b>Aufgabe abgeschlossen.</b> Anmeldung möglich.</p><p>Das <b>Login</b> ist sichtbar.</p>';
+    case 'S4': {
+      switch(state.s4SolvedBy){
+        case 'temp-ssd':
+          return '<p><b>Aufgabe abgeschlossen.</b> Du hast über das Boot-Menü temporär von der SSD gestartet.</p><p>Das <b>Login</b> ist sichtbar.</p>';
+        case 'usb-restart':
+          return '<p><b>Aufgabe abgeschlossen.</b> Störende USB-Geräte entfernt und sauber neu gestartet.</p><p>Das <b>Login</b> ist sichtbar.</p>';
+        case 'bootorder-save':
+          return '<p><b>Aufgabe abgeschlossen.</b> Bootreihenfolge korrigiert und gespeichert – die SSD startet wieder automatisch.</p><p>Das <b>Login</b> ist sichtbar.</p>';
+        default:
+          return '<p><b>Aufgabe abgeschlossen.</b> Bootfehler behoben.</p><p>Das <b>Login</b> ist sichtbar.</p>';
+      }
+    }
+    case 'K1':
+      return '<p><b>Aufgabe abgeschlossen.</b> Neustart durchgefuehrt, Tastatur reagiert wieder.</p><p>Das <b>Login</b> ist sichtbar.</p>';
+    default:
+      return '<p><b>Aufgabe geschafft.</b> PC und Monitor sind bereit.</p><p>Das <b>Login</b> ist sichtbar.</p>';
+  }
+}
+function finish(success, detail){
+      
+      try{
+        const L = levels && levels[state.levelIdx];
+        if(L && L.id === 'E1'){
+          const isSourceNow = state.currentActionId === 'source';
+          const didMonitor = !!(state.performed && state.performed['monitor']);
+          if(!(isSourceNow && didMonitor && state.monitorOn)){
+            return; 
+          }
+        }
+      }catch(e){}
+      state.solved = true;
+      showCelebration();
+      setStatus('Gelöst');
+      say(`<span class="good">Problem behoben.</span> ${detail} Der PC startet, du kannst weiterarbeiten.`);
+      
+
+      
+      const evaluation = evaluateScenarioResult();
+      const t = evaluation.time;
+      const n = evaluation.tries;
+      const level = levels[state.levelIdx];
+      if(level && level.id === 'S4'){
+        const parts = [];
+        if(evaluation.detailText) parts.push(evaluation.detailText);
+        parts.push(`Zeit: <b>${t} Min</b> - Schritte: <b>${n}</b> - Punkte: <b>${evaluation.score}</b>`);
+        resultText.innerHTML = parts.join('<br/>');
+      } else {
+        resultText.innerHTML = 'Zeit: <b>' + t + ' Min</b> - Schritte: <b>' + n + '</b> - Punkte: <b>' + evaluation.score + '</b>';
+      }
+      rankText.textContent = 'Bewertung: ' + evaluation.long;
+      rankDot.style.background = 'linear-gradient(180deg, ' + evaluation.color + ', ' + evaluation.color + ')';
+
+      
+      const prev = loadBest();
+      const current = {time:t, tries:n};
+      const better = !prev || current.time < prev.time || (current.time === prev.time && current.tries < prev.tries);
+      if (better){ saveBest(current); }
+      showBest();
+      
+      const scores = loadScores();
+      const prevS = level ? scores[level.id] : null;
+      const shouldUpdate = !prevS || (evaluation.score > prevS.score) || (evaluation.score === prevS.score && (t < prevS.time || (t === prevS.time && n < prevS.tries)));
+      if (shouldUpdate){
+        if(level){
+          scores[level.id] = { time: t, tries: n, rank: evaluation.medal, score: evaluation.score, updatedAt: new Date().toISOString() };
+        }
+        saveScores(scores);
+      }
+      updateProgressAfterCompletion(state.levelIdx);
+      renderHub();
+    }
+
+    function animateReset(){
+      try{ if(topModalEl && topModalEl.classList.contains('open')) closeTopModal(); }catch(e){}
+      try{ if(modalOpen) closeModal(); }catch(e){}
+      try{ hideCelebration(); }catch(e){}
+      const card = document.querySelector('section.card.story');
+      if(!card){ loadLevel(state.levelIdx); return; }
+      if(card.classList.contains('restart-out') || card.classList.contains('restart-in')){ loadLevel(state.levelIdx); return; }
+      
+      let ov = document.createElement('div');
+      ov.className = 'restart-overlay';
+      ov.innerHTML = '<div class="restart-indicator"><span class="icon">⟳</span><span>Neustart</span></div>';
+      document.body.appendChild(ov);
+      card.classList.add('transitioning','restart-out');
+      const onOutEnd = ()=>{
+        card.removeEventListener('animationend', onOutEnd);
+        loadLevel(state.levelIdx);
+        requestAnimationFrame(()=>{
+          card.classList.remove('restart-out');
+          card.classList.add('restart-in');
+          const onInEnd = ()=>{
+            card.removeEventListener('animationend', onInEnd);
+            card.classList.remove('restart-in','transitioning');
+            
+            setTimeout(()=>{ try{ ov.remove(); }catch(e){} }, 200);
+          };
+          card.addEventListener('animationend', onInEnd, { once:true });
+        });
+      };
+      card.addEventListener('animationend', onOutEnd, { once:true });
+    }
+
+    function reset(){ animateReset(); }
+
+    function showBest(){
+      const best = loadBest();
+      if(best){
+        if(bestText) bestText.textContent = `${best.time} Min / ${best.tries} Schritte`;
+        if(bestRow) bestRow.style.display = '';
+      } else {
+        if(bestRow) bestRow.style.display = 'none';
+      }
+    }
+
+    
+    function makeActions(){
+      return {
+        
+        ram: {
+          id: 'ram',
+          label: '📏 Arbeitsspeicher überprüfen',
+          hotkey: '1',
+          delta: 6,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            setStatus('Intern - nicht zielfuehrend');
+            pushLog(this.label, `+${this.delta} Min`);
+            say('<span class="bad">Overkill!</span> Wenn der PC nicht angeht sollten wir zuerst externe Checks machen (Strom, Monitor).');
+          }
+        },
+        network: {
+          id: 'network',
+          label: '🌐 Netzwerkkabel prüfen',
+          hotkey: '6',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            setStatus('Nicht relevant');
+            pushLog(this.label, '+1 Min');
+            say('<span class="warn">Kein Einfluss aufs Einschalten.</span> Nützlich bei Internet-/Anmeldeproblemen.');
+          }
+        },
+        
+        monitorToggle: {
+          id: 'monitor',
+          label: '🖥️ Monitor ein/aus',
+          hotkey: '2',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            if(state.monitorOn){
+              state.monitorOn = false; updateScene();
+              setStatus('Monitor aus');
+              pushLog(this.label, '+1 Min');
+              say('<span class="warn">Monitor ausgeschaltet.</span> Schalte ihn wieder ein, wenn du bereit bist, und prüfe <b>Quelle/Kabel</b>.');
+              openModal({
+                title: 'Monitor ausgeschaltet',
+                html: '<p>Du schaltest den Monitor aus. Das Display bleibt schwarz.</p><p>Schalte ihn wieder ein, um die Anzeige zu prüfen.</p>'
+              });
+            } else {
+              state.monitorOn = true; updateScene();
+              setStatus('Monitor an');
+              pushLog(this.label, '+1 Min');
+              if(state.pcOn && state.signalOk){
+                say('<span class="good">Monitor eingeschaltet.</span> <b>Login</b> ist sichtbar.');
+                openModal({
+                  title: 'Bild vorhanden',
+                  html: '<p>Der Monitor ist an und zeigt <b>Login</b>.</p><p>Gut gemacht!</p>'
+                });
+                const currentLevel = levels && levels[state.levelIdx];
+                if(currentLevel && currentLevel.id === 'M3' && state.ramChecked){
+                  finish(true, 'RAM sitzt korrekt - Anzeige ist wieder da.');
+                }
+              } else {
+                say('<span class="warn">Monitor ist an.</span> Anzeige zeigt <b>NO SIGNAL</b>.');
+                openModal({
+                  title: 'Monitor eingeschaltet',
+                  html: '<p>Du hast den Monitor eingeschaltet.</p><p>Es wird <b>NO SIGNAL</b> angezeigt.</p>'
+                });
+              }
+            }
+          }
+        },
+        bios: {
+          id: 'bios',
+          label: '⚙️ Direkt ins BIOS starten',
+          hotkey: '3',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            setStatus('Nicht zielfuehrend');
+            pushLog(this.label, '+1 Min');
+            const currentLevel = levels && levels[state.levelIdx];
+            if(currentLevel && currentLevel.id === 'L0'){
+              say('<span class="warn">Dies hat keinen Einfluss aufs Einschalten des PCs.</span> Zuerst externe Checks machen (Strom, Monitor).');
+              return;
+            }
+            if(!state.pcOn){
+              say(`<span class="bad">Das geht (noch) nicht.</span> Solange der PC <i>gar nicht</i> startet, kommst du nicht ins BIOS. Erst muss <b>Strom</b> vorhanden sein.`);
+            } else {
+              say(`<span class="warn">Nicht zielführend.</span> Das Problem betrifft <b>Anzeige/Signal</b>, nicht das BIOS. Prüfe Monitor <b>ein/aus</b>, <b>Quelle</b> oder <b>Kabel</b>.`);
+            }
+          }
+        },
+        cpu: {
+          id: 'cpu',
+          label: '🧰 Prozessor ausbauen & neu einsetzen',
+          hotkey: '4',
+          delta: 8,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            setStatus('Risiko hoch');
+            pushLog(this.label, '+8 Min');
+            say(`<span class="bad">Overkill!</span> Das ist ein tiefer Eingriff mit Risiko. Zuerst immer die <b>einfachen</b> Dinge prüfen: Strom, Kabel, Netzschalter.`);
+          }
+        },
+        power: {
+          id: 'power-cable',
+          label: '🔌 Stromkabel & Steckdose prüfen',
+          hotkey: '5',
+          delta: 2,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            const wasOn = state.pcOn;
+            setStatus('Strom ok');
+            pushLog(this.label, `+${this.delta} Min`);
+            state.pcOn = true;
+            updateScene();
+            const html = wasOn
+              ? '<p>Du prüfst die Stromkette – sie war bereits <b>in Ordnung</b>. Der PC hat Strom.</p>'
+              : '<p>Du verfolgst das Netzkabel bis zur Steckdose. Am Netzteil war das Kabel <b>locker</b> – du steckst es fest ein. Die PC-LED leuchtet jetzt <b>grün</b>.</p><p>Der Monitor bleibt noch schwarz.</p>';
+            openModal({ title: 'Stromkette geprüft', html });
+            if(state.monitorOn && state.signalOk){
+              say('<span class="good">Stromversorgung hergestellt.</span> <b>Login</b> ist sichtbar.');
+            } else {
+              say('<span class="good">Stromversorgung hergestellt.</span> Prüfe nun die <b>Anzeige/Signal</b> (Monitor einschalten / Quelle wählen).');
+            }
+          }
+        },
+        monitorCable: {
+          id: 'monitor-cable',
+          label: '🔌 Monitorkabel prüfen',
+          hotkey: '1',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            setStatus('Signal pruefen');
+            pushLog(this.label, '+1 Min');
+            
+            const cur = levels && levels[state.levelIdx];
+            if(cur && cur.id === 'E1'){
+              say('<span class="info">Das Kabel war bereits <b>korrekt eingesteckt</b>.</span>.');
+              return;
+            }
+            state.signalOk = true; updateScene();
+            const L = levels && levels[state.levelIdx];
+            if(state.pcOn && state.monitorOn){
+              say('<span class="good">Kabel sitzt fest.</span> <b>Login</b> ist sichtbar.');
+              if(!L || L.id !== 'E1'){
+                finish(true, 'Signal wiederhergestellt.');
+              }
+            } else if(!state.monitorOn){
+              say('<span class="warn">Kabel sitzt fest.</span> Schalte jetzt den <b>Monitor</b> ein.');
+            } else {
+              say('<span class="warn">Kabel sitzt fest.</span> Prüfe noch die <b>Stromversorgung</b> des PCs.');
+            }
+          }
+        },
+        source: {
+          id: 'source',
+          label: '🔀 Monitorquelle umschalten (HDMI/DP)',
+          hotkey: '6',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            setStatus('Signal pruefen');
+            pushLog(this.label, '+1 Min');
+            
+            if(!state.monitorOn){
+              say('<span class="warn">Monitor ist aus.</span> Schalte zuerst den <b>Monitor</b> ein, dann die <b>Quelle</b> wählen.');
+              return;
+            }
+            
+            state.signalOk = true; updateScene();
+            if(state.pcOn){
+              say('<span class="good">Quelle korrekt.</span> <b>Login</b> ist sichtbar.');
+              finish(true, 'Signal wiederhergestellt.');
+            } else {
+              say('<span class="warn">Quelle korrekt.</span> Prüfe noch die <b>Stromversorgung</b> des PCs.');
+            }
+          }
+        },
+        ramFix: {
+          id: 'ram-fix',
+          label: '📏 Arbeitsspeicher (RAM) überprüfen',
+          hotkey: '4',
+          delta: 4,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            setStatus('POST ok');
+            pushLog(this.label, '+4 Min');
+            state.signalOk = true; updateScene();
+            if(state.pcOn && state.monitorOn){
+              say('<span class="good">Arbeitsspeicher sitzt korrekt.</span> <b>Login</b> ist sichtbar.');
+              finish(true, 'POST erfolgreich, Anzeige aktiv.');
+            } else if(!state.monitorOn){
+              say('<span class="warn">Arbeitsspeicher sitzt korrekt.</span> Schalte jetzt den <b>Monitor</b> ein.');
+            } else {
+              say('<span class="warn">Arbeitsspeicher sitzt korrekt.</span> Prüfe noch die <b>Stromversorgung</b>.');
+            }
+          }
+        },
+        postCheck: {
+          id: 'post-check',
+          label: '🔔 Pieptöne / POST‑LED prüfen',
+          hotkey: '1',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            setStatus('Diagnose');
+            pushLog(this.label, '+1 Min');
+            say('<span class="good">Hinweis:</span> Die <b>DRAM-LED</b> leuchtet / Beepcode für Speicher. <b>Arbeitsspeicher (RAM) prüfen<\/b> (korrekt einsetzen).');
+          }
+        },
+        cmosReset: {
+          id: 'cmos-reset',
+          label: '🪛 CMOS‑Reset (kurz)',
+          hotkey: '6',
+          delta: 2,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            setStatus('Nicht zielfuehrend');
+            pushLog(this.label, '+2 Min');
+            say('<span class="warn">Hier unwahrscheinlich.</span> CMOS-Reset hilft bei BIOS-Fehlkonfiguration. Der Hinweis zeigt eher auf <b>RAM</b> (POST).');
+          }
+        }
+      };
+    }
+    function makeScenario3Actions(base){
+      const post = Object.assign({}, base.postCheck, { hotkey: '1' });
+      const monitor = Object.assign({}, base.monitorToggle, {
+        hotkey: '2',
+        effect(){
+          if(state.solved) return;
+          if(state.powerUnplugged){
+            say('<span class="warn">Monitor hat keinen Strom.</span> Stecke zuerst die <b>Stromzufuhr</b> wieder ein.');
+            return;
+          }
+          const originalContext = this;
+          base.monitorToggle.effect.call(originalContext);
+          const currentLevel = levels && levels[state.levelIdx];
+          if(currentLevel && currentLevel.id === 'M3' && state.ramChecked && state.pcOn && state.signalOk && state.monitorOn){
+            setStatus('Gelöst');
+            finish(true, 'RAM sitzt korrekt - Anzeige ist wieder da.');
+            openModal({ title: 'Aufgabe abgeschlossen', html: completionIntroHtml() });
+          }
+        }
+      });
+      const ramInspect = {
+        id: 'ram-inspect',
+        label: '📏 RAM-Module prüfen',
+        hotkey: '3',
+        delta: 4,
+        effect(){
+          if(state.solved) return;
+          state.time += this.delta; state.tries++;
+          pushLog(this.label, `+${this.delta} Min`);
+          const cur = levels && levels[state.levelIdx];
+          if(!cur || cur.id !== 'M3'){
+            setStatus('Nicht erforderlich');
+            say('<span class="info">Diese Aktion wird hier nicht benötigt.</span>');
+            return;
+          }
+          if(state.pcOn){
+            setStatus('PC läuft');
+            say('<span class="warn">Der PC läuft noch.</span> Fahre ihn zuerst herunter & entferne den Strom, bevor du das RAM berührst.');
+            return;
+          }
+          if(!state.powerUnplugged){
+            setStatus('Strom an');
+            say('<span class="warn">Der PC hängt noch am Strom.</span> Ziehe das <b>Stromkabel</b>, bevor du die RAM-Module anfässt.');
+            return;
+          }
+          if(state.ramChecked){
+            setStatus('RAM bereits geprüft');
+            say('<span class="info">Die RAM-Module sitzen bereits korrekt.</span> Stecke den Strom wieder an und starte den PC.');
+            return;
+          }
+          state.ramChecked = true;
+          setStatus('RAM korrekt eingesetzt');
+          say('<span class="good">Eines der RAM-Module war nicht richtig eingerastet. Du drückst es besser hinen und hörst ein Klicken, welches dich zufrieden stellt. Die RAM-Riegel sitzen jetzt korrekt.</span>');
+        }
+      };
+      const shutdown = {
+        id: 'pc-shutdown',
+        label: '🛑 PC herunterfahren',
+        hotkey: '4',
+        delta: 2,
+        effect(){
+          if(state.solved) return;
+          state.time += this.delta; state.tries++;
+          pushLog(this.label, `+${this.delta} Min`);
+          if(!state.pcOn){
+            setStatus('PC aus');
+            say('<span class="info">Der PC ist bereits ausgeschaltet.</span>');
+            return;
+          }
+          const monitorWasOn = state.monitorOn;
+          state.pcOn = false;
+          state.signalOk = false;
+          updateScene();
+          setStatus('PC ausgeschaltet');
+          if(monitorWasOn){
+            say('<span class="info">Du fährst den PC herunter.</span>');
+          } else {
+            say('<span class="info">Du fährst den PC herunter.</span>');
+          }
+        }
+      };
+      const start = {
+        id: 'pc-start',
+        label: '▶️ PC starten',
+        hotkey: '5',
+        delta: 2,
+        effect(){
+          if(state.solved) return;
+          state.time += this.delta; state.tries++;
+          pushLog(this.label, `+${this.delta} Min`);
+          if(state.pcOn){
+            setStatus('PC läuft');
+            say('<span class="info">Der PC läuft bereits.</span>');
+            return;
+          }
+          if(state.powerUnplugged){
+            setStatus('Strom getrennt');
+            say('<span class="warn">Der PC ist noch vom Strom getrennt.</span> Stelle zuerst die <b>Stromzufuhr</b> wieder her.');
+            return;
+          }
+          state.powerUnplugged = false;
+          const ramFixed = !!state.ramChecked;
+          state.signalOk = ramFixed;
+          state.pcOn = true;
+          updateScene();
+          if(ramFixed){
+            if(state.monitorOn){
+              setStatus('Gelöst');
+              say('<span class="good">Der PC startet wieder mit Bild.</span> Ursache war das RAM-Modul.');
+              finish(true, 'RAM sitzt korrekt - Anzeige ist wieder da.');
+            } else {
+              setStatus('PC läuft');
+              say('<span class="good">Der PC startet wieder.</span> Schalte den Monitor ein, um das Bild zu prüfen.');
+            }
+          } else {
+            setStatus('PC läuft');
+            say('<span class="warn">Du startest den PC.</span>');
+          }
+        }
+      };
+      const biosWrong = {
+        id: 'bios-wrong',
+        label: '⚠️ Direkt ins BIOS starten',
+        hotkey: '6',
+        delta: 2,
+        effect(){
+          if(state.solved) return;
+          state.time += this.delta; state.tries++;
+          pushLog(this.label, `+${this.delta} Min`);
+          if(!state.pcOn){
+            setStatus('PC aus');
+            say('<span class="warn">Der PC ist aus.</span> Ohne Strom erreichst du das BIOS nicht. Prüfe zuerst RAM und Strom.');
+          } else {
+            setStatus('Nicht zielführend');
+            say('<span class="warn">BIOS hilft hier nicht.</span> Der Hinweis zeigt auf <b>RAM</b>. PC ausschalten, Strom trennen und Module prüfen.');
+          }
+        }
+      };
+      const unplug = {
+        id: 'power-unplug',
+        label: '🔌❌ Strom entfernen',
+        hotkey: '7',
+        delta: 1,
+        effect(){
+          if(state.solved) return;
+          state.time += this.delta; state.tries++;
+          pushLog(this.label, `+${this.delta} Min`);
+          if(state.pcOn){
+            setStatus('PC läuft');
+            say('<span class="warn">Der PC läuft noch.</span> Fahre ihn zuerst herunter, bevor du das Stromkabel abziehst.');
+            return;
+          }
+          if(state.powerUnplugged){
+            setStatus('Strom getrennt');
+            say('<span class="info">Strom ist bereits getrennt.</span>');
+            return;
+          }
+          state.powerUnplugged = true;
+          state.monitorOn = false;
+          updateScene();
+          setStatus('Strom getrennt');
+          say('<span class="info">Du trennst PC und Monitor komplett vom Strom.</span>');
+        }
+      };
+      const restorePower = {
+        id: 'power-restore',
+        label: '🔌✅ Stromzufuhr wiederherstellen',
+        hotkey: '8',
+        delta: 1,
+        effect(){
+          if(state.solved) return;
+          state.time += this.delta; state.tries++;
+          pushLog(this.label, `+${this.delta} Min`);
+          if(!state.powerUnplugged){
+            setStatus('Strom verbunden');
+            say('<span class="info">Strom ist bereits verbunden.</span> Starte nun den PC und prüfe das Bild.');
+            return;
+          }
+          state.powerUnplugged = false;
+          setStatus('Strom verbunden');
+          say('<span class="info">Du steckst Strom und Monitor wieder ein.</span> Starte jetzt den PC und schalte den Monitor ein.');
+        }
+      };
+      const cmosWrong = {
+        id: 'cmos-reset-wrong',
+        label: '🪫 BIOS-Batterie entfernen',
+        hotkey: '9',
+        delta: 2,
+        effect(){
+          if(state.solved) return;
+          state.time += this.delta; state.tries++;
+          pushLog(this.label, `+${this.delta} Min`);
+          setStatus('Nicht zielführend');
+          say('<span class="warn">Hier nicht sinnvoll.</span> Das Entfernen der BIOS-Batterie (CMOS-Reset) hilft bei Fehlkonfigurationen, aber nicht bei lockerem RAM.');
+        }
+      };
+      return [post, monitor, ramInspect, shutdown, start, biosWrong, unplug, restorePower, cmosWrong];
+    }
+
+    function makeScenario4Actions(){
+      return [
+        {
+          id: 'remove-usb',
+          set: 'A',
+          label: '⏏️ USB-Sticks entfernen',
+          hotkey: '1',
+          delta: 1,
+          effect(){
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            const alreadyRemoved = !state.usbPresent;
+            setStatus('USB geprüft');
+            if(alreadyRemoved){
+              say('<span class="info">Keine USB-Sticks eingesteckt.</span> Der Bootfehler liegt woanders.');
+              openModal({
+                title: this.label,
+                html: '<p>Es ist kein USB-Stick eingesteckt – der Fehler bleibt bestehen.</p><p>Öffne das <b>Boot-Menü</b> oder passe die Bootreihenfolge an.</p>'
+              });
+            } else {
+              state.usbPresent = false;
+              state.s4RemovedUsb = true;
+              say('<span class="good">USB entfernt.</span> Jetzt neu starten oder das <b>Boot-Menü</b> nutzen.');
+              openModal({
+                title: this.label,
+                html: '<p>Du entfernst alle USB-Sticks. Damit stört kein externes Medium mehr.</p><p>Starte jetzt <b>neu</b> oder wähle im <b>Boot-Menü</b> die SSD.</p>'
+              });
+            }
+          }
+        },
+        {
+          id: 's4-restart',
+          set: 'A',
+          label: '🔁 Neu starten',
+          hotkey: '2',
+          delta: 2,
+          effect(){
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            const resolvedByUsb = !state.usbPresent;
+            const resolvedByPersist = state.bootOrderPersisted;
+            state.bootMenuOpen = false;
+            state.activeSet = 'A';
+            if(resolvedByPersist){ state.bootOrderChanged = false; }
+            updateScene();
+            if(resolvedByUsb || resolvedByPersist){
+              state.bootError = false;
+              updateScene();
+              if(resolvedByUsb){
+                state.s4SolvedBy = 'usb-restart';
+                finish(true, 'USB-Sticks entfernt – der PC startet wieder von der SSD.');
+              } else {
+                state.s4SolvedBy = 'bootorder-save';
+                finish(true, 'Gespeicherte Bootreihenfolge – SSD steht nun an erster Stelle.');
+              }
+            } else {
+              setStatus('Bootfehler bleibt');
+              say('<span class="warn">Noch kein Erfolg.</span> Der PC zeigt weiterhin <b>NO BOOTABLE DEVICE</b>.');
+              openModal({
+                title: this.label,
+                html: '<p>Nach dem Neustart erscheint weiterhin <b>NO BOOTABLE DEVICE</b>.</p><p>Öffne das <b>Boot-Menü (F12)</b> oder passe die Bootreihenfolge im BIOS an.</p>'
+              });
+            }
+          }
+        },
+        {
+          id: 's4-monitor',
+          set: 'A',
+          label: '🖥️ Monitor ein/aus',
+          hotkey: '3',
+          delta: 1,
+          effect(){
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            state.monitorOn = !state.monitorOn;
+            updateScene();
+            if(state.monitorOn){
+              setStatus('Monitor an');
+              say('<span class="info">Monitor eingeschaltet.</span> Bild ist da – der Fehler liegt beim Booten.');
+              openModal({
+                title: this.label,
+                html: '<p>Der Monitor ist wieder an und zeigt weiterhin <b>NO BOOTABLE DEVICE</b>.</p><p>Die Anzeige funktioniert – konzentriere dich auf Boot-Geräte.</p>'
+              });
+            } else {
+              setStatus('Monitor aus');
+              say('<span class="warn">Monitor ausgeschaltet.</span> Zum Analysieren wieder einschalten.');
+              openModal({
+                title: this.label,
+                html: '<p>Du schaltest den Monitor aus. Für die Fehlersuche brauchst du das Bild – schalte ihn wieder ein.</p>'
+              });
+            }
+          }
+        },
+        {
+          id: 's4-power',
+          set: 'A',
+          label: '🔌 Stromkette prüfen',
+          hotkey: '4',
+          delta: 1,
+          effect(){
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            state.pcOn = true;
+            setStatus('Strom ok');
+            say('<span class="info">Stromversorgung geprüft.</span> Alles eingeschaltet – der Fehler liegt beim Booten.');
+            openModal({
+              title: this.label,
+              html: '<p>Netzkabel und Steckdosenleiste sind in Ordnung. Der PC läuft – das Problem ist das fehlende Boot-Gerät.</p>'
+            });
+          }
+        },
+        {
+          id: 's4-signal',
+          set: 'A',
+          label: '🔗 Monitorkabel/Quelle prüfen',
+          hotkey: '5',
+          delta: 1,
+          effect(){
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            state.signalOk = true;
+            setStatus('Signal geprüft');
+            say('<span class="info">Signal in Ordnung.</span> Anzeige passt – jetzt Boot-Reihenfolge klären.');
+            openModal({
+              title: this.label,
+              html: '<p>Kabel und Eingang sind korrekt. Die Anzeige funktioniert – das Problem bleibt der Bootvorgang.</p>'
+            });
+          }
+        },
+        {
+          id: 'boot-menu',
+          set: 'A',
+          label: '🧭 Boot-Menü öffnen (F12)',
+          hotkey: '6',
+          delta: 1,
+          effect(){
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            state.activeSet = 'B';
+            state.bootMenuOpen = true;
+            state.s4UsedBootMenu = true;
+            setStatus('Boot-Menü geöffnet');
+            updateScene();
+            renderActions();
+            say('<span class="info">Boot-Menü offen.</span> Wähle jetzt die SSD – das ist schnell und reversibel.');
+            openModal({
+              title: this.label,
+              html: '<p>Du öffnest das <b>Boot-Menü</b>. Wähle die interne <b>SSD</b> als Startgerät – das wirkt sofort und ist jederzeit rückgängig.</p>'
+            });
+          }
+        },
+        {
+          id: 'boot-ssd',
+          set: 'B',
+          label: '💽 Von SSD starten (temporär)',
+          hotkey: '1',
+          delta: 1,
+          effect(){
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            state.bootError = false;
+            state.bootMenuOpen = false;
+            state.activeSet = 'A';
+            updateScene();
+            renderActions();
+            state.s4SolvedBy = 'temp-ssd';
+            finish(true, 'Im Boot-Menü die SSD gewählt – temporärer Start gelingt sofort.');
+          }
+        },
+        {
+          id: 'boot-order',
+          set: 'B',
+          label: '🔀 Bootreihenfolge ansehen/ändern',
+          hotkey: '2',
+          delta: 2,
+          effect(){
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            state.bootOrderChanged = true;
+            state.s4ChangedBootOrder = true;
+            setStatus('Bootreihenfolge angepasst');
+            say('<span class="info">Bootreihenfolge geändert.</span> Speichere die Änderung, damit sie bleibt.');
+            openModal({
+              title: this.label,
+              html: '<p>Du schiebst die <b>SSD</b> an die erste Stelle. Drücke jetzt <b>Änderungen speichern</b>, sonst bleibt alles beim Alten.</p>'
+            });
+          }
+        },
+        {
+          id: 'drive-check',
+          set: 'B',
+          label: '🧾 Laufwerke erkannt?',
+          hotkey: '3',
+          delta: 1,
+          effect(){
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            setStatus('Diagnose');
+            say('<span class="info">SSD vorhanden.</span> Sie erscheint im BIOS – Fehler liegt an der Startreihenfolge.');
+            openModal({
+              title: this.label,
+              html: '<p>Die interne <b>SSD</b> wird erkannt. Hardware ist ok – passe die Bootreihenfolge an oder starte direkt von der SSD.</p>'
+            });
+          }
+        },
+        {
+          id: 'secure-boot',
+          set: 'B',
+          label: '🔒 UEFI/Secure-Boot Status ansehen',
+          hotkey: '4',
+          delta: 1,
+          effect(){
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            setStatus('Info');
+            say('<span class="info">Nur Informationen.</span> Secure Boot ist hier nicht die Ursache.');
+            openModal({
+              title: this.label,
+              html: '<p>Du wirfst einen Blick auf UEFI/Secure Boot. Alles unauffällig – für dieses Problem nicht nötig.</p>'
+            });
+          }
+        },
+        {
+          id: 'save-changes',
+          set: 'B',
+          label: '💾 Änderungen speichern',
+          hotkey: '5',
+          delta: 2,
+          effect(){
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            if(state.bootOrderChanged){
+              state.bootOrderPersisted = true;
+              state.bootOrderChanged = false;
+              state.bootError = false;
+              state.activeSet = 'A';
+              state.bootMenuOpen = false;
+              updateScene();
+              renderActions();
+              state.s4SolvedBy = 'bootorder-save';
+              finish(true, 'Bootreihenfolge gespeichert – der Neustart findet die SSD automatisch.');
+            } else {
+              setStatus('Keine Änderungen');
+              say('<span class="warn">Nichts zu speichern.</span> Passe zuerst die Reihenfolge an.');
+              openModal({
+                title: this.label,
+                html: '<p>Es wurden keine Änderungen vorgenommen. Verschiebe zuerst die SSD nach oben und speichere dann.</p>'
+              });
+            }
+          }
+        },
+        {
+          id: 'exit-nosave',
+          set: 'B',
+          label: '🚪 BIOS schließen (ohne Speichern)',
+          hotkey: '6',
+          delta: 1,
+          effect(){
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            state.bootMenuOpen = false;
+            state.activeSet = 'A';
+            state.bootOrderChanged = false;
+            updateScene();
+            renderActions();
+            setStatus('BIOS verlassen');
+            say('<span class="warn">Keine Änderungen gespeichert.</span> Der Bootfehler bleibt bestehen.');
+            openModal({
+              title: this.label,
+              html: '<p>Du verlässt das BIOS ohne zu speichern. Der PC startet neu und zeigt wieder <b>NO BOOTABLE DEVICE</b>.</p>'
+            });
+          }
+        }
+      ];
+    }
+    function makeScenario5Actions(base){
+      const monitor = Object.assign({}, base.monitorToggle, { hotkey: '3' });
+      const bios = Object.assign({}, base.bios, { hotkey: '4' });
+      const cpu = Object.assign({}, base.cpu, { hotkey: '5' });
+      return [
+        {
+          id: 'lan-cable',
+          label: '🌐 Netzwerkkabel einstecken',
+          hotkey: '1',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            const already = !!state.lanConnected;
+            setStatus('Netzwerk prüfen');
+            if(already){
+              setStatus('Netzwerk verbunden');
+              say('<span class="info">Kabel sitzt bereits.</span> Der Fehler liegt nicht am PC – versuche den Login erneut.');
+              openModal({
+                title: this.label,
+                html: '<p>Das Netzwerkkabel war bereits korrekt eingesteckt.</p><p>Prüfe ggf. eine andere Dose oder den Switch-Port.</p>'
+              });
+              return;
+            }
+            state.lanConnected = true;
+            state.switchLedOn = true;
+            updateScene();
+            setStatus('Netzwerk verbunden');
+            say('<span class="good">Link aktiv.</span> Die Domäne ist wieder erreichbar – starte den Login neu.');
+            openModal({
+              title: this.label,
+              html: '<p>Du steckst das Netzwerkkabel in die richtige Dose.</p><p>Am Switch leuchtet die Link-LED. Führe jetzt den Login erneut aus.</p>'
+            });
+          }
+        },
+        {
+          id: 'switch-led',
+          label: '💡 Switch-Port prüfen (Link-LED)',
+          hotkey: '2',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            if(state.lanConnected){
+              state.switchLedOn = true;
+              setStatus('Netzwerk verbunden');
+              say('<span class="info">Link-LED grün.</span> Verbindung steht – der Login sollte funktionieren.');
+              openModal({
+                title: this.label,
+                html: '<p>Die Link-LED am Switch blinkt grün. Das Kabel steckt korrekt.</p><p>Starte den Login erneut.</p>'
+              });
+            } else {
+              state.switchLedOn = false;
+              setStatus('Keine Verbindung');
+              say('<span class="warn">Link-LED aus.</span> Kein Netzwerk – Kabel kontrollieren.');
+              openModal({
+                title: this.label,
+                html: '<p>Die Link-LED bleibt dunkel – es liegt keine Verbindung an.</p><p>Stecke das Netzwerkkabel korrekt ein (richtige Dose).</p>'
+              });
+            }
+          }
+        },
+        monitor,
+        bios,
+        cpu,
+        {
+          id: 'retry-login',
+          label: '👤 Erneut anmelden (Domäne/Offline)',
+          hotkey: '6',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            if(state.lanConnected){
+              setStatus('Login erfolgreich');
+              say('<span class="good">Anmeldung erfolgreich.</span> Mit Netzwerkverbindung klappt der Domänen-Login wieder.');
+              state.n1SolvedBy = 'network';
+              updateScene();
+              finish(true, 'Netzwerkkabel korrekt angeschlossen – Domänen-Login funktioniert wieder.');
+              return;
+            }
+            setStatus('Domäne nicht erreichbar');
+            say('<span class="warn">Domäne offline.</span> Ohne Netzwerk kein Profil. Stecke das LAN-Kabel ein oder nutze nur im Notfall ein lokales Konto.');
+            openModal({
+              title: this.label,
+              html: '<p>Die Anmeldung scheitert weiterhin: Die Domäne ist nicht erreichbar.</p><p>Verbinde das Netzwerkkabel oder verwende ein lokales Konto als Notlösung.</p>'
+            });
+          }
+        }
+      ];
+    }
+    function makeScenario6Actions(){
+      return [
+        {
+          id: 's2-network',
+          label: '🌐 Netzwerkkabel prüfen',
+          hotkey: '1',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            setStatus('Nicht relevant');
+            say('<span class="warn">Kein Netzwerkproblem.</span> Der Absturz unter Last deutet auf <b>Thermik</b> hin.');
+            openModal({
+              title: this.label,
+              html:
+                '<p>Du kontrollierst das Netzwerkkabel – es steckt korrekt, Internet funktioniert.</p>' +
+                '<p>Der Fehler tritt jedoch erst unter Last auf. Konzentriere dich auf die <b>Kühlung</b>.</p>'
+            });
+          }
+        },
+        {
+          id: 's2-monitor',
+          label: '🖥️ Monitor ein/aus',
+          hotkey: '2',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            state.monitorOn = true;
+            updateScene();
+            setStatus('Nicht relevant');
+            say('<span class="warn">Bild ist vorhanden.</span> Das Problem liegt nicht an der Anzeige, sondern an der <b>Kühlung</b>.');
+            openModal({
+              title: this.label,
+              html:
+                '<p>Du schaltest den Monitor testweise aus und wieder ein – das Bild war die ganze Zeit stabil.</p>' +
+                '<p>Der Fehler (Shutdown/Throttling) entsteht unter Last, daher <b>Lüfter und Temperaturen</b> prüfen.</p>'
+            });
+          }
+        },
+        {
+          id: 's2-stress',
+          label: '🔥 Belastungstest starten',
+          hotkey: '3',
+          delta: 2,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            setStatus('Lasttest läuft');
+            if(state.fanBlocked){
+              state.overheatObserved = true;
+              state.tempsStable = false;
+              updateScene();
+              setStatus('Überhitzung unter Last');
+              say('<span class="bad">Temperaturen steigen schnell.</span> Nach wenigen Minuten drosselt der PC – Kühlung prüfen.');
+              openModal({
+                title: this.label,
+                html:
+                  '<p>Du lässt einen Benchmark laufen. Nach kurzer Zeit geht die CPU über 90 °C, das System drosselt massiv und droht abzuschalten.</p>' +
+                  '<p>Damit ist klar: Unter <b>Last</b> fehlt Kühlung – der Lüfter könnte blockiert oder zugesetzt sein.</p>'
+              });
+              return;
+            }
+            if(!state.dustCleared){
+              state.tempsStable = false;
+              updateScene();
+              setStatus('Lasttest kritisch');
+              say('<span class="warn">Verbesserung nur teilweise.</span> Noch Staub im Kühler – weiter reinigen.');
+              openModal({
+                title: this.label,
+                html:
+                  '<p>Der Test läuft etwas ruhiger, aber die Temperaturen bleiben grenzwertig. Staub sitzt noch zwischen den Lamellen.</p>' +
+                  '<p>Reinige den Lüfter gründlich und prüfe dann erneut.</p>'
+              });
+              return;
+            }
+            setStatus('Lasttest stabil');
+            say('<span class="info">Belastungstest stabil.</span> Überwache jetzt die Temperaturen – Sensoren checken.');
+            openModal({
+              title: this.label,
+              html:
+                '<p>Nach der Reinigung läuft der Lasttest ohne Drosseln. Beobachte nun die Sensoren, um die Temperaturen zu bestätigen.</p>' +
+                '<p>Optional: Wärmeleitpaste nur ansprechen, falls sie sichtbar ausgetrocknet ist.</p>'
+            });
+          }
+        },
+        {
+          id: 's2-inspect',
+          label: '🔎 Gehäuse öffnen & Lüfter prüfen',
+          hotkey: '4',
+          delta: 2,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            setStatus('Lüfter prüfen');
+            if(state.fanBlocked){
+              say('<span class="warn">Lüfter blockiert.</span> Ein Kabel und Staub verhindern den Luftstrom.');
+              openModal({
+                title: this.label,
+                html:
+                  '<p>Mit abgenommener Seitenwand siehst du: Der hintere Lüfter steckt voller Staub, zusätzlich klemmt ein loses Kabel in den Rotorblättern.</p>' +
+                  '<p>Entferne die Blockade und reinige den Lüfter.</p>'
+              });
+            } else {
+              say('<span class="info">Lüfter dreht frei.</span> Kontrolliere noch die Temperaturentwicklung.');
+              openModal({
+                title: this.label,
+                html:
+                  '<p>Der Lüfter dreht wieder frei. Prüfe jetzt die Temperaturen unter Last – optional Wärmeleitpaste nur erwähnen, falls sie alt aussieht.</p>'
+              });
+            }
+          }
+        },
+        {
+          id: 's2-clean',
+          label: '🧹 Lüfter reinigen / Blockade entfernen',
+          hotkey: '5',
+          delta: 3,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            if(!state.fanBlocked && state.dustCleared){
+              setStatus('Bereits sauber');
+              say('<span class="info">Lüfter war schon frei.</span> Prüfe zur Sicherheit die Temperaturen unter Last.');
+              openModal({
+                title: this.label,
+                html:
+                  '<p>Du hast den Lüfter bereits gereinigt. Führe nun einen Belastungstest und das Temperatur-Monitoring durch.</p>'
+              });
+              return;
+            }
+            state.fanBlocked = false;
+            state.dustCleared = true;
+            state.tempsStable = false;
+            updateScene();
+            setStatus('Kühlung verbessert');
+            say('<span class="good">Lüfter dreht wieder.</span> Staub entfernt, Kabel fixiert – jetzt Temperaturen prüfen.');
+            openModal({
+              title: this.label,
+              html:
+                '<p>Du bläst den Staub aus dem Kühler und legst das störende Kabel beiseite. Der Lüfter dreht frei.</p>' +
+                '<p>Starte danach einen Lasttest und überwache die Temperaturen, um den Erfolg zu bestätigen.</p>'
+            });
+          }
+        },
+        {
+          id: 's2-temp',
+          label: '🌡️ Temperaturen überwachen',
+          hotkey: '6',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            if(state.fanBlocked){
+              state.tempsStable = false;
+              updateScene();
+              setStatus('Temperaturen kritisch');
+              say('<span class="bad">Sensoren schlagen aus.</span> Ohne Luftstrom steigt die Temperatur sofort – erst reinigen.');
+              openModal({
+                title: this.label,
+                html:
+                  '<p>Schon im Monitoring siehst du Temperaturen deutlich über dem Soll – der Lüfter steht still.</p>' +
+                  '<p>Reinige und befreie den Lüfter, bevor du weitere Tests machst.</p>'
+              });
+              return;
+            }
+            if(!state.dustCleared){
+              state.tempsStable = false;
+              updateScene();
+              setStatus('Temperaturen hoch');
+              say('<span class="warn">Noch zu warm.</span> Staub blockiert weiterhin den Luftstrom.');
+              openModal({
+                title: this.label,
+                html:
+                  '<p>Die Temperaturen fallen noch nicht ausreichend – es sitzt weiterhin Staub im Kühler.</p>' +
+                  '<p>Reinige den Lüfter vollständig und prüfe dann erneut.</p>'
+              });
+              return;
+            }
+            const ranStress = !!(state.performed && state.performed['s2-stress']);
+            if(!ranStress){
+              setStatus('Monitoring aktiv');
+              say('<span class="warn">Lasttest fehlt.</span> Fuehre einen Belastungstest aus, um die Wirkung der Reinigung zu bestaetigen.');
+              openModal({
+                title: this.label,
+                html:
+                  '<p>Im Idle wirken die Temperaturen normal. Um sicher zu sein, lass einen <b>Belastungstest</b> laufen und beobachte die Sensoren nochmals.</p>'
+              });
+              return;
+            }
+            state.tempsStable = true;
+            updateScene();
+            setStatus('Temperaturen stabil');
+            say('<span class="good">Sensoren im grünen Bereich.</span> Unter Last bleibt das System stabil. Wärmeleitpaste nur bei Bedarf erneuern.');
+            finish(true, 'Kühlung gereinigt – der PC bleibt auch unter Last stabil.');
+          }
+        }
+      ];
+    }
+    function makeScenario7Actions(){
+      return [
+        {
+          id: 'k1-cable',
+          label: 'USB-Stecker kontrollieren',
+          hotkey: '1',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            setStatus('Keine Aenderung');
+            say('<span class="warn">Stecker sitzt bereits fest.</span> Die Tastatur meldet sich weiterhin nicht.');
+            openModal({
+              title: this.label,
+              html:
+                '<p>Du ziehst den USB-Stecker kurz und steckst ihn sauber wieder ein.</p>' +
+                '<p>Windows meldet jedoch kein neues Geraet. Ueberlege einen <b>Neustart</b>, bevor du Hardware austauschst.</p>'
+            });
+          }
+        },
+        {
+          id: 'k1-port',
+          label: 'Anderen USB-Port testen',
+          hotkey: '2',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            setStatus('Keine Aenderung');
+            say('<span class="warn">Port-Wechsel hilft nicht.</span> Die Tastatur bleibt ohne Funktion.');
+            openModal({
+              title: this.label,
+              html:
+                '<p>Du steckst die Tastatur in einen anderen USB-Port.</p>' +
+                '<p>Auch dort wird sie nicht erkannt. Es liegt vermutlich kein Hardwaredefekt vor, sondern ein <b>temporaeres Treiberproblem</b>.</p>'
+            });
+          }
+        },
+        {
+          id: 'k1-onscreen',
+          label: 'Bildschirmtastatur nutzen',
+          hotkey: '3',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            setStatus('Workaround aktiv');
+            say('<span class="info">Bildschirmtastatur geoeffnet.</span> Notloesung moeglich, aber das eigentliche Problem bleibt bestehen.');
+            openModal({
+              title: this.label,
+              html:
+                '<p>Du aktivierst die Bildschirmtastatur und kannst dich behelfsweise anmelden.</p>' +
+                '<p>Fuer den regulaeren Betrieb solltest du das Eingabegeraet dennoch <b>korrekt initialisieren</b>.</p>'
+            });
+          }
+        },
+        {
+          id: 'k1-restart',
+          label: 'PC neu starten',
+          hotkey: '4',
+          delta: 3,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            setStatus('Neustart durchgefuehrt');
+            state.pcOn = true;
+            state.monitorOn = true;
+            state.signalOk = true;
+            state.keyboardResponsive = true;
+            updateScene();
+            say('<span class="good">Nach dem Neustart wird die Tastatur wieder erkannt.</span> Du kannst dein Passwort eingeben.');
+            finish(true, 'Neustart abgeschlossen - Tastatur reagiert wieder.');
+          }
+        },
+        {
+          id: 'k1-driver',
+          label: 'Treiber neu installieren',
+          hotkey: '5',
+          delta: 5,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            setStatus('Overkill');
+            say('<span class="warn">Treiber neu installieren dauert.</span> Fuer einen Schul-PC ist das unnoetig - versuche zuerst einfache Schritte.');
+            openModal({
+              title: this.label,
+              html:
+                '<p>Du wuerdest im Geraetemanager den Treiber entfernen und neu installieren.</p>' +
+                '<p>Das kostet Zeit und erfordert Admin-Rechte. Ein <b>Neustart</b> ist der schnellere Weg.</p>'
+            });
+          }
+        },
+        {
+          id: 'k1-replace',
+          label: 'Ersatztastatur holen',
+          hotkey: '6',
+          delta: 4,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            setStatus('Noch nicht gelöst');
+            say('<span class="warn">Hardwaretausch voreilig.</span> Pruefe zuerst einfache Softwareloesungen.');
+            openModal({
+              title: this.label,
+              html:
+                '<p>Du ueberlegst, eine Ersatztastatur zu holen.</p>' +
+                '<p>Bevor du Hardware tauschst, probiere einen <b>Neustart</b>: Haeufig reicht das aus.</p>'
+            });
+          }
+        }
+      ];
+    }
+    function getActionsForLevel(levelId){
+      const A = makeActions();
+      if(levelId === 'L0'){
+        return [A.ram, A.monitorToggle, A.bios, A.cpu, A.power, A.network];
+      } else if(levelId === 'E1'){
+        return [A.monitorCable, A.monitorToggle, A.bios, A.cpu, A.power, A.source];
+      } else if(levelId === 'M3'){
+        return makeScenario3Actions(A);
+      } else if(levelId === 'S4'){
+        return makeScenario4Actions();
+      } else if(levelId === 'N1'){
+        return makeScenario5Actions(A);
+      } else if(levelId === 'S2'){
+        return makeScenario6Actions();
+      } else if(levelId === 'K1'){
+        return makeScenario7Actions();
+      } else {
+        return [A.monitorToggle, A.bios, A.power, A.network, A.cpu, A.source];
+      }
+    }
+
+    function loadLevel(idx){
+      if(!isLevelUnlocked(idx)){
+        idx = findFirstUnlockedIndex();
+      }
+      state.levelIdx = idx;
+      
+      state.time = 0; state.tries = 0; state.solved = false; state.log = [];
+      state.performed = {};
+      state.currentActionId = null;
+      
+      const L = levels[idx];
+      state.pcOn = L.start.pcOn;
+      state.monitorOn = L.start.monitorOn;
+      state.signalOk = L.start.signalOk;
+      state.bootError = L.start.bootError ?? false;
+      state.activeSet = L.start.activeSet || 'A';
+      state.bootMenuOpen = !!L.start.bootMenuOpen;
+      state.usbPresent = 'usbPresent' in L.start ? L.start.usbPresent : true;
+      state.bootOrderChanged = !!L.start.bootOrderChanged;
+      state.bootOrderPersisted = !!L.start.bootOrderPersisted;
+      state.actionSequence = [];
+      state.s4SolvedBy = null;
+      state.s4RemovedUsb = false;
+      state.s4UsedBootMenu = false;
+      state.s4ChangedBootOrder = false;
+      state.powerUnplugged = 'powerUnplugged' in L.start ? !!L.start.powerUnplugged : false;
+      state.ramChecked = 'ramChecked' in L.start ? !!L.start.ramChecked : false;
+      state.lanConnected = 'lanConnected' in L.start ? !!L.start.lanConnected : true;
+      state.switchLedOn = 'switchLedOn' in L.start ? !!L.start.switchLedOn : state.lanConnected;
+      state.n1SolvedBy = null;
+      state.fanBlocked = 'fanBlocked' in L.start ? !!L.start.fanBlocked : false;
+      state.dustCleared = 'dustCleared' in L.start ? !!L.start.dustCleared : false;
+      state.tempsStable = 'tempsStable' in L.start ? !!L.start.tempsStable : true;
+      state.overheatObserved = 'overheatObserved' in L.start ? !!L.start.overheatObserved : false;
+      state.keyboardResponsive = 'keyboardResponsive' in L.start ? !!L.start.keyboardResponsive : true;
+
+      
+      state.actions = getActionsForLevel(L.id);
+
+      
+      
+      
+      (function(){
+        const powerAct = state.actions && state.actions.find(x => x.id === 'power-cable');
+        const monitorAct = state.actions && state.actions.find(x => x.id === 'monitor');
+        if(powerAct && typeof powerAct.effect === 'function'){
+          const originalEffect = powerAct.effect;
+          powerAct.effect = function(){
+            const prevWasMonitor = !!(state.log && state.log.length && monitorAct && state.log[state.log.length-1].step === monitorAct.label);
+            const willSolve = false; 
+            originalEffect.call(this);
+            if(willSolve){
+              finish(true, 'Stromversorgung und Monitor aktiviert.');
+              openModal({
+                title: 'Aufgabe abgeschlossen',
+                html: completionIntroHtml(),
+                okLabel: 'Zurück zum Hub',
+                scene: { pcOn: true, monitorOn: true, signalOk: true }
+              });
+            }
+          };
+        }
+      })();
+
+      
+      
+      (function(){
+        const monitorAct = state.actions && state.actions.find(x => x.id === 'monitor');
+        if(monitorAct && typeof monitorAct.effect === 'function'){
+          const originalEffect = monitorAct.effect;
+          monitorAct.effect = function(){
+            const willSolve = false; 
+            originalEffect.call(this);
+            if(willSolve){
+              finish(true, 'Stromversorgung und Monitor aktiviert.');
+              openModal({
+                title: 'Aufgabe abgeschlossen',
+                html: completionIntroHtml(),
+                okLabel: 'Zurück zum Hub',
+                scene: { pcOn: true, monitorOn: true, signalOk: true }
+              });
+            }
+          };
+        }
+      })();
+
+      renderActions();
+
+      
+      document.getElementById('storyTitle').textContent = L.storyTitle;
+      document.getElementById('storyText').innerHTML = L.storyText;
+      const h1 = document.getElementById('hintText1'); if(h1) h1.innerHTML = L.hints.h1;
+      const h2 = document.getElementById('hintText2'); if(h2) h2.innerHTML = L.hints.h2;
+
+      
+      setStatus('Unbekannt'); renderMeters();
+      feedbackEl.innerHTML = 'Wähle deinen ersten Schritt.'; stepLogEl.innerHTML = '';
+      summary.classList.remove('active');
+
+      
+      updateScene();
+
+      
+      const tag = document.getElementById('levelTag');
+      if(tag){ tag.textContent = `Fall ${idx+1}/${levels.length}`; }
+
+      showBest();
+    }
+
+    
+    document.getElementById('levelTag').addEventListener('click', ()=>{});
+    
+    (function(){
+      const levelTagEl = document.getElementById('levelTag');
+      if(!levelTagEl || !levelTagEl.parentNode) return;
+      
+      const wrap = document.createElement('div');
+      wrap.className = 'level-nav';
+      levelTagEl.parentNode.insertBefore(wrap, levelTagEl);
+      wrap.appendChild(levelTagEl);
+      
+      const prevBtn = document.createElement('button');
+      prevBtn.className = 'btn';
+      prevBtn.id = 'levelPrev';
+      prevBtn.title = 'Vorheriger Fall';
+      prevBtn.setAttribute('aria-label','Vorheriger Fall');
+      prevBtn.textContent = '<';
+      wrap.insertBefore(prevBtn, levelTagEl);
+      prevBtn.addEventListener('click', ()=>{
+        if(!scenarioActive) return;
+        closeModal(); hideCelebration();
+        const prev = findUnlockedIndex(state.levelIdx, -1);
+        if(prev !== state.levelIdx) animateToLevel(prev);
+      });
+      
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'btn';
+      nextBtn.id = 'levelNext';
+      nextBtn.title = 'Nächster Fall';
+      nextBtn.setAttribute('aria-label','Nächster Fall');
+      nextBtn.textContent = '>';
+      wrap.appendChild(nextBtn);
+      nextBtn.addEventListener('click', ()=>{
+        if(!scenarioActive) return;
+        closeModal(); hideCelebration();
+        const next = findUnlockedIndex(state.levelIdx, 1);
+        if(next !== state.levelIdx) animateToLevel(next);
+      });
+    })();
+
+    
+    if(topModalCloseEl){
+      topModalCloseEl.addEventListener('click', ()=>{ closeTopModal(); });
+      topModalCloseEl.hidden = true;
+    }
+    if(scoreButtons.length){
+      const handleScoreClick = ()=>{
+        const scores = loadScores();
+        const rows = levels.map((L, idx)=>{
+          const s = scores[L.id];
+          const hasScore = !!s;
+          const rank = hasScore ? (s.rank || '-') : '-';
+          const rankClass = hasScore && rank ? `rank-${rank.toLowerCase()}` : 'rank-none';
+          const timeLabel = hasScore && typeof s.time === 'number' ? `${s.time} Min` : '–';
+          const triesLabel = hasScore && typeof s.tries === 'number' ? `${s.tries}` : '–';
+          const scoreLabel = hasScore && typeof s.score === 'number' ? `${s.score}` : '–';
+          const note = hasScore ? '' : '<span class="score-note">Noch kein Ergebnis</span>';
+          return `<tr${hasScore ? '' : ' class="score-row-empty"'}>` +
+            `<td class="score-col-index">Fall ${idx+1}</td>` +
+            `<td class="score-col-name">${L.name}</td>` +
+            `<td class="score-col-rank"><span class="score-rank ${rankClass}">${rank}</span>${note}</td>` +
+            `<td class="score-col-time">${timeLabel}</td>` +
+            `<td class="score-col-tries">${triesLabel}</td>` +
+            `<td class="score-col-score">${scoreLabel}</td>` +
+          `</tr>`;
+        }).join('');
+        const subtitle = 'Deine besten Ergebnisse pro Szenario';
+        const html = `
+          <div class="score-table-wrap">
+            <table class="score-table" role="table">
+              <thead>
+                <tr>
+                  <th scope="col" class="score-col-index">Fall</th>
+                  <th scope="col" class="score-col-name">Szenario</th>
+                  <th scope="col" class="score-col-rank">Rang</th>
+                  <th scope="col" class="score-col-time">Zeit</th>
+                  <th scope="col" class="score-col-tries">Schritte</th>
+                  <th scope="col" class="score-col-score">Score</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>`;
+        openTopModal({ title: '', subtitle, html });
+        if(topModalCloseEl){ topModalCloseEl.hidden = false; }
+      };
+      scoreButtons.forEach(btn => btn.addEventListener('click', handleScoreClick));
+    }
+    document.getElementById('resetBtn').addEventListener('click', reset);    
+    if(goalBtn){ goalBtn.addEventListener('click', () => openModal({title:'Ziele & LP21-Bezug', html: goalHtml})); }
+
+    
+    window.addEventListener('keydown', (e)=>{
+      const k = e.key.toLowerCase();
+      if(k === 'n'){
+        if(modalOpen){
+          if(state.solved){
+            if(startNextUnlockedScenario({ afterCurrent: true })){
+              e.preventDefault();
+            }
+          }
+          return;
+        }
+        if(!scenarioActive){
+          if(startNextUnlockedScenario()){
+            e.preventDefault();
+          }
+          return;
+        }
+        if(scenarioActive && state.solved){
+          if(startNextUnlockedScenario({ afterCurrent: true })){
+            e.preventDefault();
+          }
+          return;
+        }
+        return;
+      }
+      
+      if(k==='r'){ if(scenarioActive) reset(); return; }
+      
+      if(modalOpen){
+        if(!state.solved){
+          if(k==='escape'){
+            if(topModalEl && topModalEl.classList.contains('open')) closeTopModal(); else closeModal();
+            return;
+          }
+          if(modalOpenKey && e.key === modalOpenKey){
+            if(topModalEl && topModalEl.classList.contains('open')) closeTopModal(); else closeModal();
+            return;
+          }
+        }
+        return;
+      }
+      if(!scenarioActive) return;
+      const L = levels && levels[state.levelIdx];
+      const isS4 = !!(L && L.id === 'S4');
+      const activeSet = isS4 ? (state.activeSet || 'A') : null;
+      const action = state.actions.find(a => a.hotkey === e.key && (!isS4 || !a.set || a.set === activeSet));
+      if(action){
+        
+        lastHotkey = e.key;
+        runAction(action);
+      }
+    });
+
+    
+    showHub();
+</script>
+</body>
+</html>
