@@ -112,9 +112,9 @@
               <g class="bootmenu" aria-hidden="true">
                 <rect x="250" y="32" width="250" height="120" rx="10" class="bootmenu-bg"/>
                 <text x="375" y="58" font-size="16" text-anchor="middle" style="fill:rgba(229,231,235,.92);font-weight:600;letter-spacing:1px">BOOT ORDER</text>
-                <text x="290" y="82" font-size="13" style="fill:rgba(229,231,235,.65);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;"> ▶ USB Device</text>
-                <text x="290" y="104" font-size="13" style="fill:rgba(229,231,235,.88);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;"> SSD (Windows)</text>
-                <text x="290" y="126" font-size="13" style="fill:rgba(229,231,235,.65);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;">  Network Boot</text>
+                <text class="bootorder-line bootorder-usb" data-label="USB Device" x="290" y="82" font-size="13" style="fill:rgba(229,231,235,.65);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;">▶ USB Device</text>
+                <text class="bootorder-line bootorder-ssd" data-label="SSD (Windows)" x="290" y="104" font-size="13" style="fill:rgba(229,231,235,.88);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;">  SSD (Windows)</text>
+                <text class="bootorder-line bootorder-network" data-label="Network Boot" x="290" y="126" font-size="13" style="fill:rgba(229,231,235,.65);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;">  Network Boot</text>
                 <text x="375" y="148" font-size="11" text-anchor="middle" style="fill:rgba(229,231,235,.5);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;">AMIBIOS(C)2015 AMERICAN MEGATRENDS, Inc.</text>
               </g>
               <g class="login login-default" aria-hidden="true">
@@ -885,6 +885,24 @@
       return false;
     }
 
+    function updateBootOrderDisplay(scene, level){
+      if(!scene || !level || level.id !== 'S4') return;
+      try{
+        const usbLine = scene.querySelector('.bootorder-usb');
+        const ssdLine = scene.querySelector('.bootorder-ssd');
+        if(!usbLine || !ssdLine) return;
+        const usbLabel = usbLine.dataset && usbLine.dataset.label ? usbLine.dataset.label : 'USB Device';
+        const ssdLabel = ssdLine.dataset && ssdLine.dataset.label ? ssdLine.dataset.label : 'SSD (Windows)';
+        const highlightSsd = !!(state.bootOrderChanged || state.bootOrderPersisted);
+        const activeColor = 'rgba(229,231,235,.88)';
+        const inactiveColor = 'rgba(229,231,235,.65)';
+        usbLine.textContent = `${highlightSsd ? '  ' : '▶ '}${usbLabel}`;
+        ssdLine.textContent = `${highlightSsd ? '▶ ' : '  '}${ssdLabel}`;
+        usbLine.style.fill = highlightSsd ? inactiveColor : activeColor;
+        ssdLine.style.fill = highlightSsd ? activeColor : inactiveColor;
+      }catch(e){}
+    }
+
     function updateScene(){
       const scene = document.querySelector('.scene');
       if(!scene) return;
@@ -925,6 +943,7 @@
           if(!state.fanBlocked && state.dustCleared){ scene.classList.add('fan-clean'); }
         }
       }
+      //updateBootOrderDisplay(scene, L);
     }
 
     function renderActions(){
@@ -1816,6 +1835,12 @@ function finish(success, detail){
               title: this.label,
               html: '<p>Du schiebst die <b>SSD</b> an die erste Stelle. Drücke jetzt <b>Änderungen speichern</b>, sonst bleibt alles beim Alten.</p>'
             });
+            // Update SVG arrow to SSD
+            const scene = document.querySelector('.scene');
+            const L = levels && levels[state.levelIdx];
+            if(scene && L && L.id === 'S4'){
+              updateBootOrderDisplay(scene, L);
+            }
           }
         },
         {
