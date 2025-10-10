@@ -111,7 +111,7 @@
               </g>
               <g class="bootmenu" aria-hidden="true">
                 <rect x="265" y="32" width="220" height="120" rx="10" class="bootmenu-bg"/>
-                <text x="375" y="58" font-size="16" text-anchor="middle" style="fill:rgba(229,231,235,.92);font-weight:600;letter-spacing:1px">BOOT MENU</text>
+                <text x="375" y="58" font-size="16" text-anchor="middle" style="fill:rgba(229,231,235,.92);font-weight:600;letter-spacing:1px">BOOT ORDER</text>
                 <text x="290" y="82" font-size="13" style="fill:rgba(229,231,235,.88);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;">▶ SSD (Windows)</text>
                 <text x="290" y="104" font-size="13" style="fill:rgba(229,231,235,.65);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;">  USB Device</text>
                 <text x="290" y="126" font-size="13" style="fill:rgba(229,231,235,.65);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;">  Network Boot</text>
@@ -913,6 +913,10 @@
           if(isScenarioS2){
             scene.classList.add('desktop');
           }
+          if(L && L.id === 'N1' && state.solved){
+            scene.classList.add('desktop');
+            scene.classList.remove('login');
+          }
         }
         if(isScenarioS2){
           scene.classList.add('fan-visible');
@@ -1073,7 +1077,7 @@ function completionIntroHtml(){
       return '<p><b>Aufgabe abgeschlossen.</b> Lüfter gereinigt, Blockaden entfernt – die Kühlung arbeitet wieder zuverlässig.</p><p>Unter Last bleiben die Temperaturen stabil (Wärmeleitpaste nur bei Bedarf ansprechen).</p>';
     case 'N1':
       if(state.n1SolvedBy === 'network'){
-        return '<p><b>Aufgabe abgeschlossen.</b> Netzwerkkabel steckt wieder – die Domäne ist erreichbar.</p><p>Das <b>Login</b> funktioniert.</p>';
+        return '<p><b>Aufgabe abgeschlossen.</b> Netzwerkkabel steckt wieder – die Domäne ist erreichbar.</p><p>Das <b>Login</b> hat funktioniert.</p>';
       }
       return '<p><b>Aufgabe abgeschlossen.</b> Anmeldung möglich.</p><p>Das <b>Login</b> ist sichtbar.</p>';
     case 'S4': {
@@ -1107,6 +1111,7 @@ function finish(success, detail){
         }
       }catch(e){}
       state.solved = true;
+      updateScene();
       showCelebration();
       setStatus('Gelöst');
       say(`<span class="good">Problem behoben.</span> ${detail} Der PC startet, du kannst weiterarbeiten.`);
