@@ -2685,12 +2685,26 @@ function finish(success, detail){
               </thead>
               <tbody>${rows}</tbody>
             </table>
-          </div>
-          <div class="score-modal-footer" style="display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:12px;">
-            <button type="button" id="scoreBombToggle" class="btn" title="Löschen-Buttons einblenden" aria-label="Löschen-Buttons einblenden"><span class="emoji" aria-hidden="true">💣</span></button>
           </div>`;
         openTopModal({ title: '', subtitle, html });
         if(topModalCloseEl){ topModalCloseEl.hidden = false; }
+
+        const headerEl = topModalEl ? topModalEl.querySelector('.mhead') : null;
+        if(headerEl){
+          let bombToggle = document.getElementById('scoreBombToggle');
+          const closeBtn = (topModalCloseEl && headerEl.contains(topModalCloseEl)) ? topModalCloseEl : null;
+          if(!bombToggle){
+            bombToggle = document.createElement('button');
+            bombToggle.type = 'button';
+            bombToggle.id = 'scoreBombToggle';
+            bombToggle.innerHTML = '<span class="emoji" aria-hidden="true">💣</span>';
+          }
+          bombToggle.className = 'modal-icon-btn';
+          bombToggle.title = 'Löschen-Buttons einblenden';
+          bombToggle.setAttribute('aria-label', 'Löschen-Buttons einblenden');
+          bombToggle.setAttribute('aria-pressed', 'false');
+          headerEl.insertBefore(bombToggle, closeBtn);
+        }
 
         // Add event delegation for score reset via bomb button
         setTimeout(()=>{
@@ -2729,15 +2743,27 @@ function finish(success, detail){
             });
           }
           if(bombToggle){
-            let bombsVisible = false;
-            bombToggle.addEventListener('click', function(){
-              bombsVisible = !bombsVisible;
-              const bombBtns = document.querySelectorAll('.score-bomb-btn[data-scenario-idx]');
-              bombBtns.forEach(btn => {
-                btn.style.display = bombsVisible ? '' : 'none';
+            bombToggle.setAttribute('aria-pressed', 'false');
+            bombToggle.title = 'Löschen-Buttons einblenden';
+            bombToggle.setAttribute('aria-label', 'Löschen-Buttons einblenden');
+            if(!bombToggle.dataset.bound){
+              bombToggle.addEventListener('click', function(){
+                const isActive = this.getAttribute('aria-pressed') === 'true';
+                const nextState = !isActive;
+                const bombBtns = document.querySelectorAll('.score-bomb-btn[data-scenario-idx]');
+                bombBtns.forEach(btn => {
+                  btn.style.display = nextState ? '' : 'none';
+                });
+                this.setAttribute('aria-pressed', nextState ? 'true' : 'false');
+                const label = nextState ? 'Löschen-Buttons ausblenden' : 'Löschen-Buttons einblenden';
+                this.title = label;
+                this.setAttribute('aria-label', label);
               });
-              bombToggle.setAttribute('aria-pressed', bombsVisible ? 'true' : 'false');
-              bombToggle.title = bombsVisible ? 'Löschen-Buttons ausblenden' : 'Löschen-Buttons einblenden';
+              bombToggle.dataset.bound = 'true';
+            }
+            const bombBtns = document.querySelectorAll('.score-bomb-btn[data-scenario-idx]');
+            bombBtns.forEach(btn => {
+              btn.style.display = 'none';
             });
           }
         }, 0);
