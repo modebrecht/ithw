@@ -2654,6 +2654,10 @@ function finish(success, detail){
           const triesLabel = hasScore && typeof s.tries === 'number' ? `${s.tries}` : '–';
           const scoreLabel = hasScore && typeof s.score === 'number' ? `${s.score}` : '–';
           const note = hasScore ? '' : '<span class="score-note">Noch kein Ergebnis</span>';
+          // Bomb icon button for reset
+          const bombBtn = hasScore
+            ? `<button type="button" class="score-bomb-btn" data-scenario-idx="${idx}" title="Fortschritt für dieses Szenario löschen" aria-label="Fortschritt für Fall ${idx+1} löschen"><span class="emoji" aria-hidden="true">💣</span></button>`
+            : '';
           return `<tr${hasScore ? '' : ' class="score-row-empty"'}>` +
             `<td class="score-col-index">Fall ${idx+1}</td>` +
             `<td class="score-col-name">${L.name}</td>` +
@@ -2661,6 +2665,7 @@ function finish(success, detail){
             `<td class="score-col-time">${timeLabel}</td>` +
             `<td class="score-col-tries">${triesLabel}</td>` +
             `<td class="score-col-score">${scoreLabel}</td>` +
+            `<td class="score-col-reset">${bombBtn}</td>` +
           `</tr>`;
         }).join('');
         const subtitle = 'Deine besten Ergebnisse pro Szenario';
@@ -2682,6 +2687,43 @@ function finish(success, detail){
           </div>`;
         openTopModal({ title: '', subtitle, html });
         if(topModalCloseEl){ topModalCloseEl.hidden = false; }
+
+        // Add event delegation for score reset via bomb button
+        setTimeout(()=>{
+          const scoreTable = document.querySelector('.score-table');
+          if(scoreTable){
+            scoreTable.addEventListener('click', function(e){
+              const btn = e.target.closest('button.score-bomb-btn');
+              if(btn && btn.hasAttribute('data-scenario-idx')){
+                const idx = parseInt(btn.getAttribute('data-scenario-idx'), 10);
+                if(!isNaN(idx) && levels[idx]){
+                  const scenarioName = levels[idx].name;
+                  const confirmed = window.confirm(`Fortschritt und Score für "${scenarioName}" wirklich löschen?`);
+                  if(confirmed){
+                    // Remove score and progress for this scenario
+                    const scores = loadScores();
+                    const progress = loadProgress();
+                    delete scores[levels[idx].id];
+                    if(progress.completed) delete progress.completed[levels[idx].id];
+                    saveScores(scores);
+                    saveProgress(progress);
+                    renderHub();
+                    closeTopModal();
+                    window.alert(`Fortschritt für "${scenarioName}" wurde gelöscht.`);
+                  }
+                }
+              }
+            });
+            scoreTable.addEventListener('keydown', function(e){
+              if((e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar')){
+                const btn = e.target.closest('button.score-bomb-btn');
+                if(btn && btn.hasAttribute('data-scenario-idx')){
+                  btn.click();
+                }
+              }
+            });
+          }
+        }, 0);
       };
       scoreButtons.forEach(btn => btn.addEventListener('click', handleScoreClick));
     }
