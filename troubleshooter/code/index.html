@@ -2002,16 +2002,28 @@ function finish(success, detail){
             if(state.solved) return;
             state.time += this.delta; state.tries++;
             pushLog(this.label, `+${this.delta} Min`);
-            state.monitorOn = true;
+            const wasOn = !!state.monitorOn;
+            state.monitorOn = !state.monitorOn;
             updateScene();
-            setStatus('Nicht relevant');
-            say('<span class="warn">Bild ist vorhanden.</span> Das Problem liegt nicht an der Anzeige, sondern an der <b>Kühlung</b>.');
-            openModal({
-              title: this.label,
-              html:
-                '<p>Du schaltest den Monitor testweise aus und wieder ein – das Bild war die ganze Zeit stabil.</p>' +
-                '<p>Der Fehler (Shutdown/Throttling) entsteht unter Last, daher <b>Lüfter und Temperaturen</b> prüfen.</p>'
-            });
+            if(wasOn){
+              setStatus('Monitor ausgeschaltet');
+              say('<span class="info">Monitor ausgeschaltet.</span> Anzeige dunkel – Ursache bleibt die <b>Kühlung</b>.');
+              openModal({
+                title: this.label,
+                html:
+                  '<p>Du schaltest den Monitor aus. Das Bild ist weg, aber das eigentliche Problem – Leistungsverlust unter Last – bleibt bestehen.</p>' +
+                  '<p>Konzentriere dich auf <b>Lüfter</b> und <b>Temperaturen</b>.</p>'
+              });
+            } else {
+              setStatus('Monitor eingeschaltet');
+              say('<span class="info">Monitor eingeschaltet.</span> Anzeige stabil – Ursache bleibt die <b>Kühlung</b>.');
+              openModal({
+                title: this.label,
+                html:
+                  '<p>Der Monitor war aus. Nach dem Einschalten ist das Bild wieder da.</p>' +
+                  '<p>Der Fehler tritt weiter nur unter Last auf – prüfe also <b>Lüfter</b> und <b>Temperaturen</b>.</p>'
+              });
+            }
           }
         },
         {
