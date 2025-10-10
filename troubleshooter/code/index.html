@@ -981,6 +981,25 @@ function evaluateScenarioResult(){
         const color = medal === 'Gold' ? 'var(--gold)' : medal === 'Silber' ? 'var(--silver)' : 'var(--bronze)';
         return { medal, long, color, score, detailText, time: t, tries: n };
       }
+      if(L && L.id === 'S2'){
+        let medal = 'Bronze';
+        let long = 'Bronze - gelöst, aber umständlich';
+        let score = 40;
+        let detailText = 'Pfad: Lüfterproblem behoben.';
+        if(n <= 8){
+          medal = 'Gold';
+          long = 'Gold - strukturiert & effizient gelöst';
+          score = 100;
+          detailText = 'Pfad: Thermik analysiert, Lüfter gereinigt, Belastungstest bestätigt.';
+        } else if(n <= 12){
+          medal = 'Silber';
+          long = 'Silber - solide, aber mit Zusatzschritten';
+          score = 70;
+          detailText = 'Pfad: Lösung gefunden, jedoch mit einigen Umwegen.';
+        }
+        const color = medal === 'Gold' ? 'var(--gold)' : medal === 'Silber' ? 'var(--silver)' : 'var(--bronze)';
+        return { medal, long, color, score, detailText, time: t, tries: n };
+      }
       if(L && L.id === 'S4'){
         const seq = Array.isArray(state.actionSequence) ? state.actionSequence.slice() : [];
         const solvedBy = state.s4SolvedBy;
