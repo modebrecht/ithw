@@ -913,7 +913,10 @@
         if(!state.monitorOn){
           return;
         }
-        if(!state.bootError){
+        if(state.s4BlankScreen){
+          // Show NO SIGNAL screen (as in scenario 2)
+          scene.classList.add('nosig');
+        } else if(!state.bootError){
           scene.classList.add('login');
         } else if(state.activeSet === 'B'){
           scene.classList.add('bootmenu');
@@ -1031,30 +1034,26 @@ function evaluateScenarioResult(){
         let long = 'Bronze – Fehler behoben, aber mit Umwegen.';
         let score = 40;
         let detailText = '';
-        if(solvedBy === 'temp-ssd' && matches(['boot-menu','boot-ssd'])){
+        // Gold: 5 steps, correct path
+        if(solvedBy === 'bootorder-save' && seq.length === 5 && matches(['boot-menu','boot-order','save-changes','exit-nosave','s4-restart'])){
           medal = 'Gold';
-          long = 'Gold – Boot-Menü genutzt und temporär von der SSD gestartet.';
+          long = 'Gold – Bootreihenfolge korrigiert und gespeichert.';
           score = 100;
-          detailText = 'Pfad: Boot-Menü → SSD (temporär).';
-        } else if(solvedBy === 'usb-restart' && matches(['remove-usb','s4-restart'])){
+          detailText = 'Pfad: Boot-Menü → Bootreihenfolge ändern → Speichern → BIOS verlassen → Neustart.';
+        } else if(solvedBy === 'bootorder-save' && seq.length === 6 && matches(['boot-menu','boot-order','save-changes','exit-nosave','s4-monitor','s4-restart'])){
           medal = 'Silber';
-          long = 'Silber – USB entfernt und sauber neu gestartet.';
+          long = 'Silber – Bootreihenfolge korrigiert und gespeichert (mit Zusatzschritt).';
           score = 70;
-          detailText = 'Pfad: USB entfernen → Neustart.';
-        } else if(solvedBy === 'bootorder-save' && matches(['boot-menu','boot-order','save-changes'])){
-          medal = 'Silber';
-          long = 'Silber – Bootreihenfolge korrigiert und gespeichert.';
-          score = 70;
-          detailText = 'Pfad: Boot-Menü → Bootreihenfolge ändern → Speichern.';
-        } else if(solvedBy === 'temp-ssd'){
-          long = 'Bronze – Boot-Menü genutzt, aber mit Umwegen.';
-          detailText = 'Pfad: Boot-Menü / SSD mit Zusatzschritten.';
-        } else if(solvedBy === 'usb-restart'){
-          long = 'Bronze – USB-Lösung, aber mit Umwegen.';
-          detailText = 'Pfad: USB + Neustart (Umwege).';
+          detailText = 'Pfad: Boot-Menü → Bootreihenfolge ändern → Speichern → BIOS verlassen → Monitor → Neustart.';
         } else if(solvedBy === 'bootorder-save'){
           long = 'Bronze – BIOS-Anpassung mit Umwegen.';
           detailText = 'Pfad: Bootreihenfolge angepasst (Umwege).';
+        } else if(solvedBy === 'usb-restart'){
+          long = 'Bronze – USB-Lösung, aber mit Umwegen.';
+          detailText = 'Pfad: USB + Neustart (Umwege).<br><span class="hint">Das Problem wurde nur vorübergehend gelöst – beim nächsten Start könnte es erneut auftreten. Deshalb gibt es nur Bronze.</span>';
+        } else if(solvedBy === 'temp-ssd'){
+          long = 'Bronze – Boot-Menü genutzt, aber mit Umwegen.';
+          detailText = 'Pfad: Boot-Menü / SSD mit Zusatzschritten.';
         } else {
           detailText = 'Pfad: Problem behoben.';
         }
@@ -1104,7 +1103,7 @@ function completionIntroHtml(){
         case 'temp-ssd':
           return '<p><b>Aufgabe abgeschlossen.</b> Du hast über das Boot-Menü temporär von der SSD gestartet.</p><p>Das <b>Login</b> ist sichtbar.</p>';
         case 'usb-restart':
-          return '<p><b>Aufgabe abgeschlossen.</b> Störende USB-Geräte entfernt und sauber neu gestartet.</p><p>Das <b>Login</b> ist sichtbar.</p>';
+          return '<p><b>Aufgabe abgeschlossen.</b> Störende USB-Geräte entfernt und PC neu gestartet. Das Problem wurde nur vorübergehend gelöst, daher wird nur Bronze vergeben.</p><p>Das <b>Login</b> ist sichtbar.</p>';
         case 'bootorder-save':
           return '<p><b>Aufgabe abgeschlossen.</b> Bootreihenfolge korrigiert und gespeichert – die SSD startet wieder automatisch.</p><p>Das <b>Login</b> ist sichtbar.</p>';
         default:
@@ -1692,19 +1691,37 @@ function finish(success, detail){
             const resolvedByPersist = state.bootOrderPersisted;
             state.bootMenuOpen = false;
             state.activeSet = 'A';
-            if(resolvedByPersist){ state.bootOrderChanged = false; }
-            updateScene();
-            if(resolvedByUsb || resolvedByPersist){
+            if(resolvedByPersist){
+              state.bootOrderChanged = false;
+              state.s4BlankScreen = false;
+              state.pcOn = true;
+              state.monitorOn = true;
+              state.signalOk = true;
               state.bootError = false;
               updateScene();
-              if(resolvedByUsb){
-                state.s4SolvedBy = 'usb-restart';
-                finish(true, 'USB-Sticks entfernt – der PC startet wieder von der SSD.');
-              } else {
-                state.s4SolvedBy = 'bootorder-save';
-                finish(true, 'Gespeicherte Bootreihenfolge – SSD steht nun an erster Stelle.');
-              }
+              const scene = document.querySelector('.scene');
+              if(scene) scene.classList.add('power-on');
+              state.s4SolvedBy = 'bootorder-save';
+              finish(true, 'Gespeicherte Bootreihenfolge – SSD steht nun an erster Stelle.');
+            } else if(resolvedByUsb){
+              state.s4BlankScreen = false;
+              state.pcOn = true;
+              state.monitorOn = true;
+              state.signalOk = true;
+              state.bootError = false;
+              updateScene();
+              const scene = document.querySelector('.scene');
+              if(scene) scene.classList.add('power-on');
+              state.s4SolvedBy = 'usb-restart';
+              finish(true, 'USB-Sticks entfernt – der PC startet wieder von der SSD.');
             } else {
+              // If boot order is not saved and USB not removed, show boot error
+              state.s4BlankScreen = false;
+              state.pcOn = true;
+              state.monitorOn = true;
+              state.signalOk = false;
+              state.bootError = true;
+              updateScene();
               setStatus('Bootfehler bleibt');
               say('<span class="warn">Noch kein Erfolg.</span> Der PC zeigt weiterhin <b>NO BOOTABLE DEVICE</b>.');
               openModal({
@@ -1790,6 +1807,8 @@ function finish(success, detail){
             state.activeSet = 'B';
             state.bootMenuOpen = true;
             state.s4UsedBootMenu = true;
+            // Show boot menu even after blank screen
+            state.s4BlankScreen = false;
             setStatus('Boot-Menü geöffnet');
             updateScene();
             renderActions();
@@ -1889,13 +1908,14 @@ function finish(success, detail){
             if(state.bootOrderChanged){
               state.bootOrderPersisted = true;
               state.bootOrderChanged = false;
-              state.bootError = false;
-              state.activeSet = 'A';
-              state.bootMenuOpen = false;
               updateScene();
-              renderActions();
-              state.s4SolvedBy = 'bootorder-save';
-              finish(true, 'Bootreihenfolge gespeichert – der Neustart findet die SSD automatisch.');
+              setStatus('Bootreihenfolge gespeichert');
+              say('<span class="good">Bootreihenfolge gespeichert.</span> Die SSD steht nun an erster Stelle. Du bist weiterhin im BIOS und kannst weitere Einstellungen vornehmen oder das BIOS manuell verlassen.');
+              openModal({
+                title: this.label,
+                html: '<p>Du hast die Bootreihenfolge gespeichert. Die SSD ist jetzt an erster Stelle. <b>Du bleibst im BIOS-Menü</b> und kannst weitere Änderungen vornehmen oder das BIOS schließen.</p>'
+              });
+              // Do NOT update SVG here; only update after restart
             } else {
               setStatus('Keine Änderungen');
               say('<span class="warn">Nichts zu speichern.</span> Passe zuerst die Reihenfolge an.');
@@ -1909,7 +1929,7 @@ function finish(success, detail){
         {
           id: 'exit-nosave',
           set: 'B',
-          label: '🚪 BIOS schließen (ohne Speichern)',
+          label: '🚪 Bios schliessen & PC herunterfahren',
           hotkey: '6',
           delta: 1,
           effect(){
@@ -1918,13 +1938,16 @@ function finish(success, detail){
             state.bootMenuOpen = false;
             state.activeSet = 'A';
             state.bootOrderChanged = false;
+            state.pcOn = false; // PC is off
+            state.monitorOn = true; // Monitor stays ON
+            state.s4BlankScreen = true; // Always show blank screen after BIOS exit
             updateScene();
             renderActions();
             setStatus('BIOS verlassen');
-            say('<span class="warn">Keine Änderungen gespeichert.</span> Der Bootfehler bleibt bestehen.');
+            say('<span class="good">PC ist heruntergefahren.</span> Monitor ist an, zeigt aber nichts. Starte den PC neu, um zu prüfen, ob das Problem gelöst ist.');
             openModal({
               title: this.label,
-              html: '<p>Du verlässt das BIOS ohne zu speichern. Der PC startet neu und zeigt wieder <b>NO BOOTABLE DEVICE</b>.</p>'
+              html: '<p>Du verlässt das BIOS und fährst den PC herunter. <b>Monitor ist an, zeigt aber nichts.</b> Starte den PC neu, um zu prüfen, ob das Problem gelöst ist.</p>'
             });
           }
         }
@@ -2476,10 +2499,11 @@ function finish(success, detail){
       state.bootOrderChanged = !!L.start.bootOrderChanged;
       state.bootOrderPersisted = !!L.start.bootOrderPersisted;
       state.actionSequence = [];
-      state.s4SolvedBy = null;
-      state.s4RemovedUsb = false;
-      state.s4UsedBootMenu = false;
-      state.s4ChangedBootOrder = false;
+  state.s4SolvedBy = null;
+  state.s4RemovedUsb = false;
+  state.s4UsedBootMenu = false;
+  state.s4ChangedBootOrder = false;
+  state.s4BlankScreen = false;
       state.powerUnplugged = 'powerUnplugged' in L.start ? !!L.start.powerUnplugged : false;
       state.ramChecked = 'ramChecked' in L.start ? !!L.start.ramChecked : false;
       state.lanConnected = 'lanConnected' in L.start ? !!L.start.lanConnected : true;
@@ -2556,6 +2580,14 @@ function finish(success, detail){
 
       // Visuals
       updateScene();
+      // For scenario S4, always redraw boot order SVG to match initial state (arrow at USB Device)
+      const Lcheck = levels[idx];
+      if(Lcheck && Lcheck.id === 'S4'){
+        const scene = document.querySelector('.scene');
+        if(scene){
+          updateBootOrderDisplay(scene, Lcheck);
+        }
+      }
 
       // Badge text
       const tag = document.getElementById('levelTag');
