@@ -1,10 +1,10 @@
 export default {
   id: 'N1',
-  name: 'Netzwerk/Login-Spezial',
+  name: 'Domänen-Login',
   storyTitle: 'Szenario 6: Domänen-Login scheitert',
   storyText:
-    'Der PC ist gestartet, der Login-Bildschirm erscheint – doch dein Domänenkonto meldet: ' +
-    '"<b>Profil nicht verfügbar / Server nicht erreichbar</b>". ' +
+    'Der PC ist gestartet, du versuchst dich einzuloggen und dann erscheint die Meldung: ' +
+    '"<b>Domäne nicht verfügbar</b>". ' +
     'Finde die Ursache und ermögliche den Login.',
   hints: {
     h1: 'Domänen-Login schlägt fehl – was sagt das über die <b>Netzwerkverbindung</b>?',

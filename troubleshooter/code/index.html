@@ -2171,7 +2171,7 @@ function finish(success, detail){
         },
         {
           id: 's2-clean',
-          label: '🧹 Lüfter reinigen / Blockade entfernen',
+          label: '🧹 PC-Gehäuse öffnen',
           hotkey: '6',
           delta: 3,
           effect(){
@@ -2184,17 +2184,17 @@ function finish(success, detail){
               openModal({
                 title: this.label,
                 html:
-                  '<p>Für eine sichere Reinigung muss der PC ausgeschaltet und vom Strom getrennt sein.</p>'
+                  '<p>Um das Gehäuse sicher zu öffnen muss der PC ausgeschaltet und vom Strom getrennt sein.</p>'
               });
               return;
             }
             if(!state.powerUnplugged){
               setStatus('Strom verbunden');
-              say('<span class="warn">Strom ist noch verbunden.</span> Trenne zuerst die Stromzufuhr.');
+              say('<span class="warn">Strom ist noch da.</span> Trenne zuerst die Stromzufuhr.');
               openModal({
                 title: this.label,
                 html:
-                  '<p>Ziehe den Netzstecker oder schalte die Steckdosenleiste aus, bevor du den Lüfter reinigst.</p>'
+                  '<p>Ziehe den Netzstecker oder schalte die Steckdosenleiste aus, bevor du das Gehäuse öffnest.</p>'
               });
               return;
             }
@@ -2245,7 +2245,7 @@ function finish(success, detail){
             state.monitorOn = false;
             updateScene();
             setStatus('Strom getrennt');
-            say('<span class="info">Strom entfernt.</span> Jetzt kannst du sicher das Gehäuse öffnen und den Lüfter reinigen.');
+            say('<span class="info">Strom entfernt.</span> Jetzt kannst du sicher das Gehäuse öffnen.');
             openModal({
               title: this.label,
               html:
