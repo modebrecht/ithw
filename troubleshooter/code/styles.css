@@ -1,4 +1,14 @@
-﻿/* Score modal bomb button styling */
+﻿/* Make the last score table cell (bomb button) as small as possible */
+.score-table td.score-col-reset, .score-table th.score-col-reset {
+  width: 1px;
+  min-width: 0;
+  padding-left: 0;
+  padding-right: 0;
+  text-align: center;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+/* Score modal bomb button styling */
 .score-bomb-btn {
   background: none;
   border: none;

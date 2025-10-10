@@ -2654,9 +2654,9 @@ function finish(success, detail){
           const triesLabel = hasScore && typeof s.tries === 'number' ? `${s.tries}` : '–';
           const scoreLabel = hasScore && typeof s.score === 'number' ? `${s.score}` : '–';
           const note = hasScore ? '' : '<span class="score-note">Noch kein Ergebnis</span>';
-          // Bomb icon button for reset
+          // Bomb icon button for reset, hidden by default
           const bombBtn = hasScore
-            ? `<button type="button" class="score-bomb-btn" data-scenario-idx="${idx}" title="Fortschritt für dieses Szenario löschen" aria-label="Fortschritt für Fall ${idx+1} löschen"><span class="emoji" aria-hidden="true">💣</span></button>`
+            ? `<button type="button" class="score-bomb-btn" data-scenario-idx="${idx}" title="Fortschritt für dieses Szenario löschen" aria-label="Fortschritt für Fall ${idx+1} löschen" style="display:none"><span class="emoji" aria-hidden="true">💣</span></button>`
             : '';
           return `<tr${hasScore ? '' : ' class="score-row-empty"'}>` +
             `<td class="score-col-index">Fall ${idx+1}</td>` +
@@ -2680,10 +2680,14 @@ function finish(success, detail){
                   <th scope="col" class="score-col-time">Zeit</th>
                   <th scope="col" class="score-col-tries">Schritte</th>
                   <th scope="col" class="score-col-score">Score</th>
+                  <th scope="col" class="score-col-reset" style="width:1px"></th>
                 </tr>
               </thead>
               <tbody>${rows}</tbody>
             </table>
+          </div>
+          <div class="score-modal-footer" style="display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:12px;">
+            <button type="button" id="scoreBombToggle" class="btn" title="Löschen-Buttons einblenden" aria-label="Löschen-Buttons einblenden"><span class="emoji" aria-hidden="true">💣</span></button>
           </div>`;
         openTopModal({ title: '', subtitle, html });
         if(topModalCloseEl){ topModalCloseEl.hidden = false; }
@@ -2691,10 +2695,11 @@ function finish(success, detail){
         // Add event delegation for score reset via bomb button
         setTimeout(()=>{
           const scoreTable = document.querySelector('.score-table');
+          const bombToggle = document.getElementById('scoreBombToggle');
           if(scoreTable){
             scoreTable.addEventListener('click', function(e){
               const btn = e.target.closest('button.score-bomb-btn');
-              if(btn && btn.hasAttribute('data-scenario-idx')){
+              if(btn && btn.hasAttribute('data-scenario-idx') && btn.style.display !== 'none'){
                 const idx = parseInt(btn.getAttribute('data-scenario-idx'), 10);
                 if(!isNaN(idx) && levels[idx]){
                   const scenarioName = levels[idx].name;
@@ -2717,10 +2722,22 @@ function finish(success, detail){
             scoreTable.addEventListener('keydown', function(e){
               if((e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar')){
                 const btn = e.target.closest('button.score-bomb-btn');
-                if(btn && btn.hasAttribute('data-scenario-idx')){
+                if(btn && btn.hasAttribute('data-scenario-idx') && btn.style.display !== 'none'){
                   btn.click();
                 }
               }
+            });
+          }
+          if(bombToggle){
+            let bombsVisible = false;
+            bombToggle.addEventListener('click', function(){
+              bombsVisible = !bombsVisible;
+              const bombBtns = document.querySelectorAll('.score-bomb-btn[data-scenario-idx]');
+              bombBtns.forEach(btn => {
+                btn.style.display = bombsVisible ? '' : 'none';
+              });
+              bombToggle.setAttribute('aria-pressed', bombsVisible ? 'true' : 'false');
+              bombToggle.title = bombsVisible ? 'Löschen-Buttons ausblenden' : 'Löschen-Buttons einblenden';
             });
           }
         }, 0);
