@@ -903,19 +903,22 @@
           scene.classList.add('booterr');
         }
       } else {
+        const isScenarioS2 = !!(L && L.id === 'S2');
         if(state.monitorOn && (!state.pcOn || !state.signalOk)) scene.classList.add('nosig');
         if(state.pcOn && state.monitorOn && state.signalOk){
           scene.classList.add('login');
           if(L && L.id === 'N1' && !state.lanConnected){
             scene.classList.add('domain-error');
           }
-          if(L && L.id === 'S2'){
+          if(isScenarioS2){
             scene.classList.add('desktop');
-            scene.classList.add('fan-visible');
-            if(state.fanBlocked){ scene.classList.add('fan-blocked'); }
-            if(!state.tempsStable){ scene.classList.add('overheat'); }
-            if(!state.fanBlocked && state.dustCleared){ scene.classList.add('fan-clean'); }
           }
+        }
+        if(isScenarioS2){
+          scene.classList.add('fan-visible');
+          if(state.fanBlocked){ scene.classList.add('fan-blocked'); }
+          if(!state.tempsStable){ scene.classList.add('overheat'); }
+          if(!state.fanBlocked && state.dustCleared){ scene.classList.add('fan-clean'); }
         }
       }
     }
@@ -2033,6 +2036,27 @@ function finish(success, detail){
           delta: 2,
           effect(){
             if(state.solved) return;
+            if(!state.pcOn || state.powerUnplugged){
+              setStatus('PC aus');
+              if(state.powerUnplugged){
+                say('<span class="warn">Der PC ist vom Strom getrennt.</span> Stecke die Stromzufuhr wieder ein und starte den PC, bevor du einen Belastungstest beginnst.');
+                openModal({
+                  title: this.label,
+                  html:
+                    '<p>Ohne Stromversorgung kann kein Belastungstest laufen.</p>' +
+                    '<p>Stelle die Stromzufuhr her, starte den PC und versuche es erneut.</p>'
+                });
+              } else {
+                say('<span class="warn">Der PC ist ausgeschaltet.</span> Starte ihn zuerst, bevor du einen Belastungstest durchführst.');
+                openModal({
+                  title: this.label,
+                  html:
+                    '<p>Der Rechner ist aus – der Benchmark kann nicht starten.</p>' +
+                    '<p>Schalte den PC ein und beginne dann mit dem Belastungstest.</p>'
+                });
+              }
+              return;
+            }
             state.time += this.delta; state.tries++;
             pushLog(this.label, `+${this.delta} Min`);
             setStatus('Lasttest läuft');
@@ -2063,53 +2087,98 @@ function finish(success, detail){
               });
               return;
             }
+            state.tempsStable = true;
+            updateScene();
             setStatus('Lasttest stabil');
-            say('<span class="info">Belastungstest stabil.</span> Überwache jetzt die Temperaturen – Sensoren checken.');
-            openModal({
-              title: this.label,
-              html:
-                '<p>Nach der Reinigung läuft der Lasttest ohne Drosseln. Beobachte nun die Sensoren, um die Temperaturen zu bestätigen.</p>' +
-                '<p>Optional: Wärmeleitpaste nur ansprechen, falls sie sichtbar ausgetrocknet ist.</p>'
-            });
+            say('<span class="good">Belastungstest stabil.</span> Unter Last bleibt das System kühl – Aufgabe erfüllt.');
+            finish(true, 'Kühlung gereinigt – der PC bleibt auch unter Last stabil.');
           }
         },
         {
-          id: 's2-inspect',
-          label: '🔎 Gehäuse öffnen & Lüfter prüfen',
+          id: 's2-shutdown',
+          label: '🛑 PC herunterfahren',
           hotkey: '4',
           delta: 2,
           effect(){
             if(state.solved) return;
             state.time += this.delta; state.tries++;
             pushLog(this.label, `+${this.delta} Min`);
-            setStatus('Lüfter prüfen');
-            if(state.fanBlocked){
-              say('<span class="warn">Lüfter blockiert.</span> Ein Kabel und Staub verhindern den Luftstrom.');
-              openModal({
-                title: this.label,
-                html:
-                  '<p>Mit abgenommener Seitenwand siehst du: Der hintere Lüfter steckt voller Staub, zusätzlich klemmt ein loses Kabel in den Rotorblättern.</p>' +
-                  '<p>Entferne die Blockade und reinige den Lüfter.</p>'
-              });
+            if(!state.pcOn){
+              setStatus('PC aus');
+              say('<span class="info">Der PC ist bereits ausgeschaltet.</span>');
+              return;
+            }
+            const monitorWasOn = state.monitorOn;
+            state.pcOn = false;
+            state.signalOk = false;
+            updateScene();
+            setStatus('PC ausgeschaltet');
+            if(monitorWasOn){
+              say('<span class="info">Du fährst den PC kontrolliert herunter.</span>');
             } else {
-              say('<span class="info">Lüfter dreht frei.</span> Kontrolliere noch die Temperaturentwicklung.');
-              openModal({
-                title: this.label,
-                html:
-                  '<p>Der Lüfter dreht wieder frei. Prüfe jetzt die Temperaturen unter Last – optional Wärmeleitpaste nur erwähnen, falls sie alt aussieht.</p>'
-              });
+              say('<span class="info">Du fährst den PC kontrolliert herunter.</span>');
+            }
+          }
+        },
+        {
+          id: 's2-start',
+          label: '▶️ PC starten',
+          hotkey: '5',
+          delta: 2,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            if(state.pcOn){
+              setStatus('PC läuft');
+              say('<span class="info">Der PC läuft bereits.</span>');
+              return;
+            }
+            if(state.powerUnplugged){
+              setStatus('Strom getrennt');
+              say('<span class="warn">Strom ist noch getrennt.</span> Stelle zuerst die Stromzufuhr wieder her.');
+              return;
+            }
+            state.pcOn = true;
+            state.signalOk = true;
+            updateScene();
+            setStatus('PC läuft');
+            if(state.monitorOn){
+              say('<span class="info">Der PC startet. Teste jetzt erneut unter Last.</span>');
+            } else {
+              say('<span class="info">Der PC startet.</span> Schalte den Monitor ein, um Temperaturen zu beobachten.');
             }
           }
         },
         {
           id: 's2-clean',
           label: '🧹 Lüfter reinigen / Blockade entfernen',
-          hotkey: '5',
+          hotkey: '6',
           delta: 3,
           effect(){
             if(state.solved) return;
             state.time += this.delta; state.tries++;
             pushLog(this.label, `+${this.delta} Min`);
+            if(state.pcOn){
+              setStatus('PC läuft');
+              say('<span class="warn">Der PC läuft noch.</span> Schalte ihn aus und trenne den Strom, bevor du am Lüfter arbeitest.');
+              openModal({
+                title: this.label,
+                html:
+                  '<p>Für eine sichere Reinigung muss der PC ausgeschaltet und vom Strom getrennt sein.</p>'
+              });
+              return;
+            }
+            if(!state.powerUnplugged){
+              setStatus('Strom verbunden');
+              say('<span class="warn">Strom ist noch verbunden.</span> Trenne zuerst die Stromzufuhr.');
+              openModal({
+                title: this.label,
+                html:
+                  '<p>Ziehe den Netzstecker oder schalte die Steckdosenleiste aus, bevor du den Lüfter reinigst.</p>'
+              });
+              return;
+            }
             if(!state.fanBlocked && state.dustCleared){
               setStatus('Bereits sauber');
               say('<span class="info">Lüfter war schon frei.</span> Prüfe zur Sicherheit die Temperaturen unter Last.');
@@ -2135,56 +2204,65 @@ function finish(success, detail){
           }
         },
         {
-          id: 's2-temp',
-          label: '🌡️ Temperaturen überwachen',
-          hotkey: '6',
+          id: 's2-power-unplug',
+          label: '??? Strom entfernen',
+          hotkey: '7',
           delta: 1,
           effect(){
             if(state.solved) return;
             state.time += this.delta; state.tries++;
             pushLog(this.label, `+${this.delta} Min`);
-            if(state.fanBlocked){
-              state.tempsStable = false;
-              updateScene();
-              setStatus('Temperaturen kritisch');
-              say('<span class="bad">Sensoren schlagen aus.</span> Ohne Luftstrom steigt die Temperatur sofort – erst reinigen.');
-              openModal({
-                title: this.label,
-                html:
-                  '<p>Schon im Monitoring siehst du Temperaturen deutlich über dem Soll – der Lüfter steht still.</p>' +
-                  '<p>Reinige und befreie den Lüfter, bevor du weitere Tests machst.</p>'
-              });
+            if(state.pcOn){
+              setStatus('PC läuft');
+              say('<span class="warn">Der PC läuft noch.</span> Fahre ihn zuerst herunter, bevor du das Stromkabel abziehst.');
               return;
             }
-            if(!state.dustCleared){
-              state.tempsStable = false;
-              updateScene();
-              setStatus('Temperaturen hoch');
-              say('<span class="warn">Noch zu warm.</span> Staub blockiert weiterhin den Luftstrom.');
-              openModal({
-                title: this.label,
-                html:
-                  '<p>Die Temperaturen fallen noch nicht ausreichend – es sitzt weiterhin Staub im Kühler.</p>' +
-                  '<p>Reinige den Lüfter vollständig und prüfe dann erneut.</p>'
-              });
+            if(state.powerUnplugged){
+              setStatus('Strom getrennt');
+              say('<span class="info">Strom ist bereits getrennt.</span>');
               return;
             }
-            const ranStress = !!(state.performed && state.performed['s2-stress']);
-            if(!ranStress){
-              setStatus('Monitoring aktiv');
-              say('<span class="warn">Lasttest fehlt.</span> Fuehre einen Belastungstest aus, um die Wirkung der Reinigung zu bestaetigen.');
-              openModal({
-                title: this.label,
-                html:
-                  '<p>Im Idle wirken die Temperaturen normal. Um sicher zu sein, lass einen <b>Belastungstest</b> laufen und beobachte die Sensoren nochmals.</p>'
-              });
-              return;
-            }
-            state.tempsStable = true;
+            state.powerUnplugged = true;
+            state.monitorOn = false;
             updateScene();
-            setStatus('Temperaturen stabil');
-            say('<span class="good">Sensoren im grünen Bereich.</span> Unter Last bleibt das System stabil. Wärmeleitpaste nur bei Bedarf erneuern.');
-            finish(true, 'Kühlung gereinigt – der PC bleibt auch unter Last stabil.');
+            setStatus('Strom getrennt');
+            say('<span class="info">Strom entfernt.</span> Jetzt kannst du sicher das Gehäuse öffnen und den Lüfter reinigen.');
+            openModal({
+              title: this.label,
+              html:
+                '<p>Du ziehst den Netzstecker bzw. schaltest die Steckdosenleiste aus.</p>' +
+                '<p>PC und Monitor sind spannungsfrei – Sicherheitsvorgaben erfüllt.</p>'
+            });
+          }
+        },
+        {
+          id: 's2-power-restore',
+          label: '??? Stromzufuhr wiederherstellen',
+          hotkey: '8',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            if(!state.powerUnplugged){
+              setStatus('Strom verbunden');
+              say('<span class="info">Strom ist bereits wieder verbunden.</span> Starte bei Bedarf den PC und überwache die Temperaturen.');
+              openModal({
+                title: this.label,
+                html:
+                  '<p>Alle Stecker sitzen bereits. Du kannst den PC einschalten und die Kühlung testen.</p>'
+              });
+              return;
+            }
+            state.powerUnplugged = false;
+            setStatus('Strom verbunden');
+            say('<span class="info">Stromzufuhr wiederhergestellt.</span> Stecke den Netzstecker ein und starte den PC bei Bedarf.');
+            openModal({
+              title: this.label,
+              html:
+                '<p>Du steckst Netzstecker und Monitor wieder ein bzw. schaltest die Leiste ein.</p>' +
+                '<p>Der PC ist wieder mit Strom versorgt und bereit für den nächsten Testlauf.</p>'
+            });
           }
         }
       ];
