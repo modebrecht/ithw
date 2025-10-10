@@ -4,7 +4,7 @@ export default {
   storyTitle: 'Szenario 7: "No bootable device"',
   storyText:
     'Der PC startet, Monitor und Signal sind aktiv – doch statt Windows erscheint sofort <b>NO BOOTABLE DEVICE</b>. ' +
-    'Finde den Fehler und bringe das System wieder bis zum Login.',
+    'Finde den Fehler und mache das System wieder funktionsfähig.',
   hints: {
     h1: '<b>Externes Medium?</b> Bootet der PC vielleicht vom falschen Gerät (USB-Stick)?',
     h2:
