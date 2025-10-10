@@ -773,9 +773,9 @@ const scenario4 = {
     h1: 'Welche Schritte brauchst du, bevor du Hardware austauschst?',
     h2:
       '<ul class="hint">' +
-      '<li><b>Kabel pruefen:</b> Steckt der USB-Stecker fest oder hilft ein anderer Port?</li>' +
-      '<li><b>Andere Geraete?</b> Maus funktioniert, Anzeige steht stabil.</li>' +
-      '<li><b>Software-Reset:</b> Ein sauberer Neustart initialisiert die Eingabegeraete neu.</li>' +
+      '<li><b>Kabel prüfen:</b> Steckt der USB-Stecker fest oder hilft ein anderer Port?</li>' +
+      '<li><b>Andere Geräte?</b> Maus funktioniert, Anzeige steht stabil.</li>' +
+      '<li><b>Software-Reset:</b> Ein sauberer Neustart initialisiert die Eingabegeräte neu.</li>' +
       '</ul>'
   },
   start: {
@@ -1715,7 +1715,7 @@ function completionIntroHtml(){
       }
     }
     case 'K1':
-      return '<p><b>Aufgabe abgeschlossen.</b> Neustart durchgefuehrt, Tastatur reagiert wieder.</p><p>Das <b>Login</b> ist sichtbar.</p>';
+      return '<p><b>Aufgabe abgeschlossen.</b> Neustart durchgeführt, Tastatur reagiert wieder.</p><p>Das <b>Login</b> ist sichtbar.</p>';
     default:
       return '<p><b>Aufgabe geschafft.</b> PC und Monitor sind bereit.</p><p>Das <b>Login</b> ist sichtbar.</p>';
   }
@@ -1956,7 +1956,7 @@ function finish(success, detail){
           effect(){
             if(state.solved) return;
             state.time += this.delta; state.tries++;
-            setStatus('Signal pruefen');
+            setStatus('Signal Prüfen');
             pushLog(this.label, '+1 Min');
             
             const cur = levels && levels[state.levelIdx];
@@ -1986,7 +1986,7 @@ function finish(success, detail){
           effect(){
             if(state.solved) return;
             state.time += this.delta; state.tries++;
-            setStatus('Signal pruefen');
+            setStatus('Signal Prüfen');
             pushLog(this.label, '+1 Min');
             
             if(!state.monitorOn){
@@ -2836,13 +2836,13 @@ function finish(success, detail){
             if(state.solved) return;
             state.time += this.delta; state.tries++;
             pushLog(this.label, `+${this.delta} Min`);
-            setStatus('Keine Aenderung');
+            setStatus('Keine Änderung');
             say('<span class="warn">Stecker sitzt bereits fest.</span> Die Tastatur meldet sich weiterhin nicht.');
             openModal({
               title: this.label,
               html:
                 '<p>Du ziehst den USB-Stecker kurz und steckst ihn sauber wieder ein.</p>' +
-                '<p>Windows meldet jedoch kein neues Geraet. Ueberlege einen <b>Neustart</b>, bevor du Hardware austauschst.</p>'
+                '<p>Windows meldet jedoch kein neues Gerät. Überlege einen <b>Neustart</b>, bevor du Hardware austauschst.</p>'
             });
           }
         },
@@ -2855,13 +2855,13 @@ function finish(success, detail){
             if(state.solved) return;
             state.time += this.delta; state.tries++;
             pushLog(this.label, `+${this.delta} Min`);
-            setStatus('Keine Aenderung');
+            setStatus('Keine Änderung');
             say('<span class="warn">Port-Wechsel hilft nicht.</span> Die Tastatur bleibt ohne Funktion.');
             openModal({
               title: this.label,
               html:
                 '<p>Du steckst die Tastatur in einen anderen USB-Port.</p>' +
-                '<p>Auch dort wird sie nicht erkannt. Es liegt vermutlich kein Hardwaredefekt vor, sondern ein <b>temporaeres Treiberproblem</b>.</p>'
+                '<p>Auch dort wird sie nicht erkannt. Es liegt vermutlich kein Hardwaredefekt vor, sondern ein <b>temporäres Treiberproblem</b>.</p>'
             });
           }
         },
@@ -2875,12 +2875,12 @@ function finish(success, detail){
             state.time += this.delta; state.tries++;
             pushLog(this.label, `+${this.delta} Min`);
             setStatus('Workaround aktiv');
-            say('<span class="info">Bildschirmtastatur geoeffnet.</span> Notloesung moeglich, aber das eigentliche Problem bleibt bestehen.');
+            say('<span class="info">Bildschirmtastatur geöffnet.</span> Notlösung möglich, aber das eigentliche Problem bleibt bestehen.');
             openModal({
               title: this.label,
               html:
                 '<p>Du aktivierst die Bildschirmtastatur und kannst dich behelfsweise anmelden.</p>' +
-                '<p>Fuer den regulaeren Betrieb solltest du das Eingabegeraet dennoch <b>korrekt initialisieren</b>.</p>'
+                '<p>Für den regulären Betrieb solltest du das Eingabegerät dennoch <b>korrekt initialisieren</b>.</p>'
             });
           }
         },
@@ -2893,7 +2893,7 @@ function finish(success, detail){
             if(state.solved) return;
             state.time += this.delta; state.tries++;
             pushLog(this.label, `+${this.delta} Min`);
-            setStatus('Neustart durchgefuehrt');
+            setStatus('Neustart durchgeführt');
             state.pcOn = true;
             state.monitorOn = true;
             state.signalOk = true;
@@ -2913,11 +2913,11 @@ function finish(success, detail){
             state.time += this.delta; state.tries++;
             pushLog(this.label, `+${this.delta} Min`);
             setStatus('Overkill');
-            say('<span class="warn">Treiber neu installieren dauert.</span> Fuer einen Schul-PC ist das unnoetig - versuche zuerst einfache Schritte.');
+            say('<span class="warn">Treiber neu installieren dauert.</span> Für einen Schul-PC ist das unnötig - versuche zuerst einfache Schritte.');
             openModal({
               title: this.label,
               html:
-                '<p>Du wuerdest im Geraetemanager den Treiber entfernen und neu installieren.</p>' +
+                '<p>Du würdest im Gerätemanager den Treiber entfernen und neu installieren.</p>' +
                 '<p>Das kostet Zeit und erfordert Admin-Rechte. Ein <b>Neustart</b> ist der schnellere Weg.</p>'
             });
           }
@@ -2932,12 +2932,12 @@ function finish(success, detail){
             state.time += this.delta; state.tries++;
             pushLog(this.label, `+${this.delta} Min`);
             setStatus('Noch nicht gelöst');
-            say('<span class="warn">Hardwaretausch voreilig.</span> Pruefe zuerst einfache Softwareloesungen.');
+            say('<span class="warn">Hardwaretausch voreilig.</span> Prüfe zuerst einfache Softwarelösungen.');
             openModal({
               title: this.label,
               html:
-                '<p>Du ueberlegst, eine Ersatztastatur zu holen.</p>' +
-                '<p>Bevor du Hardware tauschst, probiere einen <b>Neustart</b>: Haeufig reicht das aus.</p>'
+                '<p>Du überlegst, eine Ersatztastatur zu holen.</p>' +
+                '<p>Bevor du Hardware tauschst, probiere einen <b>Neustart</b>: Häufig reicht das aus.</p>'
             });
           }
         }

@@ -9,9 +9,9 @@ export default {
     h1: 'Welche Schritte brauchst du, bevor du Hardware austauschst?',
     h2:
       '<ul class="hint">' +
-      '<li><b>Kabel pruefen:</b> Steckt der USB-Stecker fest oder hilft ein anderer Port?</li>' +
-      '<li><b>Andere Geraete?</b> Maus funktioniert, Anzeige steht stabil.</li>' +
-      '<li><b>Software-Reset:</b> Ein sauberer Neustart initialisiert die Eingabegeraete neu.</li>' +
+      '<li><b>Kabel prüfen:</b> Steckt der USB-Stecker fest oder hilft ein anderer Port?</li>' +
+      '<li><b>Andere Geräte?</b> Maus funktioniert, Anzeige steht stabil.</li>' +
+      '<li><b>Software-Reset:</b> Ein sauberer Neustart initialisiert die Eingabegeräte neu.</li>' +
       '</ul>'
   },
   start: {
@@ -21,4 +21,3 @@ export default {
     keyboardResponsive: false
   }
 };
-
