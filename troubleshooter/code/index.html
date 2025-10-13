@@ -36,7 +36,7 @@
     <div class="action-message" id="actionMessageTop" aria-hidden="true">
       <header class="mhead">
         <h3 id="messageTitleTop">Aktion</h3>
-        <button class="modal-close" type="button" id="messageCloseTop" aria-label="Schliessen" hidden>×</button>
+        <button class="modal-close modal-round-btn" type="button" id="messageCloseTop" aria-label="Schliessen" hidden>×</button>
       </header>
       <div class="mbody" id="messageBodyTop"></div>
       <div class="mfoot">
@@ -2686,14 +2686,26 @@ function finish(success, detail){
               <tbody>${rows}</tbody>
             </table>
           </div>
-          <div class="score-modal-footer" style="display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:12px;">
-            <button type="button" id="scoreBombToggle" class="btn" title="Löschen-Buttons einblenden" aria-label="Löschen-Buttons einblenden"><span class="emoji" aria-hidden="true">💣</span></button>
-          </div>`;
+          `;
         openTopModal({ title: '', subtitle, html });
         if(topModalCloseEl){ topModalCloseEl.hidden = false; }
 
         // Add event delegation for score reset via bomb button
         setTimeout(()=>{
+          const headerEl = topModalCloseEl ? topModalCloseEl.parentElement : null;
+          if(headerEl){
+            const existingToggle = document.getElementById('scoreBombToggle');
+            if(existingToggle){ existingToggle.remove(); }
+            const toggleBtn = document.createElement('button');
+            toggleBtn.type = 'button';
+            toggleBtn.id = 'scoreBombToggle';
+            toggleBtn.className = 'modal-round-btn score-bomb-toggle';
+            toggleBtn.title = 'Löschen-Buttons einblenden';
+            toggleBtn.setAttribute('aria-label','Löschen-Buttons einblenden');
+            toggleBtn.setAttribute('aria-pressed','false');
+            toggleBtn.innerHTML = '<span class="emoji" aria-hidden="true">💣</span>';
+            headerEl.insertBefore(toggleBtn, topModalCloseEl);
+          }
           const scoreTable = document.querySelector('.score-table');
           const bombToggle = document.getElementById('scoreBombToggle');
           if(scoreTable){
@@ -2730,9 +2742,10 @@ function finish(success, detail){
           }
           if(bombToggle){
             let bombsVisible = false;
+            const bombBtns = document.querySelectorAll('.score-bomb-btn[data-scenario-idx]');
+            bombBtns.forEach(btn => { btn.style.display = 'none'; });
             bombToggle.addEventListener('click', function(){
               bombsVisible = !bombsVisible;
-              const bombBtns = document.querySelectorAll('.score-bomb-btn[data-scenario-idx]');
               bombBtns.forEach(btn => {
                 btn.style.display = bombsVisible ? '' : 'none';
               });
