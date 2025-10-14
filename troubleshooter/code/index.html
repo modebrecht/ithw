@@ -2760,31 +2760,20 @@ function finish(success, detail){
     document.getElementById('resetBtn').addEventListener('click', reset);    
     if(goalBtn){ goalBtn.addEventListener('click', () => openModal({title:'Ziele & LP21-Bezug', html: goalHtml})); }
 
-    // Hotkeys 1-6 + R
+    // Hotkeys: hub digits, scenario actions + R
     window.addEventListener('keydown', (e)=>{
       const k = e.key.toLowerCase();
-      if(k === 'n'){
-        if(modalOpen){
-          if(state.solved){
-            if(startNextUnlockedScenario({ afterCurrent: true })){
-              e.preventDefault();
-            }
-          }
-          return;
-        }
-        if(!scenarioActive){
-          if(startNextUnlockedScenario()){
+      const hubActive = !scenarioActive && document.body && document.body.classList.contains('hub-active');
+      if(hubActive && !modalOpen){
+        const numericKey = parseInt(e.key, 10);
+        if(Number.isInteger(numericKey) && numericKey >= 1 && numericKey <= Math.min(levels.length, 9)){
+          const targetIdx = numericKey - 1;
+          if(levels[targetIdx] && isLevelUnlocked(targetIdx)){
+            startScenario(targetIdx);
             e.preventDefault();
+            return;
           }
-          return;
         }
-        if(scenarioActive && state.solved){
-          if(startNextUnlockedScenario({ afterCurrent: true })){
-            e.preventDefault();
-          }
-          return;
-        }
-        return;
       }
       // Neustart (R) ist immer erlaubt, selbst wenn ein Modal offen ist
       if(k==='r'){ if(scenarioActive) reset(); return; }
