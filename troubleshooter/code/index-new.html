@@ -3,23 +3,24 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>PC-Troubleshooter v3.8</title>
-  <style>﻿:root{
-  --bg:#0f172a;           
-  --card:#0b1223;         
-  --ink:#e5e7eb;          
+  <title>PC-Troubleshooter v3.9</title>
+  <style>
+:root{
+  --bg:#0f172a;
+  --card:#0b1223;
+  --ink:#e5e7eb;
   --ink-dim:#b6c1d4;
-  --accent:#60a5fa;       
-  --accent-2:#22d3ee;     
-  --good:#22c55e;         
-  --warn:#f59e0b;         
-  --bad:#ef4444;          
-  --muted:#94a3b8;        
+  --accent:#60a5fa;
+  --accent-2:#22d3ee;
+  --good:#22c55e;
+  --warn:#f59e0b;
+  --bad:#ef4444;
+  --muted:#94a3b8;
   --shadow:0 18px 40px -18px rgba(0,0,0,.55);
   --radius:16px;
-  --gold:#fbbf24;         
-  --silver:#cbd5e1;       
-  --bronze:#d97706;       
+  --gold:#fbbf24;
+  --silver:#cbd5e1;
+  --bronze:#d97706;
 }
 html,body{min-height:100%}
 body{
@@ -113,7 +114,7 @@ header .controls #hubBtn:hover{
   grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
   gap:20px;
   margin-top:20px;
-  counter-reset: hub; 
+  counter-reset: hub;
 }
 .hub-item{
   border:1px solid rgba(255,255,255,.10);
@@ -131,7 +132,7 @@ header .controls #hubBtn:hover{
 }
 .hub-item-header{
   display:grid;
-  grid-template-columns:auto 1fr auto; 
+  grid-template-columns:auto 1fr auto;
   gap:12px;
   align-items:center;
 }
@@ -482,14 +483,13 @@ body.top-modal-open #scenarioView > section{display:none}
 [aria-live]{outline:none}
 @media (prefers-reduced-motion: reduce){
   *{transition:none !important;animation:none !important}
-}
-</style>
+}</style>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzFkNGVkOCIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMwZjE3MmEiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgcng9IjE0IiBmaWxsPSJ1cmwoI2JnKSIvPgogIDxyZWN0IHg9IjE0IiB5PSIxNiIgd2lkdGg9IjM2IiBoZWlnaHQ9IjI0IiByeD0iNCIgZmlsbD0iI2RiZWFmZSIvPgogIDxyZWN0IHg9IjE0IiB5PSI0MiIgd2lkdGg9IjM2IiBoZWlnaHQ9IjQiIGZpbGw9IiMxZTI5M2IiLz4KICA8cmVjdCB4PSIyNiIgeT0iNDgiIHdpZHRoPSIxMiIgaGVpZ2h0PSI0IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPgo8L3N2Zz4=" />
 </head>
 <body>
   <div class="wrap hub-view" id="hubView">
     <header class="hub-header">
-      <div class="title">PC-Troubleshooter <span class="badge" id="hubVerTag">v3.8</span></div>
+      <div class="title">PC-Troubleshooter <span class="badge" id="hubVerTag">v3.9</span></div>
       <div class="hub-info" id="hubInfo"></div>
     </header>
     <section class="hub-card" aria-labelledby="hubTitle">
@@ -500,7 +500,7 @@ body.top-modal-open #scenarioView > section{display:none}
   </div>
   <div class="wrap hidden" id="scenarioView">
     <header>
-      <div class="title">PC-Troubleshooter <span class="badge" id="verTag">v3.8</span></div>
+      <div class="title">PC-Troubleshooter <span class="badge" id="verTag">v3.9</span></div>
       <div class="controls">
         <div class="badge" id="levelTag" aria-live="polite">Fall</div>
         <button class="btn" type="button" id="scoreBtn" title="Score anzeigen" aria-label="Score anzeigen"><span class="emoji" aria-hidden="true">🏆</span><span class="text">Score</span></button>
@@ -711,7 +711,6 @@ body.top-modal-open #scenarioView > section{display:none}
     },
     start: { pcOn: false, monitorOn: false, signalOk: true }
   };
-;
   const scenario2 = {
     id: 'E1',
     name: 'Kein Signal',
@@ -723,7 +722,6 @@ body.top-modal-open #scenarioView > section{display:none}
     },
     start: { pcOn: true, monitorOn: false, signalOk: false }
   };
-;
   const scenario3 = {
     id: 'M3',
     name: 'PC-Upgrade',
@@ -735,7 +733,6 @@ body.top-modal-open #scenarioView > section{display:none}
     },
     start: { pcOn: true, monitorOn: true, signalOk: false }
   };
-;
   const scenario4 = {
     id: 'K1',
     name: 'Tastatur reagiert nicht',
@@ -812,7 +809,6 @@ body.top-modal-open #scenarioView > section{display:none}
       switchLedOn: false
     }
   };
-;
   const scenario7 = {
     id: 'S4',
     name: 'No bootable device (Bootfehler)',
@@ -841,7 +837,6 @@ body.top-modal-open #scenarioView > section{display:none}
       bootOrderPersisted: false
     }
   };
-;
       const levels = [scenario1, scenario2, scenario3, scenario4, scenario5, scenario6, scenario7];
       const topModalCloseEl = document.getElementById('messageCloseTop');
       const STORAGE_KEY = 'pctrouble_best_v2';
@@ -1206,7 +1201,7 @@ body.top-modal-open #scenarioView > section{display:none}
         showBest();
         returnToHub();
         window.alert('Fortschritt wurde zurückgesetzt.');
-      }    
+      }
       const goalHtml = `<ul class="hint"><li><b>Du übst:</b> strukturiert Fehler finden (erst extern, dann intern), Entscheidungen begründen und deine Schritte protokollieren.</li><li><b>LP21:</b> MI 3.3 «Fehler systematisch suchen &amp; beheben», MI 2.2 «Geräte zweckmässig einsetzen» — genau das trainierst du hier im Szenario.</li><li><b>Tipps fürs Szenario:</b> formuliere deine Vermutung laut, notiere jeden Schritt (Zeit/Schritte siehst du links) und vergleiche danach mit deiner Bestleistung.</li></ul>`;
       let modalOpen = false, lastFocusEl = null;
       const modalEl = document.getElementById('actionMessage');
@@ -1387,8 +1382,8 @@ body.top-modal-open #scenarioView > section{display:none}
           return;
         }
         if(checkSolvedPerScenario && checkSolvedPerScenario()) return;
-        const solvedCombo = false; 
-        if(false){ 
+        const solvedCombo = false;
+        if(false){
           finish(true, 'Stromversorgung und Monitor aktiviert.');
           openModal({
             title: 'Aufgabe abgeschlossen',
@@ -1668,7 +1663,7 @@ body.top-modal-open #scenarioView > section{display:none}
             const isSourceNow = state.currentActionId === 'source';
             const didMonitor = !!(state.performed && state.performed['monitor']);
             if(!(isSourceNow && didMonitor && state.monitorOn)){
-              return; 
+              return;
             }
           }
         }catch(e){}
@@ -2461,9 +2456,9 @@ body.top-modal-open #scenarioView > section{display:none}
               state.bootMenuOpen = false;
               state.activeSet = 'A';
               state.bootOrderChanged = false;
-              state.pcOn = false; 
-              state.monitorOn = true; 
-              state.s4BlankScreen = true; 
+              state.pcOn = false;
+              state.monitorOn = true;
+              state.s4BlankScreen = true;
               updateScene();
               renderActions();
               setStatus('BIOS verlassen');
@@ -3050,7 +3045,7 @@ body.top-modal-open #scenarioView > section{display:none}
             const originalEffect = powerAct.effect;
             powerAct.effect = function(){
               const prevWasMonitor = !!(state.log && state.log.length && monitorAct && state.log[state.log.length-1].step === monitorAct.label);
-              const willSolve = false; 
+              const willSolve = false;
               originalEffect.call(this);
               if(willSolve){
                 finish(true, 'Stromversorgung und Monitor aktiviert.');
@@ -3069,7 +3064,7 @@ body.top-modal-open #scenarioView > section{display:none}
           if(monitorAct && typeof monitorAct.effect === 'function'){
             const originalEffect = monitorAct.effect;
             monitorAct.effect = function(){
-              const willSolve = false; 
+              const willSolve = false;
               originalEffect.call(this);
               if(willSolve){
                 finish(true, 'Stromversorgung und Monitor aktiviert.');
@@ -3253,7 +3248,7 @@ body.top-modal-open #scenarioView > section{display:none}
         };
         scoreButtons.forEach(btn => btn.addEventListener('click', handleScoreClick));
       }
-      document.getElementById('resetBtn').addEventListener('click', reset);    
+      document.getElementById('resetBtn').addEventListener('click', reset);
       if(goalBtn){ goalBtn.addEventListener('click', () => openModal({title:'Ziele & LP21-Bezug', html: goalHtml})); }
       window.addEventListener('keydown', (e)=>{
         const k = e.key.toLowerCase();
