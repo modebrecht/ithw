@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>PC-Troubleshooter v3.4</title>
+  <title>PC-Troubleshooter v3.5</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 </head>
 <body>
   <div class="wrap hub-view" id="hubView">
     <header class="hub-header">
-      <div class="title">PC-Troubleshooter <span class="badge" id="hubVerTag">v3.4</span></div>
+      <div class="title">PC-Troubleshooter <span class="badge" id="hubVerTag">v3.5</span></div>
       <div class="hub-info" id="hubInfo"></div>
     </header>
     <section class="hub-card" aria-labelledby="hubTitle">
@@ -24,7 +24,7 @@
 
   <div class="wrap hidden" id="scenarioView">
     <header>
-      <div class="title">PC-Troubleshooter <span class="badge" id="verTag">v3.4</span></div>
+      <div class="title">PC-Troubleshooter <span class="badge" id="verTag">v3.5</span></div>
       <div class="controls">
         <div class="badge" id="levelTag" aria-live="polite">Fall</div>
         <button class="btn" type="button" id="scoreBtn" title="Score anzeigen" aria-label="Score anzeigen"><span class="emoji" aria-hidden="true">🏆</span><span class="text">Score</span></button>
@@ -449,8 +449,10 @@
     const scoreButtons = [scoreBtn, hubScoreBtn].filter(Boolean);
     let scenarioActive = false;
 
-    const versionBadges = [document.getElementById('hubVerTag'), document.getElementById('verTag')];
-    versionBadges.forEach(badge => {
+    // Reset-progress badge disabled in favor of individual score bomb buttons.
+    // const versionBadges = [document.getElementById('hubVerTag'), document.getElementById('verTag')];
+    // versionBadges.forEach(badge => {
+    /*
       if(!badge) return;
       badge.classList.add('badge-action');
       badge.setAttribute('role','button');
@@ -471,6 +473,7 @@
         }
       });
     });
+    */
 
     function createMedalBadge(rank){
       const span = document.createElement('span');
