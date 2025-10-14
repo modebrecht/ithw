@@ -3,9 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>PC-Troubleshooter v3.3</title>
-  <style>
-:root{
+  <title>PC-Troubleshooter v3.5</title>
+  <style>:root{
   --bg:#0f172a;           
   --card:#0b1223;         
   --ink:#e5e7eb;          
@@ -210,6 +209,41 @@ header .controls #hubBtn:hover{
 .hub-medal.silver{background:rgba(203,213,225,.16);border-color:rgba(203,213,225,.50);color:var(--silver)}
 .hub-medal.bronze{background:rgba(217,119,6,.16);border-color:rgba(217,119,6,.50);color:var(--bronze)}
 .hub-medal.none{opacity:.6}
+
+
+.score-bomb-toggle[aria-pressed="true"] {
+  background: linear-gradient(135deg, rgba(59,130,246,.55), rgba(14,116,144,.6));
+  border-color: rgba(96,165,250,.6);
+}
+
+
+.score-table td.score-col-reset, .score-table th.score-col-reset {
+  width: 1px;
+  min-width: 0;
+  padding-left: 0;
+  padding-right: 0;
+  text-align: center;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.score-bomb-btn {
+  background: none;
+  border: none;
+  padding: 0 8px;
+  cursor: pointer;
+  font-size: 1.2em;
+  line-height: 1;
+  box-shadow: none;
+  outline: none;
+  color: inherit;
+  transition: transform 0.1s;
+}
+.score-bomb-btn .emoji {
+  font-size: 1.2em;
+  vertical-align: middle;
+  pointer-events: none;
+}
 
 
 
@@ -425,8 +459,7 @@ details[open].hintbox summary::before, details[open].didaktik summary::before{
 .action-message.top-modal{position:fixed;top:48px;left:50%;transform:translateX(-50%);max-width:720px;width:calc(100% - 48px);z-index:999;background:linear-gradient(180deg,#101c38,#0b1223);border-color:#1f2937;box-shadow:0 18px 40px rgba(15,23,42,.6);padding:18px 24px 24px}
 .action-message.top-modal.open{display:grid;grid-template-columns:1fr;grid-template-rows:auto 1fr auto;row-gap:10px}
 .action-message.top-modal .mhead{grid-column:1;grid-row:1;margin-bottom:4px;display:flex;align-items:center;gap:12px}
-.modal-close{
-  margin-left:auto;
+.modal-round-btn{
   width:32px;
   height:32px;
   border-radius:50%;
@@ -440,9 +473,12 @@ details[open].hintbox summary::before, details[open].didaktik summary::before{
   justify-content:center;
   cursor:pointer;
 }
-.modal-close:hover{
+.modal-round-btn:hover{
   background:linear-gradient(135deg, rgba(59,130,246,.4), rgba(14,116,144,.4));
 }
+.modal-close{margin-left:auto;}
+.score-bomb-toggle{margin-left:auto;}
+.score-bomb-toggle + .modal-close{margin-left:0;}
 .action-message.top-modal .modal-title-main{font-size:18px;font-weight:700;color:var(--ink)}
 .action-message.top-modal .modal-title-sub{font-size:.95rem;color:var(--ink-dim);font-weight:500;margin-left:auto;text-align:right;padding-left:24px}
 .action-message.top-modal .modal-title-sub.only{margin-left:0;padding-left:0;text-align:left}
@@ -462,7 +498,7 @@ body.top-modal-open::after{
 body.top-modal-open .wrap{pointer-events:none}
 body.top-modal-open #hubView > section,
 body.top-modal-open #scenarioView > section{display:none}
-.score-table-wrap{margin-top:8px;overflow-x:auto;border-radius:12px;border:1px solid rgba(148,163,184,.16);background:rgba(15,23,42,.55)}
+.score-table-wrap{margin-top:8px;overflow-x:clip;border-radius:12px;border:1px solid rgba(148,163,184,.16);background:rgba(15,23,42,.55)}
 .score-table{width:100%;border-collapse:collapse;font-size:.92rem}
 .score-table thead th{font-size:.75rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-dim);padding:12px 14px;background:rgba(15,23,42,.75);text-align:left}
 .score-table thead th.score-col-time,
@@ -515,14 +551,13 @@ body.top-modal-open #scenarioView > section{display:none}
 [aria-live]{outline:none}
 @media (prefers-reduced-motion: reduce){
   *{transition:none !important;animation:none !important}
-}
-</style>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzFkNGVkOCIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMwZjE3MmEiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgcng9IjE0IiBmaWxsPSJ1cmwoI2JnKSIvPgogIDxyZWN0IHg9IjE0IiB5PSIxNiIgd2lkdGg9IjM2IiBoZWlnaHQ9IjI0IiByeD0iNCIgZmlsbD0iI2RiZWFmZSIvPgogIDxyZWN0IHg9IjE0IiB5PSI0MiIgd2lkdGg9IjM2IiBoZWlnaHQ9IjQiIGZpbGw9IiMxZTI5M2IiLz4KICA8cmVjdCB4PSIyNiIgeT0iNDgiIHdpZHRoPSIxMiIgaGVpZ2h0PSI0IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPgo8L3N2Zz4K" />
+}</style>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzFkNGVkOCIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMwZjE3MmEiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgcng9IjE0IiBmaWxsPSJ1cmwoI2JnKSIvPgogIDxyZWN0IHg9IjE0IiB5PSIxNiIgd2lkdGg9IjM2IiBoZWlnaHQ9IjI0IiByeD0iNCIgZmlsbD0iI2RiZWFmZSIvPgogIDxyZWN0IHg9IjE0IiB5PSI0MiIgd2lkdGg9IjM2IiBoZWlnaHQ9IjQiIGZpbGw9IiMxZTI5M2IiLz4KICA8cmVjdCB4PSIyNiIgeT0iNDgiIHdpZHRoPSIxMiIgaGVpZ2h0PSI0IiByeD0iMiIgZmlsbD0iIzM4YmRmOCIvPgo8L3N2Zz4=" />
 </head>
 <body>
   <div class="wrap hub-view" id="hubView">
     <header class="hub-header">
-      <div class="title">PC-Troubleshooter <span class="badge" id="hubVerTag">v3.3</span></div>
+      <div class="title">PC-Troubleshooter <span class="badge" id="hubVerTag">v3.5</span></div>
       <div class="hub-info" id="hubInfo"></div>
     </header>
     <section class="hub-card" aria-labelledby="hubTitle">
@@ -535,7 +570,7 @@ body.top-modal-open #scenarioView > section{display:none}
 
   <div class="wrap hidden" id="scenarioView">
     <header>
-      <div class="title">PC-Troubleshooter <span class="badge" id="verTag">v3.3</span></div>
+      <div class="title">PC-Troubleshooter <span class="badge" id="verTag">v3.5</span></div>
       <div class="controls">
         <div class="badge" id="levelTag" aria-live="polite">Fall</div>
         <button class="btn" type="button" id="scoreBtn" title="Score anzeigen" aria-label="Score anzeigen"><span class="emoji" aria-hidden="true">🏆</span><span class="text">Score</span></button>
@@ -547,7 +582,7 @@ body.top-modal-open #scenarioView > section{display:none}
     <div class="action-message" id="actionMessageTop" aria-hidden="true">
       <header class="mhead">
         <h3 id="messageTitleTop">Aktion</h3>
-        <button class="modal-close" type="button" id="messageCloseTop" aria-label="Schliessen" hidden>×</button>
+        <button class="modal-close modal-round-btn" type="button" id="messageCloseTop" aria-label="Schliessen" hidden>×</button>
       </header>
       <div class="mbody" id="messageBodyTop"></div>
       <div class="mfoot">
@@ -621,12 +656,12 @@ body.top-modal-open #scenarioView > section{display:none}
                 <text x="375" y="92" font-size="22" text-anchor="middle" style="fill:rgba(229,231,235,.9);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;letter-spacing:1.4px">NO BOOTABLE DEVICE</text>
               </g>
               <g class="bootmenu" aria-hidden="true">
-                <rect x="265" y="32" width="220" height="120" rx="10" class="bootmenu-bg"/>
-                <text x="375" y="58" font-size="16" text-anchor="middle" style="fill:rgba(229,231,235,.92);font-weight:600;letter-spacing:1px">BOOT MENU</text>
-                <text x="290" y="82" font-size="13" style="fill:rgba(229,231,235,.88);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;">▶ SSD (Windows)</text>
-                <text x="290" y="104" font-size="13" style="fill:rgba(229,231,235,.65);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;">  USB Device</text>
-                <text x="290" y="126" font-size="13" style="fill:rgba(229,231,235,.65);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;">  Network Boot</text>
-                <text x="375" y="148" font-size="11" text-anchor="middle" style="fill:rgba(229,231,235,.5);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;">ENTER = Start · ESC = Zurück</text>
+                <rect x="250" y="32" width="250" height="120" rx="10" class="bootmenu-bg"/>
+                <text x="375" y="58" font-size="16" text-anchor="middle" style="fill:rgba(229,231,235,.92);font-weight:600;letter-spacing:1px">BOOT ORDER</text>
+                <text class="bootorder-line bootorder-usb" data-label="USB Device" x="290" y="82" font-size="13" style="fill:rgba(229,231,235,.65);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;">▶ USB Device</text>
+                <text class="bootorder-line bootorder-ssd" data-label="SSD (Windows)" x="290" y="104" font-size="13" style="fill:rgba(229,231,235,.88);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;">  SSD (Windows)</text>
+                <text class="bootorder-line bootorder-network" data-label="Network Boot" x="290" y="126" font-size="13" style="fill:rgba(229,231,235,.65);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;">  Network Boot</text>
+                <text x="375" y="148" font-size="11" text-anchor="middle" style="fill:rgba(229,231,235,.5);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;">AMIBIOS(C)2015 AMERICAN MEGATRENDS, Inc.</text>
               </g>
               <g class="login login-default" aria-hidden="true">
                 
@@ -725,7 +760,7 @@ body.top-modal-open #scenarioView > section{display:none}
     </section>
   </div>
 
-  <script type="module">
+  <script>
 const scenario1 = {
   id: 'L0',
   name: 'Der PC startet nicht',
@@ -773,9 +808,9 @@ const scenario4 = {
     h1: 'Welche Schritte brauchst du, bevor du Hardware austauschst?',
     h2:
       '<ul class="hint">' +
-      '<li><b>Kabel pruefen:</b> Steckt der USB-Stecker fest oder hilft ein anderer Port?</li>' +
-      '<li><b>Andere Geraete?</b> Maus funktioniert, Anzeige steht stabil.</li>' +
-      '<li><b>Software-Reset:</b> Ein sauberer Neustart initialisiert die Eingabegeraete neu.</li>' +
+      '<li><b>Kabel prüfen:</b> Steckt der USB-Stecker fest oder hilft ein anderer Port?</li>' +
+      '<li><b>Andere Geräte?</b> Maus funktioniert, Anzeige steht stabil.</li>' +
+      '<li><b>Software-Reset:</b> Ein sauberer Neustart initialisiert die Eingabegeräte neu.</li>' +
       '</ul>'
   },
   start: {
@@ -791,14 +826,14 @@ const scenario5 = {
   name: 'Überhitzung / Lüfter blockiert',
   storyTitle: 'Szenario 5: Überhitzung unter Last',
   storyText:
-    'Der PC startet normal und bleibt im Idle stabil. Doch sobald du ihn forderst, ' +
-    'tritt nach kurzer Zeit <b>Throttling oder ein Abschalten</b> auf. ' +
+    'Der PC startet normal und bleibt im Leerlauf stabil. Doch sobald du ihn forderst, ' +
+    'wird er nach kurzer Zeit sehr langsam, manchmal schaltet er auch ohne Vorwarnung ab. ' +
     'Finde die Ursache und stelle den stabilen Betrieb wieder her.',
   hints: {
     h1: 'Thermik-Frage: <b>Passiert der Fehler sofort oder nach einiger Zeit unter Last?</b>',
     h2:
       '<ul class="hint">' +
-      '<li><b>Frage klären:</b> „Passiert der Fehler sofort oder nach einiger Zeit unter Last?“ → deutet stark auf Thermik.</li>' +
+      '<li><b>Frage klären:</b> "Passiert der Fehler sofort oder nach einiger Zeit unter Last?" -> deutet stark auf Thermik.</li>' +
       '<li><b>Symptome beobachten:</b> Lasttest laufen lassen und auf Temperatur-/Lüfterverhalten achten.</li>' +
       '<li><b>Lüfter blockiert?</b> Seitenwand öffnen, Kabel oder Staub entfernen, Lüfter frei drehen lassen.</li>' +
       '<li><b>Nach der Reinigung:</b> Temperaturen mit Monitoring prüfen; Wärmeleitpaste nur bei Bedarf als Zusatz erwähnen.</li>' +
@@ -817,11 +852,11 @@ const scenario5 = {
 
 const scenario6 = {
   id: 'N1',
-  name: 'Netzwerk/Login-Spezial',
+  name: 'Domänen-Login',
   storyTitle: 'Szenario 6: Domänen-Login scheitert',
   storyText:
-    'Der PC ist gestartet, der Login-Bildschirm erscheint – doch dein Domänenkonto meldet: ' +
-    '"<b>Profil nicht verfügbar / Server nicht erreichbar</b>". ' +
+    'Der PC ist gestartet, du versuchst dich einzuloggen und dann erscheint die Meldung: ' +
+    '"<b>Domäne nicht verfügbar</b>". ' +
     'Finde die Ursache und ermögliche den Login.',
   hints: {
     h1: 'Domänen-Login schlägt fehl – was sagt das über die <b>Netzwerkverbindung</b>?',
@@ -847,7 +882,7 @@ const scenario7 = {
   storyTitle: 'Szenario 7: "No bootable device"',
   storyText:
     'Der PC startet, Monitor und Signal sind aktiv – doch statt Windows erscheint sofort <b>NO BOOTABLE DEVICE</b>. ' +
-    'Finde den Fehler und bringe das System wieder bis zum Login.',
+    'Finde den Fehler und mache das System wieder funktionsfähig.',
   hints: {
     h1: '<b>Externes Medium?</b> Bootet der PC vielleicht vom falschen Gerät (USB-Stick)?',
     h2:
@@ -1097,28 +1132,10 @@ const levels = [scenario1, scenario2, scenario3, scenario4, scenario5, scenario6
     const scoreButtons = [scoreBtn, hubScoreBtn].filter(Boolean);
     let scenarioActive = false;
 
-    const versionBadges = [document.getElementById('hubVerTag'), document.getElementById('verTag')];
-    versionBadges.forEach(badge => {
-      if(!badge) return;
-      badge.classList.add('badge-action');
-      badge.setAttribute('role','button');
-      badge.setAttribute('tabindex','0');
-      badge.setAttribute('title','Fortschritt zurücksetzen');
-      const label = badge.textContent ? badge.textContent.trim() : '';
-      if(label){
-        badge.setAttribute('aria-label', `Version ${label} – Fortschritt zurücksetzen`);
-      } else {
-        badge.setAttribute('aria-label', 'Fortschritt zurücksetzen');
-      }
-      const handleClick = () => resetAllProgress();
-      badge.addEventListener('click', handleClick);
-      badge.addEventListener('keydown', event => {
-        if(event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar'){
-          event.preventDefault();
-          badge.click();
-        }
-      });
-    });
+    
+    
+    
+    
 
     function createMedalBadge(rank){
       const span = document.createElement('span');
@@ -1533,6 +1550,24 @@ const levels = [scenario1, scenario2, scenario3, scenario4, scenario5, scenario6
       return false;
     }
 
+    function updateBootOrderDisplay(scene, level){
+      if(!scene || !level || level.id !== 'S4') return;
+      try{
+        const usbLine = scene.querySelector('.bootorder-usb');
+        const ssdLine = scene.querySelector('.bootorder-ssd');
+        if(!usbLine || !ssdLine) return;
+        const usbLabel = usbLine.dataset && usbLine.dataset.label ? usbLine.dataset.label : 'USB Device';
+        const ssdLabel = ssdLine.dataset && ssdLine.dataset.label ? ssdLine.dataset.label : 'SSD (Windows)';
+        const highlightSsd = !!(state.bootOrderChanged || state.bootOrderPersisted);
+        const activeColor = 'rgba(229,231,235,.88)';
+        const inactiveColor = 'rgba(229,231,235,.65)';
+        usbLine.textContent = `${highlightSsd ? '  ' : '▶ '}${usbLabel}`;
+        ssdLine.textContent = `${highlightSsd ? '▶ ' : '  '}${ssdLabel}`;
+        usbLine.style.fill = highlightSsd ? inactiveColor : activeColor;
+        ssdLine.style.fill = highlightSsd ? activeColor : inactiveColor;
+      }catch(e){}
+    }
+
     function updateScene(){
       const scene = document.querySelector('.scene');
       if(!scene) return;
@@ -1543,7 +1578,10 @@ const levels = [scenario1, scenario2, scenario3, scenario4, scenario5, scenario6
         if(!state.monitorOn){
           return;
         }
-        if(!state.bootError){
+        if(state.s4BlankScreen){
+          
+          scene.classList.add('nosig');
+        } else if(!state.bootError){
           scene.classList.add('login');
         } else if(state.activeSet === 'B'){
           scene.classList.add('bootmenu');
@@ -1551,21 +1589,29 @@ const levels = [scenario1, scenario2, scenario3, scenario4, scenario5, scenario6
           scene.classList.add('booterr');
         }
       } else {
+        const isScenarioS2 = !!(L && L.id === 'S2');
         if(state.monitorOn && (!state.pcOn || !state.signalOk)) scene.classList.add('nosig');
         if(state.pcOn && state.monitorOn && state.signalOk){
           scene.classList.add('login');
           if(L && L.id === 'N1' && !state.lanConnected){
             scene.classList.add('domain-error');
           }
-          if(L && L.id === 'S2'){
+          if(isScenarioS2){
             scene.classList.add('desktop');
-            scene.classList.add('fan-visible');
-            if(state.fanBlocked){ scene.classList.add('fan-blocked'); }
-            if(!state.tempsStable){ scene.classList.add('overheat'); }
-            if(!state.fanBlocked && state.dustCleared){ scene.classList.add('fan-clean'); }
+          }
+          if(L && L.id === 'N1' && state.solved){
+            scene.classList.add('desktop');
+            scene.classList.remove('login');
           }
         }
+        if(isScenarioS2){
+          scene.classList.add('fan-visible');
+          if(state.fanBlocked){ scene.classList.add('fan-blocked'); }
+          if(!state.tempsStable){ scene.classList.add('overheat'); }
+          if(!state.fanBlocked && state.dustCleared){ scene.classList.add('fan-clean'); }
+        }
       }
+      
     }
 
     function renderActions(){
@@ -1626,6 +1672,25 @@ function evaluateScenarioResult(){
         const color = medal === 'Gold' ? 'var(--gold)' : medal === 'Silber' ? 'var(--silver)' : 'var(--bronze)';
         return { medal, long, color, score, detailText, time: t, tries: n };
       }
+      if(L && L.id === 'S2'){
+        let medal = 'Bronze';
+        let long = 'Bronze - gelöst, aber umständlich';
+        let score = 40;
+        let detailText = 'Pfad: Lüfterproblem behoben.';
+        if(n <= 8){
+          medal = 'Gold';
+          long = 'Gold - strukturiert & effizient gelöst';
+          score = 100;
+          detailText = 'Pfad: Thermik analysiert, Lüfter gereinigt, Belastungstest bestätigt.';
+        } else if(n <= 12){
+          medal = 'Silber';
+          long = 'Silber - solide, aber mit Zusatzschritten';
+          score = 70;
+          detailText = 'Pfad: Lösung gefunden, jedoch mit einigen Umwegen.';
+        }
+        const color = medal === 'Gold' ? 'var(--gold)' : medal === 'Silber' ? 'var(--silver)' : 'var(--bronze)';
+        return { medal, long, color, score, detailText, time: t, tries: n };
+      }
       if(L && L.id === 'S4'){
         const seq = Array.isArray(state.actionSequence) ? state.actionSequence.slice() : [];
         const solvedBy = state.s4SolvedBy;
@@ -1634,30 +1699,26 @@ function evaluateScenarioResult(){
         let long = 'Bronze – Fehler behoben, aber mit Umwegen.';
         let score = 40;
         let detailText = '';
-        if(solvedBy === 'temp-ssd' && matches(['boot-menu','boot-ssd'])){
+        
+        if(solvedBy === 'bootorder-save' && seq.length === 5 && matches(['boot-menu','boot-order','save-changes','exit-nosave','s4-restart'])){
           medal = 'Gold';
-          long = 'Gold – Boot-Menü genutzt und temporär von der SSD gestartet.';
+          long = 'Gold – Bootreihenfolge korrigiert und gespeichert.';
           score = 100;
-          detailText = 'Pfad: Boot-Menü → SSD (temporär).';
-        } else if(solvedBy === 'usb-restart' && matches(['remove-usb','s4-restart'])){
+          detailText = 'Pfad: Boot-Menü → Bootreihenfolge ändern → Speichern → BIOS verlassen → Neustart.';
+        } else if(solvedBy === 'bootorder-save' && seq.length === 6 && matches(['boot-menu','boot-order','save-changes','exit-nosave','s4-monitor','s4-restart'])){
           medal = 'Silber';
-          long = 'Silber – USB entfernt und sauber neu gestartet.';
+          long = 'Silber – Bootreihenfolge korrigiert und gespeichert (mit Zusatzschritt).';
           score = 70;
-          detailText = 'Pfad: USB entfernen → Neustart.';
-        } else if(solvedBy === 'bootorder-save' && matches(['boot-menu','boot-order','save-changes'])){
-          medal = 'Silber';
-          long = 'Silber – Bootreihenfolge korrigiert und gespeichert.';
-          score = 70;
-          detailText = 'Pfad: Boot-Menü → Bootreihenfolge ändern → Speichern.';
-        } else if(solvedBy === 'temp-ssd'){
-          long = 'Bronze – Boot-Menü genutzt, aber mit Umwegen.';
-          detailText = 'Pfad: Boot-Menü / SSD mit Zusatzschritten.';
-        } else if(solvedBy === 'usb-restart'){
-          long = 'Bronze – USB-Lösung, aber mit Umwegen.';
-          detailText = 'Pfad: USB + Neustart (Umwege).';
+          detailText = 'Pfad: Boot-Menü → Bootreihenfolge ändern → Speichern → BIOS verlassen → Monitor → Neustart.';
         } else if(solvedBy === 'bootorder-save'){
           long = 'Bronze – BIOS-Anpassung mit Umwegen.';
           detailText = 'Pfad: Bootreihenfolge angepasst (Umwege).';
+        } else if(solvedBy === 'usb-restart'){
+          long = 'Bronze – USB-Lösung, aber mit Umwegen.';
+          detailText = 'Pfad: USB + Neustart (Umwege).<br><span class="hint">Das Problem wurde nur vorübergehend gelöst – beim nächsten Start könnte es erneut auftreten. Deshalb gibt es nur Bronze.</span>';
+        } else if(solvedBy === 'temp-ssd'){
+          long = 'Bronze – Boot-Menü genutzt, aber mit Umwegen.';
+          detailText = 'Pfad: Boot-Menü / SSD mit Zusatzschritten.';
         } else {
           detailText = 'Pfad: Problem behoben.';
         }
@@ -1699,7 +1760,7 @@ function completionIntroHtml(){
       return '<p><b>Aufgabe abgeschlossen.</b> Lüfter gereinigt, Blockaden entfernt – die Kühlung arbeitet wieder zuverlässig.</p><p>Unter Last bleiben die Temperaturen stabil (Wärmeleitpaste nur bei Bedarf ansprechen).</p>';
     case 'N1':
       if(state.n1SolvedBy === 'network'){
-        return '<p><b>Aufgabe abgeschlossen.</b> Netzwerkkabel steckt wieder – die Domäne ist erreichbar.</p><p>Das <b>Login</b> funktioniert.</p>';
+        return '<p><b>Aufgabe abgeschlossen.</b> Netzwerkkabel steckt wieder – die Domäne ist erreichbar.</p><p>Das <b>Login</b> hat funktioniert.</p>';
       }
       return '<p><b>Aufgabe abgeschlossen.</b> Anmeldung möglich.</p><p>Das <b>Login</b> ist sichtbar.</p>';
     case 'S4': {
@@ -1707,7 +1768,7 @@ function completionIntroHtml(){
         case 'temp-ssd':
           return '<p><b>Aufgabe abgeschlossen.</b> Du hast über das Boot-Menü temporär von der SSD gestartet.</p><p>Das <b>Login</b> ist sichtbar.</p>';
         case 'usb-restart':
-          return '<p><b>Aufgabe abgeschlossen.</b> Störende USB-Geräte entfernt und sauber neu gestartet.</p><p>Das <b>Login</b> ist sichtbar.</p>';
+          return '<p><b>Aufgabe abgeschlossen.</b> Störende USB-Geräte entfernt und PC neu gestartet. Das Problem wurde nur vorübergehend gelöst, daher wird nur Bronze vergeben.</p><p>Das <b>Login</b> ist sichtbar.</p>';
         case 'bootorder-save':
           return '<p><b>Aufgabe abgeschlossen.</b> Bootreihenfolge korrigiert und gespeichert – die SSD startet wieder automatisch.</p><p>Das <b>Login</b> ist sichtbar.</p>';
         default:
@@ -1715,7 +1776,7 @@ function completionIntroHtml(){
       }
     }
     case 'K1':
-      return '<p><b>Aufgabe abgeschlossen.</b> Neustart durchgefuehrt, Tastatur reagiert wieder.</p><p>Das <b>Login</b> ist sichtbar.</p>';
+      return '<p><b>Aufgabe abgeschlossen.</b> Neustart durchgeführt, Tastatur reagiert wieder.</p><p>Das <b>Login</b> ist sichtbar.</p>';
     default:
       return '<p><b>Aufgabe geschafft.</b> PC und Monitor sind bereit.</p><p>Das <b>Login</b> ist sichtbar.</p>';
   }
@@ -1733,6 +1794,7 @@ function finish(success, detail){
         }
       }catch(e){}
       state.solved = true;
+      updateScene();
       showCelebration();
       setStatus('Gelöst');
       say(`<span class="good">Problem behoben.</span> ${detail} Der PC startet, du kannst weiterarbeiten.`);
@@ -1956,7 +2018,7 @@ function finish(success, detail){
           effect(){
             if(state.solved) return;
             state.time += this.delta; state.tries++;
-            setStatus('Signal pruefen');
+            setStatus('Signal Prüfen');
             pushLog(this.label, '+1 Min');
             
             const cur = levels && levels[state.levelIdx];
@@ -1986,7 +2048,7 @@ function finish(success, detail){
           effect(){
             if(state.solved) return;
             state.time += this.delta; state.tries++;
-            setStatus('Signal pruefen');
+            setStatus('Signal Prüfen');
             pushLog(this.label, '+1 Min');
             
             if(!state.monitorOn){
@@ -2294,19 +2356,37 @@ function finish(success, detail){
             const resolvedByPersist = state.bootOrderPersisted;
             state.bootMenuOpen = false;
             state.activeSet = 'A';
-            if(resolvedByPersist){ state.bootOrderChanged = false; }
-            updateScene();
-            if(resolvedByUsb || resolvedByPersist){
+            if(resolvedByPersist){
+              state.bootOrderChanged = false;
+              state.s4BlankScreen = false;
+              state.pcOn = true;
+              state.monitorOn = true;
+              state.signalOk = true;
               state.bootError = false;
               updateScene();
-              if(resolvedByUsb){
-                state.s4SolvedBy = 'usb-restart';
-                finish(true, 'USB-Sticks entfernt – der PC startet wieder von der SSD.');
-              } else {
-                state.s4SolvedBy = 'bootorder-save';
-                finish(true, 'Gespeicherte Bootreihenfolge – SSD steht nun an erster Stelle.');
-              }
+              const scene = document.querySelector('.scene');
+              if(scene) scene.classList.add('power-on');
+              state.s4SolvedBy = 'bootorder-save';
+              finish(true, 'Gespeicherte Bootreihenfolge – SSD steht nun an erster Stelle.');
+            } else if(resolvedByUsb){
+              state.s4BlankScreen = false;
+              state.pcOn = true;
+              state.monitorOn = true;
+              state.signalOk = true;
+              state.bootError = false;
+              updateScene();
+              const scene = document.querySelector('.scene');
+              if(scene) scene.classList.add('power-on');
+              state.s4SolvedBy = 'usb-restart';
+              finish(true, 'USB-Sticks entfernt – der PC startet wieder von der SSD.');
             } else {
+              
+              state.s4BlankScreen = false;
+              state.pcOn = true;
+              state.monitorOn = true;
+              state.signalOk = false;
+              state.bootError = true;
+              updateScene();
               setStatus('Bootfehler bleibt');
               say('<span class="warn">Noch kein Erfolg.</span> Der PC zeigt weiterhin <b>NO BOOTABLE DEVICE</b>.');
               openModal({
@@ -2392,6 +2472,8 @@ function finish(success, detail){
             state.activeSet = 'B';
             state.bootMenuOpen = true;
             state.s4UsedBootMenu = true;
+            
+            state.s4BlankScreen = false;
             setStatus('Boot-Menü geöffnet');
             updateScene();
             renderActions();
@@ -2437,6 +2519,12 @@ function finish(success, detail){
               title: this.label,
               html: '<p>Du schiebst die <b>SSD</b> an die erste Stelle. Drücke jetzt <b>Änderungen speichern</b>, sonst bleibt alles beim Alten.</p>'
             });
+            
+            const scene = document.querySelector('.scene');
+            const L = levels && levels[state.levelIdx];
+            if(scene && L && L.id === 'S4'){
+              updateBootOrderDisplay(scene, L);
+            }
           }
         },
         {
@@ -2485,13 +2573,14 @@ function finish(success, detail){
             if(state.bootOrderChanged){
               state.bootOrderPersisted = true;
               state.bootOrderChanged = false;
-              state.bootError = false;
-              state.activeSet = 'A';
-              state.bootMenuOpen = false;
               updateScene();
-              renderActions();
-              state.s4SolvedBy = 'bootorder-save';
-              finish(true, 'Bootreihenfolge gespeichert – der Neustart findet die SSD automatisch.');
+              setStatus('Bootreihenfolge gespeichert');
+              say('<span class="good">Bootreihenfolge gespeichert.</span> Die SSD steht nun an erster Stelle. Du bist weiterhin im BIOS und kannst weitere Einstellungen vornehmen oder das BIOS manuell verlassen.');
+              openModal({
+                title: this.label,
+                html: '<p>Du hast die Bootreihenfolge gespeichert. Die SSD ist jetzt an erster Stelle. <b>Du bleibst im BIOS-Menü</b> und kannst weitere Änderungen vornehmen oder das BIOS schließen.</p>'
+              });
+              
             } else {
               setStatus('Keine Änderungen');
               say('<span class="warn">Nichts zu speichern.</span> Passe zuerst die Reihenfolge an.');
@@ -2505,7 +2594,7 @@ function finish(success, detail){
         {
           id: 'exit-nosave',
           set: 'B',
-          label: '🚪 BIOS schließen (ohne Speichern)',
+          label: '🚪 Bios schliessen & PC herunterfahren',
           hotkey: '6',
           delta: 1,
           effect(){
@@ -2514,13 +2603,16 @@ function finish(success, detail){
             state.bootMenuOpen = false;
             state.activeSet = 'A';
             state.bootOrderChanged = false;
+            state.pcOn = false; 
+            state.monitorOn = true; 
+            state.s4BlankScreen = true; 
             updateScene();
             renderActions();
             setStatus('BIOS verlassen');
-            say('<span class="warn">Keine Änderungen gespeichert.</span> Der Bootfehler bleibt bestehen.');
+            say('<span class="good">PC ist heruntergefahren.</span> Monitor ist an, zeigt aber nichts. Starte den PC neu, um zu prüfen, ob das Problem gelöst ist.');
             openModal({
               title: this.label,
-              html: '<p>Du verlässt das BIOS ohne zu speichern. Der PC startet neu und zeigt wieder <b>NO BOOTABLE DEVICE</b>.</p>'
+              html: '<p>Du verlässt das BIOS und fährst den PC herunter. <b>Monitor ist an, zeigt aber nichts.</b> Starte den PC neu, um zu prüfen, ob das Problem gelöst ist.</p>'
             });
           }
         }
@@ -2650,25 +2742,58 @@ function finish(success, detail){
             if(state.solved) return;
             state.time += this.delta; state.tries++;
             pushLog(this.label, `+${this.delta} Min`);
-            state.monitorOn = true;
+            const wasOn = !!state.monitorOn;
+            state.monitorOn = !state.monitorOn;
             updateScene();
-            setStatus('Nicht relevant');
-            say('<span class="warn">Bild ist vorhanden.</span> Das Problem liegt nicht an der Anzeige, sondern an der <b>Kühlung</b>.');
-            openModal({
-              title: this.label,
-              html:
-                '<p>Du schaltest den Monitor testweise aus und wieder ein – das Bild war die ganze Zeit stabil.</p>' +
-                '<p>Der Fehler (Shutdown/Throttling) entsteht unter Last, daher <b>Lüfter und Temperaturen</b> prüfen.</p>'
-            });
+            if(wasOn){
+              setStatus('Monitor ausgeschaltet');
+              say('<span class="info">Monitor ausgeschaltet.</span> Anzeige dunkel – Ursache bleibt die <b>Kühlung</b>.');
+              openModal({
+                title: this.label,
+                html:
+                  '<p>Du schaltest den Monitor aus. Das Bild ist weg, aber das eigentliche Problem – Leistungsverlust unter Last – bleibt bestehen.</p>' +
+                  '<p>Konzentriere dich auf <b>Lüfter</b> und <b>Temperaturen</b>.</p>'
+              });
+            } else {
+              setStatus('Monitor eingeschaltet');
+              say('<span class="info">Monitor eingeschaltet.</span> Anzeige stabil – Ursache bleibt die <b>Kühlung</b>.');
+              openModal({
+                title: this.label,
+                html:
+                  '<p>Der Monitor war aus. Nach dem Einschalten ist das Bild wieder da.</p>' +
+                  '<p>Der Fehler tritt weiter nur unter Last auf – prüfe also <b>Lüfter</b> und <b>Temperaturen</b>.</p>'
+              });
+            }
           }
         },
         {
           id: 's2-stress',
-          label: '🔥 Belastungstest starten',
+          label: '🌡️ Belastungstest starten',
           hotkey: '3',
           delta: 2,
           effect(){
             if(state.solved) return;
+            if(!state.pcOn || state.powerUnplugged){
+              setStatus('PC aus');
+              if(state.powerUnplugged){
+                say('<span class="warn">Der PC ist vom Strom getrennt.</span> Stecke die Stromzufuhr wieder ein und starte den PC, bevor du einen Belastungstest beginnst.');
+                openModal({
+                  title: this.label,
+                  html:
+                    '<p>Ohne Stromversorgung kann kein Belastungstest laufen.</p>' +
+                    '<p>Stelle die Stromzufuhr her, starte den PC und versuche es erneut.</p>'
+                });
+              } else {
+                say('<span class="warn">Der PC ist ausgeschaltet.</span> Starte ihn zuerst, bevor du einen Belastungstest durchführst.');
+                openModal({
+                  title: this.label,
+                  html:
+                    '<p>Der Rechner ist aus – der Benchmark kann nicht starten.</p>' +
+                    '<p>Schalte den PC ein und beginne dann mit dem Belastungstest.</p>'
+                });
+              }
+              return;
+            }
             state.time += this.delta; state.tries++;
             pushLog(this.label, `+${this.delta} Min`);
             setStatus('Lasttest läuft');
@@ -2699,53 +2824,98 @@ function finish(success, detail){
               });
               return;
             }
+            state.tempsStable = true;
+            updateScene();
             setStatus('Lasttest stabil');
-            say('<span class="info">Belastungstest stabil.</span> Überwache jetzt die Temperaturen – Sensoren checken.');
-            openModal({
-              title: this.label,
-              html:
-                '<p>Nach der Reinigung läuft der Lasttest ohne Drosseln. Beobachte nun die Sensoren, um die Temperaturen zu bestätigen.</p>' +
-                '<p>Optional: Wärmeleitpaste nur ansprechen, falls sie sichtbar ausgetrocknet ist.</p>'
-            });
+            say('<span class="good">Belastungstest stabil.</span> Unter Last bleibt das System kühl – Aufgabe erfüllt.');
+            finish(true, 'Kühlung gereinigt – der PC bleibt auch unter Last stabil.');
           }
         },
         {
-          id: 's2-inspect',
-          label: '🔎 Gehäuse öffnen & Lüfter prüfen',
+          id: 's2-shutdown',
+          label: '🛑 PC herunterfahren',
           hotkey: '4',
           delta: 2,
           effect(){
             if(state.solved) return;
             state.time += this.delta; state.tries++;
             pushLog(this.label, `+${this.delta} Min`);
-            setStatus('Lüfter prüfen');
-            if(state.fanBlocked){
-              say('<span class="warn">Lüfter blockiert.</span> Ein Kabel und Staub verhindern den Luftstrom.');
-              openModal({
-                title: this.label,
-                html:
-                  '<p>Mit abgenommener Seitenwand siehst du: Der hintere Lüfter steckt voller Staub, zusätzlich klemmt ein loses Kabel in den Rotorblättern.</p>' +
-                  '<p>Entferne die Blockade und reinige den Lüfter.</p>'
-              });
+            if(!state.pcOn){
+              setStatus('PC aus');
+              say('<span class="info">Der PC ist bereits ausgeschaltet.</span>');
+              return;
+            }
+            const monitorWasOn = state.monitorOn;
+            state.pcOn = false;
+            state.signalOk = false;
+            updateScene();
+            setStatus('PC ausgeschaltet');
+            if(monitorWasOn){
+              say('<span class="info">Du fährst den PC kontrolliert herunter.</span>');
             } else {
-              say('<span class="info">Lüfter dreht frei.</span> Kontrolliere noch die Temperaturentwicklung.');
-              openModal({
-                title: this.label,
-                html:
-                  '<p>Der Lüfter dreht wieder frei. Prüfe jetzt die Temperaturen unter Last – optional Wärmeleitpaste nur erwähnen, falls sie alt aussieht.</p>'
-              });
+              say('<span class="info">Du fährst den PC kontrolliert herunter.</span>');
+            }
+          }
+        },
+        {
+          id: 's2-start',
+          label: '▶️ PC starten',
+          hotkey: '5',
+          delta: 2,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            if(state.pcOn){
+              setStatus('PC läuft');
+              say('<span class="info">Der PC läuft bereits.</span>');
+              return;
+            }
+            if(state.powerUnplugged){
+              setStatus('Strom getrennt');
+              say('<span class="warn">Strom ist noch getrennt.</span> Stelle zuerst die Stromzufuhr wieder her.');
+              return;
+            }
+            state.pcOn = true;
+            state.signalOk = true;
+            updateScene();
+            setStatus('PC läuft');
+            if(state.monitorOn){
+              say('<span class="info">Der PC startet. Teste jetzt erneut unter Last.</span>');
+            } else {
+              say('<span class="info">Der PC startet.</span> Schalte den Monitor ein, um Temperaturen zu beobachten.');
             }
           }
         },
         {
           id: 's2-clean',
-          label: '🧹 Lüfter reinigen / Blockade entfernen',
-          hotkey: '5',
+          label: '🧹 PC-Gehäuse öffnen',
+          hotkey: '6',
           delta: 3,
           effect(){
             if(state.solved) return;
             state.time += this.delta; state.tries++;
             pushLog(this.label, `+${this.delta} Min`);
+            if(state.pcOn){
+              setStatus('PC läuft');
+              say('<span class="warn">Der PC läuft noch.</span> Schalte ihn aus und trenne den Strom, bevor du am Lüfter arbeitest.');
+              openModal({
+                title: this.label,
+                html:
+                  '<p>Um das Gehäuse sicher zu öffnen muss der PC ausgeschaltet und vom Strom getrennt sein.</p>'
+              });
+              return;
+            }
+            if(!state.powerUnplugged){
+              setStatus('Strom verbunden');
+              say('<span class="warn">Strom ist noch da.</span> Trenne zuerst die Stromzufuhr.');
+              openModal({
+                title: this.label,
+                html:
+                  '<p>Ziehe den Netzstecker oder schalte die Steckdosenleiste aus, bevor du das Gehäuse öffnest.</p>'
+              });
+              return;
+            }
             if(!state.fanBlocked && state.dustCleared){
               setStatus('Bereits sauber');
               say('<span class="info">Lüfter war schon frei.</span> Prüfe zur Sicherheit die Temperaturen unter Last.');
@@ -2771,56 +2941,65 @@ function finish(success, detail){
           }
         },
         {
-          id: 's2-temp',
-          label: '🌡️ Temperaturen überwachen',
-          hotkey: '6',
+          id: 's2-power-unplug',
+          label: '🔌❌ Strom entfernen',
+          hotkey: '7',
           delta: 1,
           effect(){
             if(state.solved) return;
             state.time += this.delta; state.tries++;
             pushLog(this.label, `+${this.delta} Min`);
-            if(state.fanBlocked){
-              state.tempsStable = false;
-              updateScene();
-              setStatus('Temperaturen kritisch');
-              say('<span class="bad">Sensoren schlagen aus.</span> Ohne Luftstrom steigt die Temperatur sofort – erst reinigen.');
-              openModal({
-                title: this.label,
-                html:
-                  '<p>Schon im Monitoring siehst du Temperaturen deutlich über dem Soll – der Lüfter steht still.</p>' +
-                  '<p>Reinige und befreie den Lüfter, bevor du weitere Tests machst.</p>'
-              });
+            if(state.pcOn){
+              setStatus('PC läuft');
+              say('<span class="warn">Der PC läuft noch.</span> Fahre ihn zuerst herunter, bevor du das Stromkabel abziehst.');
               return;
             }
-            if(!state.dustCleared){
-              state.tempsStable = false;
-              updateScene();
-              setStatus('Temperaturen hoch');
-              say('<span class="warn">Noch zu warm.</span> Staub blockiert weiterhin den Luftstrom.');
-              openModal({
-                title: this.label,
-                html:
-                  '<p>Die Temperaturen fallen noch nicht ausreichend – es sitzt weiterhin Staub im Kühler.</p>' +
-                  '<p>Reinige den Lüfter vollständig und prüfe dann erneut.</p>'
-              });
+            if(state.powerUnplugged){
+              setStatus('Strom getrennt');
+              say('<span class="info">Strom ist bereits getrennt.</span>');
               return;
             }
-            const ranStress = !!(state.performed && state.performed['s2-stress']);
-            if(!ranStress){
-              setStatus('Monitoring aktiv');
-              say('<span class="warn">Lasttest fehlt.</span> Fuehre einen Belastungstest aus, um die Wirkung der Reinigung zu bestaetigen.');
-              openModal({
-                title: this.label,
-                html:
-                  '<p>Im Idle wirken die Temperaturen normal. Um sicher zu sein, lass einen <b>Belastungstest</b> laufen und beobachte die Sensoren nochmals.</p>'
-              });
-              return;
-            }
-            state.tempsStable = true;
+            state.powerUnplugged = true;
+            state.monitorOn = false;
             updateScene();
-            setStatus('Temperaturen stabil');
-            say('<span class="good">Sensoren im grünen Bereich.</span> Unter Last bleibt das System stabil. Wärmeleitpaste nur bei Bedarf erneuern.');
-            finish(true, 'Kühlung gereinigt – der PC bleibt auch unter Last stabil.');
+            setStatus('Strom getrennt');
+            say('<span class="info">Strom entfernt.</span> Jetzt kannst du sicher das Gehäuse öffnen.');
+            openModal({
+              title: this.label,
+              html:
+                '<p>Du ziehst den Netzstecker bzw. schaltest die Steckdosenleiste aus.</p>' +
+                '<p>PC und Monitor sind spannungsfrei – Sicherheitsvorgaben erfüllt.</p>'
+            });
+          }
+        },
+        {
+          id: 's2-power-restore',
+          label: '🔌✅ Stromzufuhr wiederherstellen',
+          hotkey: '8',
+          delta: 1,
+          effect(){
+            if(state.solved) return;
+            state.time += this.delta; state.tries++;
+            pushLog(this.label, `+${this.delta} Min`);
+            if(!state.powerUnplugged){
+              setStatus('Strom verbunden');
+              say('<span class="info">Strom ist bereits wieder verbunden.</span> Starte bei Bedarf den PC und überwache die Temperaturen.');
+              openModal({
+                title: this.label,
+                html:
+                  '<p>Alle Stecker sitzen bereits. Du kannst den PC einschalten und die Kühlung testen.</p>'
+              });
+              return;
+            }
+            state.powerUnplugged = false;
+            setStatus('Strom verbunden');
+            say('<span class="info">Stromzufuhr wiederhergestellt.</span> Stecke den Netzstecker ein und starte den PC bei Bedarf.');
+            openModal({
+              title: this.label,
+              html:
+                '<p>Du steckst Netzstecker und Monitor wieder ein bzw. schaltest die Leiste ein.</p>' +
+                '<p>Der PC ist wieder mit Strom versorgt und bereit für den nächsten Testlauf.</p>'
+            });
           }
         }
       ];
@@ -2829,45 +3008,45 @@ function finish(success, detail){
       return [
         {
           id: 'k1-cable',
-          label: 'USB-Stecker kontrollieren',
+          label: '🔌 USB-Stecker kontrollieren',
           hotkey: '1',
           delta: 1,
           effect(){
             if(state.solved) return;
             state.time += this.delta; state.tries++;
             pushLog(this.label, `+${this.delta} Min`);
-            setStatus('Keine Aenderung');
+            setStatus('Keine Änderung');
             say('<span class="warn">Stecker sitzt bereits fest.</span> Die Tastatur meldet sich weiterhin nicht.');
             openModal({
               title: this.label,
               html:
                 '<p>Du ziehst den USB-Stecker kurz und steckst ihn sauber wieder ein.</p>' +
-                '<p>Windows meldet jedoch kein neues Geraet. Ueberlege einen <b>Neustart</b>, bevor du Hardware austauschst.</p>'
+                '<p>Windows meldet jedoch kein neues Gerät.</p>'
             });
           }
         },
         {
           id: 'k1-port',
-          label: 'Anderen USB-Port testen',
+          label: '🔀 Anderen USB-Port testen',
           hotkey: '2',
           delta: 1,
           effect(){
             if(state.solved) return;
             state.time += this.delta; state.tries++;
             pushLog(this.label, `+${this.delta} Min`);
-            setStatus('Keine Aenderung');
+            setStatus('Keine Änderung');
             say('<span class="warn">Port-Wechsel hilft nicht.</span> Die Tastatur bleibt ohne Funktion.');
             openModal({
               title: this.label,
               html:
                 '<p>Du steckst die Tastatur in einen anderen USB-Port.</p>' +
-                '<p>Auch dort wird sie nicht erkannt. Es liegt vermutlich kein Hardwaredefekt vor, sondern ein <b>temporaeres Treiberproblem</b>.</p>'
+                '<p>Auch dort wird sie nicht erkannt. Es liegt vermutlich kein Hardwaredefekt vor, sondern ein <b>temporäres Treiberproblem</b>.</p>'
             });
           }
         },
         {
           id: 'k1-onscreen',
-          label: 'Bildschirmtastatur nutzen',
+          label: '⌨️ Bildschirmtastatur nutzen',
           hotkey: '3',
           delta: 1,
           effect(){
@@ -2875,25 +3054,25 @@ function finish(success, detail){
             state.time += this.delta; state.tries++;
             pushLog(this.label, `+${this.delta} Min`);
             setStatus('Workaround aktiv');
-            say('<span class="info">Bildschirmtastatur geoeffnet.</span> Notloesung moeglich, aber das eigentliche Problem bleibt bestehen.');
+            say('<span class="info">Bildschirmtastatur geöffnet.</span> Notlösung möglich, aber das eigentliche Problem bleibt bestehen.');
             openModal({
               title: this.label,
               html:
                 '<p>Du aktivierst die Bildschirmtastatur und kannst dich behelfsweise anmelden.</p>' +
-                '<p>Fuer den regulaeren Betrieb solltest du das Eingabegeraet dennoch <b>korrekt initialisieren</b>.</p>'
+                '<p>Für den regulären Betrieb solltest du das Eingabegerät dennoch <b>korrekt initialisieren</b>.</p>'
             });
           }
         },
         {
           id: 'k1-restart',
-          label: 'PC neu starten',
+          label: '🔄 PC neu starten',
           hotkey: '4',
           delta: 3,
           effect(){
             if(state.solved) return;
             state.time += this.delta; state.tries++;
             pushLog(this.label, `+${this.delta} Min`);
-            setStatus('Neustart durchgefuehrt');
+            setStatus('Neustart durchgeführt');
             state.pcOn = true;
             state.monitorOn = true;
             state.signalOk = true;
@@ -2905,7 +3084,7 @@ function finish(success, detail){
         },
         {
           id: 'k1-driver',
-          label: 'Treiber neu installieren',
+          label: '🛠️ Treiber neu installieren',
           hotkey: '5',
           delta: 5,
           effect(){
@@ -2913,18 +3092,18 @@ function finish(success, detail){
             state.time += this.delta; state.tries++;
             pushLog(this.label, `+${this.delta} Min`);
             setStatus('Overkill');
-            say('<span class="warn">Treiber neu installieren dauert.</span> Fuer einen Schul-PC ist das unnoetig - versuche zuerst einfache Schritte.');
+            say('<span class="warn">Treiber neu installieren dauert.</span> Für einen Schul-PC ist das unnötig - versuche zuerst einfache Schritte.');
             openModal({
               title: this.label,
               html:
-                '<p>Du wuerdest im Geraetemanager den Treiber entfernen und neu installieren.</p>' +
-                '<p>Das kostet Zeit und erfordert Admin-Rechte. Ein <b>Neustart</b> ist der schnellere Weg.</p>'
+                '<p>Du würdest im Gerätemanager den Treiber entfernen und neu installieren.</p>' +
+                '<p>Das kostet Zeit und erfordert Administrator-Rechte. Ein <b>Neustart</b> ist der schnellere Weg.</p>'
             });
           }
         },
         {
           id: 'k1-replace',
-          label: 'Ersatztastatur holen',
+          label: '📦 Ersatztastatur holen',
           hotkey: '6',
           delta: 4,
           effect(){
@@ -2932,12 +3111,12 @@ function finish(success, detail){
             state.time += this.delta; state.tries++;
             pushLog(this.label, `+${this.delta} Min`);
             setStatus('Noch nicht gelöst');
-            say('<span class="warn">Hardwaretausch voreilig.</span> Pruefe zuerst einfache Softwareloesungen.');
+            say('<span class="warn">Hardwaretausch voreilig.</span> Prüfe zuerst einfache Softwarelösungen.');
             openModal({
               title: this.label,
               html:
-                '<p>Du ueberlegst, eine Ersatztastatur zu holen.</p>' +
-                '<p>Bevor du Hardware tauschst, probiere einen <b>Neustart</b>: Haeufig reicht das aus.</p>'
+                '<p>Du überlegst, eine Ersatztastatur zu holen.</p>' +
+                '<p>Bevor du Hardware tauschst, probiere einen <b>Neustart</b>. Häufig reicht es aus den PC neuzustarten, so werden die Treiber neu initialisiert.</p>'
             });
           }
         }
@@ -2985,10 +3164,11 @@ function finish(success, detail){
       state.bootOrderChanged = !!L.start.bootOrderChanged;
       state.bootOrderPersisted = !!L.start.bootOrderPersisted;
       state.actionSequence = [];
-      state.s4SolvedBy = null;
-      state.s4RemovedUsb = false;
-      state.s4UsedBootMenu = false;
-      state.s4ChangedBootOrder = false;
+  state.s4SolvedBy = null;
+  state.s4RemovedUsb = false;
+  state.s4UsedBootMenu = false;
+  state.s4ChangedBootOrder = false;
+  state.s4BlankScreen = false;
       state.powerUnplugged = 'powerUnplugged' in L.start ? !!L.start.powerUnplugged : false;
       state.ramChecked = 'ramChecked' in L.start ? !!L.start.ramChecked : false;
       state.lanConnected = 'lanConnected' in L.start ? !!L.start.lanConnected : true;
@@ -3065,6 +3245,14 @@ function finish(success, detail){
 
       
       updateScene();
+      
+      const Lcheck = levels[idx];
+      if(Lcheck && Lcheck.id === 'S4'){
+        const scene = document.querySelector('.scene');
+        if(scene){
+          updateBootOrderDisplay(scene, Lcheck);
+        }
+      }
 
       
       const tag = document.getElementById('levelTag');
@@ -3131,6 +3319,10 @@ function finish(success, detail){
           const triesLabel = hasScore && typeof s.tries === 'number' ? `${s.tries}` : '–';
           const scoreLabel = hasScore && typeof s.score === 'number' ? `${s.score}` : '–';
           const note = hasScore ? '' : '<span class="score-note">Noch kein Ergebnis</span>';
+          
+          const bombBtn = hasScore
+            ? `<button type="button" class="score-bomb-btn" data-scenario-idx="${idx}" title="Fortschritt für dieses Szenario löschen" aria-label="Fortschritt für Fall ${idx+1} löschen" style="display:none"><span class="emoji" aria-hidden="true">💣</span></button>`
+            : '';
           return `<tr${hasScore ? '' : ' class="score-row-empty"'}>` +
             `<td class="score-col-index">Fall ${idx+1}</td>` +
             `<td class="score-col-name">${L.name}</td>` +
@@ -3138,6 +3330,7 @@ function finish(success, detail){
             `<td class="score-col-time">${timeLabel}</td>` +
             `<td class="score-col-tries">${triesLabel}</td>` +
             `<td class="score-col-score">${scoreLabel}</td>` +
+            `<td class="score-col-reset">${bombBtn}</td>` +
           `</tr>`;
         }).join('');
         const subtitle = 'Deine besten Ergebnisse pro Szenario';
@@ -3152,13 +3345,80 @@ function finish(success, detail){
                   <th scope="col" class="score-col-time">Zeit</th>
                   <th scope="col" class="score-col-tries">Schritte</th>
                   <th scope="col" class="score-col-score">Score</th>
+                  <th scope="col" class="score-col-reset" style="width:1px"></th>
                 </tr>
               </thead>
               <tbody>${rows}</tbody>
             </table>
-          </div>`;
+          </div>
+          `;
         openTopModal({ title: '', subtitle, html });
         if(topModalCloseEl){ topModalCloseEl.hidden = false; }
+
+        
+        setTimeout(()=>{
+          const headerEl = topModalCloseEl ? topModalCloseEl.parentElement : null;
+          if(headerEl){
+            const existingToggle = document.getElementById('scoreBombToggle');
+            if(existingToggle){ existingToggle.remove(); }
+            const toggleBtn = document.createElement('button');
+            toggleBtn.type = 'button';
+            toggleBtn.id = 'scoreBombToggle';
+            toggleBtn.className = 'modal-round-btn score-bomb-toggle';
+            toggleBtn.title = 'Löschen-Buttons einblenden';
+            toggleBtn.setAttribute('aria-label','Löschen-Buttons einblenden');
+            toggleBtn.setAttribute('aria-pressed','false');
+            toggleBtn.innerHTML = '<span class="emoji" aria-hidden="true">💣</span>';
+            headerEl.insertBefore(toggleBtn, topModalCloseEl);
+          }
+          const scoreTable = document.querySelector('.score-table');
+          const bombToggle = document.getElementById('scoreBombToggle');
+          if(scoreTable){
+            scoreTable.addEventListener('click', function(e){
+              const btn = e.target.closest('button.score-bomb-btn');
+              if(btn && btn.hasAttribute('data-scenario-idx') && btn.style.display !== 'none'){
+                const idx = parseInt(btn.getAttribute('data-scenario-idx'), 10);
+                if(!isNaN(idx) && levels[idx]){
+                  const scenarioName = levels[idx].name;
+                  const confirmed = window.confirm(`Fortschritt und Score für "${scenarioName}" wirklich löschen?`);
+                  if(confirmed){
+                    
+                    const scores = loadScores();
+                    const progress = loadProgress();
+                    delete scores[levels[idx].id];
+                    if(progress.completed) delete progress.completed[levels[idx].id];
+                    saveScores(scores);
+                    saveProgress(progress);
+                    renderHub();
+                    closeTopModal();
+                    window.alert(`Fortschritt für "${scenarioName}" wurde gelöscht.`);
+                  }
+                }
+              }
+            });
+            scoreTable.addEventListener('keydown', function(e){
+              if((e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar')){
+                const btn = e.target.closest('button.score-bomb-btn');
+                if(btn && btn.hasAttribute('data-scenario-idx') && btn.style.display !== 'none'){
+                  btn.click();
+                }
+              }
+            });
+          }
+          if(bombToggle){
+            let bombsVisible = false;
+            const bombBtns = document.querySelectorAll('.score-bomb-btn[data-scenario-idx]');
+            bombBtns.forEach(btn => { btn.style.display = 'none'; });
+            bombToggle.addEventListener('click', function(){
+              bombsVisible = !bombsVisible;
+              bombBtns.forEach(btn => {
+                btn.style.display = bombsVisible ? '' : 'none';
+              });
+              bombToggle.setAttribute('aria-pressed', bombsVisible ? 'true' : 'false');
+              bombToggle.title = bombsVisible ? 'Löschen-Buttons ausblenden' : 'Löschen-Buttons einblenden';
+            });
+          }
+        }, 0);
       };
       scoreButtons.forEach(btn => btn.addEventListener('click', handleScoreClick));
     }
@@ -3168,28 +3428,17 @@ function finish(success, detail){
     
     window.addEventListener('keydown', (e)=>{
       const k = e.key.toLowerCase();
-      if(k === 'n'){
-        if(modalOpen){
-          if(state.solved){
-            if(startNextUnlockedScenario({ afterCurrent: true })){
-              e.preventDefault();
-            }
-          }
-          return;
-        }
-        if(!scenarioActive){
-          if(startNextUnlockedScenario()){
+      const hubActive = !scenarioActive && document.body && document.body.classList.contains('hub-active');
+      if(hubActive && !modalOpen){
+        const numericKey = parseInt(e.key, 10);
+        if(Number.isInteger(numericKey) && numericKey >= 1 && numericKey <= Math.min(levels.length, 9)){
+          const targetIdx = numericKey - 1;
+          if(levels[targetIdx] && isLevelUnlocked(targetIdx)){
+            startScenario(targetIdx);
             e.preventDefault();
+            return;
           }
-          return;
         }
-        if(scenarioActive && state.solved){
-          if(startNextUnlockedScenario({ afterCurrent: true })){
-            e.preventDefault();
-          }
-          return;
-        }
-        return;
       }
       
       if(k==='r'){ if(scenarioActive) reset(); return; }
@@ -3221,6 +3470,6 @@ function finish(success, detail){
 
     
     showHub();
-</script>
+  </script>
 </body>
 </html>
