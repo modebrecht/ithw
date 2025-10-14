@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>PC-Troubleshooter v3.5</title>
+  <title>PC-Troubleshooter v3.6</title>
   <style>:root{
   --bg:#0f172a;           
   --card:#0b1223;         
@@ -443,10 +443,14 @@ details[open].hintbox summary::before, details[open].didaktik summary::before{
 .scene.fan-blocked .fan-unit .fan-ring{stroke:var(--warn);fill:rgba(245,158,11,.12)}
 .scene.fan-clean .fan-unit .fan-ring{stroke:var(--good);fill:rgba(34,197,94,.15)}
 .scene.fan-clean .fan-unit .fan-hub{fill:var(--good)}
-.scene.overheat .heat{display:block}
+.scene.fan-hot .heat{display:block}
 .scene.fan-clean .cool-air{display:block}
 .scene.overheat .cool-air{display:none}
-.scene .heat path{stroke:rgba(239,68,68,.65);stroke-width:2.5;fill:none;stroke-linecap:round}
+.scene .heat path{stroke-width:2.5;fill:none;stroke-linecap:round;opacity:.95}
+.scene .heat circle{mix-blend-mode:screen}
+.scene .heat .heat-flame{display:none;fill:url(#heatFlame);opacity:.9}
+.scene.fan-flame .heat .heat-flame{display:block}
+.scene .heat .heat-label{font-size:11px;font-weight:700;letter-spacing:1px;fill:#fb923c;text-transform:uppercase}
 .scene .cool-air path{stroke:rgba(56,189,248,.75);stroke-width:2.5;fill:none;stroke-linecap:round;opacity:.85}
 
 
@@ -557,7 +561,7 @@ body.top-modal-open #scenarioView > section{display:none}
 <body>
   <div class="wrap hub-view" id="hubView">
     <header class="hub-header">
-      <div class="title">PC-Troubleshooter <span class="badge" id="hubVerTag">v3.5</span></div>
+      <div class="title">PC-Troubleshooter <span class="badge" id="hubVerTag">v3.6</span></div>
       <div class="hub-info" id="hubInfo"></div>
     </header>
     <section class="hub-card" aria-labelledby="hubTitle">
@@ -570,7 +574,7 @@ body.top-modal-open #scenarioView > section{display:none}
 
   <div class="wrap hidden" id="scenarioView">
     <header>
-      <div class="title">PC-Troubleshooter <span class="badge" id="verTag">v3.5</span></div>
+      <div class="title">PC-Troubleshooter <span class="badge" id="verTag">v3.6</span></div>
       <div class="controls">
         <div class="badge" id="levelTag" aria-live="polite">Fall</div>
         <button class="btn" type="button" id="scoreBtn" title="Score anzeigen" aria-label="Score anzeigen"><span class="emoji" aria-hidden="true">🏆</span><span class="text">Score</span></button>
@@ -615,6 +619,24 @@ body.top-modal-open #scenarioView > section{display:none}
                   <stop offset="0%" stop-color="#1f2937" stop-opacity="0.92"/>
                   <stop offset="100%" stop-color="#111827" stop-opacity="0.92"/>
                 </linearGradient>
+                <linearGradient id="heatWave" x1="0" y1="1" x2="0" y2="0">
+                  <stop offset="0%" stop-color="#f97316" stop-opacity="0.25"/>
+                  <stop offset="55%" stop-color="#f97316" stop-opacity="0.65"/>
+                  <stop offset="100%" stop-color="#ef4444" stop-opacity="0.95"/>
+                </linearGradient>
+                <linearGradient id="heatFlame" x1="0" y1="1" x2="0.2" y2="0">
+                  <stop offset="0%" stop-color="#fb923c" stop-opacity="0.85"/>
+                  <stop offset="60%" stop-color="#f97316" stop-opacity="0.92"/>
+                  <stop offset="100%" stop-color="#fbbf24" stop-opacity="0.9"/>
+                </linearGradient>
+                <radialGradient id="heatPulse" cx="0.52" cy="0.4" r="0.72">
+                  <stop offset="0%" stop-color="#fde047" stop-opacity="0.65"/>
+                  <stop offset="55%" stop-color="#fb923c" stop-opacity="0.45"/>
+                  <stop offset="100%" stop-color="#ef4444" stop-opacity="0"/>
+                </radialGradient>
+                <filter id="heatGlow" x="-40%" y="-40%" width="180%" height="180%">
+                  <feGaussianBlur stdDeviation="3"/>
+                </filter>
               </defs>
               
               <rect x="20" y="194" width="760" height="8" rx="4" class="mutfill"/>
@@ -634,8 +656,14 @@ body.top-modal-open #scenarioView > section{display:none}
                 <line x1="110" y1="165" x2="140" y2="135"/>
               </g>
               <g class="heat" aria-hidden="true">
-                <path d="M92 96 C104 82, 114 82, 126 96"/>
-                <path d="M118 92 C130 78, 140 78, 152 92"/>
+                <title>Hitzeentwicklung durch blockierten Luefter</title>
+                <text class="heat-label" x="142" y="78">Hitze</text>
+                <circle cx="140" cy="118" r="12" fill="url(#heatPulse)" opacity="0.85" filter="url(#heatGlow)"/>
+                <path d="M86 112 C100 92, 116 92, 130 112" stroke="url(#heatWave)" stroke-dasharray="14 10" filter="url(#heatGlow)"/>
+                <path d="M94 102 C108 84, 124 84, 138 104" stroke="url(#heatWave)" stroke-dasharray="12 10" filter="url(#heatGlow)"/>
+                <path d="M102 92 C118 76, 134 76, 150 96" stroke="url(#heatWave)" stroke-dasharray="10 9" filter="url(#heatGlow)"/>
+                <path d="M110 82 C128 70, 146 70, 160 90" stroke="url(#heatWave)" stroke-dasharray="9 8" filter="url(#heatGlow)"/>
+                <path class="heat-flame" d="M138 126 C150 108 148 96 140 84 C142 98 132 106 134 114 C126 108 126 122 136 130 Z" />
               </g>
               <g class="cool-air" aria-hidden="true">
                 <path d="M92 94 C104 82, 114 82, 126 94"/>
@@ -760,7 +788,7 @@ body.top-modal-open #scenarioView > section{display:none}
     </section>
   </div>
 
-  <script>
+    <script>
 const scenario1 = {
   id: 'L0',
   name: 'Der PC startet nicht',
@@ -846,7 +874,7 @@ const scenario5 = {
     fanBlocked: true,
     dustCleared: false,
     tempsStable: true,
-    overheatObserved: false
+    overheatObserved: true
   }
 };
 
@@ -992,7 +1020,9 @@ const levels = [scenario1, scenario2, scenario3, scenario4, scenario5, scenario6
       dustCleared: false,
       tempsStable: true,
       overheatObserved: false,
-      keyboardResponsive: true
+      keyboardResponsive: true,
+      s2CaseOpened: false,
+      s2StressBeforeCase: false
     };
     let progress = loadProgress();
     progress = normalizeProgress(progress);
@@ -1571,7 +1601,7 @@ const levels = [scenario1, scenario2, scenario3, scenario4, scenario5, scenario6
     function updateScene(){
       const scene = document.querySelector('.scene');
       if(!scene) return;
-      scene.classList.remove('nosig','power-on','login','booterr','bootmenu','domain-error','desktop','overheat','fan-blocked','fan-clean','fan-visible');
+      scene.classList.remove('nosig','power-on','login','booterr','bootmenu','domain-error','desktop','overheat','fan-blocked','fan-clean','fan-visible','fan-hot','fan-flame');
       if(state.pcOn) scene.classList.add('power-on');
       const L = levels && levels[state.levelIdx];
       if(L && L.id === 'S4'){
@@ -1609,6 +1639,10 @@ const levels = [scenario1, scenario2, scenario3, scenario4, scenario5, scenario6
           if(state.fanBlocked){ scene.classList.add('fan-blocked'); }
           if(!state.tempsStable){ scene.classList.add('overheat'); }
           if(!state.fanBlocked && state.dustCleared){ scene.classList.add('fan-clean'); }
+          const heatActive = state.pcOn && state.overheatObserved;
+          if(heatActive){ scene.classList.add('fan-hot'); }
+          const flameActive = heatActive && state.s2StressBeforeCase;
+          if(flameActive){ scene.classList.add('fan-flame'); }
         }
       }
       
@@ -2218,6 +2252,8 @@ function finish(success, detail){
           const ramFixed = !!state.ramChecked;
           state.signalOk = ramFixed;
           state.pcOn = true;
+          state.overheatObserved = false;
+          state.s2StressBeforeCase = false;
           updateScene();
           if(ramFixed){
             if(state.monitorOn){
@@ -2677,7 +2713,7 @@ function finish(success, detail){
               say('<span class="warn">Link-LED aus.</span> Kein Netzwerk – Kabel kontrollieren.');
               openModal({
                 title: this.label,
-                html: '<p>Die Link-LED bleibt dunkel – es liegt keine Verbindung an.</p><p>Stecke das Netzwerkkabel korrekt ein (richtige Dose).</p>'
+                html: '<p>Die Link-LED bleibt dunkel – es gibt keine Verbindung.</p><p>Stecke das Netzwerkkabel korrekt ein (richtige Dose).</p>'
               });
             }
           }
@@ -2797,6 +2833,7 @@ function finish(success, detail){
             state.time += this.delta; state.tries++;
             pushLog(this.label, `+${this.delta} Min`);
             setStatus('Lasttest läuft');
+            state.s2StressBeforeCase = !state.s2CaseOpened;
             if(state.fanBlocked){
               state.overheatObserved = true;
               state.tempsStable = false;
@@ -2812,6 +2849,7 @@ function finish(success, detail){
               return;
             }
             if(!state.dustCleared){
+              state.overheatObserved = true;
               state.tempsStable = false;
               updateScene();
               setStatus('Lasttest kritisch');
@@ -2825,6 +2863,7 @@ function finish(success, detail){
               return;
             }
             state.tempsStable = true;
+            state.overheatObserved = false;
             updateScene();
             setStatus('Lasttest stabil');
             say('<span class="good">Belastungstest stabil.</span> Unter Last bleibt das System kühl – Aufgabe erfüllt.');
@@ -2889,7 +2928,7 @@ function finish(success, detail){
         },
         {
           id: 's2-clean',
-          label: '🧹 PC-Gehäuse öffnen',
+          label: '🧹 PC-Gehäuse öffnen / entstauben',
           hotkey: '6',
           delta: 3,
           effect(){
@@ -2928,7 +2967,10 @@ function finish(success, detail){
             }
             state.fanBlocked = false;
             state.dustCleared = true;
+            state.s2CaseOpened = true;
+            state.s2StressBeforeCase = false;
             state.tempsStable = false;
+            state.overheatObserved = false;
             updateScene();
             setStatus('Kühlung verbessert');
             say('<span class="good">Lüfter dreht wieder.</span> Staub entfernt, Kabel fixiert – jetzt Temperaturen prüfen.');
@@ -3179,6 +3221,8 @@ function finish(success, detail){
       state.tempsStable = 'tempsStable' in L.start ? !!L.start.tempsStable : true;
       state.overheatObserved = 'overheatObserved' in L.start ? !!L.start.overheatObserved : false;
       state.keyboardResponsive = 'keyboardResponsive' in L.start ? !!L.start.keyboardResponsive : true;
+      state.s2CaseOpened = !!state.dustCleared;
+      state.s2StressBeforeCase = false;
 
       
       state.actions = getActionsForLevel(L.id);
