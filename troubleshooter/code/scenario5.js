@@ -23,6 +23,6 @@ export default {
     fanBlocked: true,
     dustCleared: false,
     tempsStable: true,
-    overheatObserved: false
+    overheatObserved: true
   }
 };

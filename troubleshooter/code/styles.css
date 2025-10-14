@@ -437,10 +437,14 @@ details[open].hintbox summary::before, details[open].didaktik summary::before{
 .scene.fan-blocked .fan-unit .fan-ring{stroke:var(--warn);fill:rgba(245,158,11,.12)}
 .scene.fan-clean .fan-unit .fan-ring{stroke:var(--good);fill:rgba(34,197,94,.15)}
 .scene.fan-clean .fan-unit .fan-hub{fill:var(--good)}
-.scene.overheat .heat{display:block}
+.scene.fan-hot .heat{display:block}
 .scene.fan-clean .cool-air{display:block}
 .scene.overheat .cool-air{display:none}
-.scene .heat path{stroke:rgba(239,68,68,.65);stroke-width:2.5;fill:none;stroke-linecap:round}
+.scene .heat path{stroke-width:2.5;fill:none;stroke-linecap:round;opacity:.95}
+.scene .heat circle{mix-blend-mode:screen}
+.scene .heat .heat-flame{display:none;fill:url(#heatFlame);opacity:.9}
+.scene.fan-flame .heat .heat-flame{display:block}
+.scene .heat .heat-label{font-size:11px;font-weight:700;letter-spacing:1px;fill:#fb923c;text-transform:uppercase}
 .scene .cool-air path{stroke:rgba(56,189,248,.75);stroke-width:2.5;fill:none;stroke-linecap:round;opacity:.85}
 
 /* Action message */
