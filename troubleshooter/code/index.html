@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>PC-Troubleshooter v3.9</title>
+  <title>PC-Troubleshooter v4.0</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 </head>
 <body>
   <div class="wrap hub-view" id="hubView">
     <header class="hub-header">
-      <div class="title">PC-Troubleshooter <span class="badge" id="hubVerTag">v3.9</span></div>
+      <div class="title">PC-Troubleshooter <span class="badge" id="hubVerTag">v4.0</span></div>
       <div class="hub-info" id="hubInfo"></div>
     </header>
     <section class="hub-card" aria-labelledby="hubTitle">
@@ -24,7 +24,7 @@
 
   <div class="wrap hidden" id="scenarioView">
     <header>
-      <div class="title">PC-Troubleshooter <span class="badge" id="verTag">v3.9</span></div>
+      <div class="title">PC-Troubleshooter <span class="badge" id="verTag">v4.0</span></div>
       <div class="controls">
         <div class="badge" id="levelTag" aria-live="polite">Fall</div>
         <button class="btn" type="button" id="scoreBtn" title="Score anzeigen" aria-label="Score anzeigen"><span class="emoji" aria-hidden="true">🏆</span><span class="text">Score</span></button>
@@ -1847,6 +1847,11 @@ function finish(success, detail){
             setStatus('Boot-Menü geöffnet');
             updateScene();
             renderActions();
+            const scene = document.querySelector('.scene');
+            const L = levels && levels[state.levelIdx];
+            if(scene && L && L.id === 'S4'){
+              updateBootOrderDisplay(scene, L);
+            }
             say('<span class="info">Boot-Menü offen.</span> Wähle jetzt die SSD – das ist schnell und reversibel.');
             openModal({
               title: this.label,
@@ -1978,6 +1983,11 @@ function finish(success, detail){
             state.s4BlankScreen = true; // Always show blank screen after BIOS exit
             updateScene();
             renderActions();
+            const scene = document.querySelector('.scene');
+            const L = levels && levels[state.levelIdx];
+            if(scene && L && L.id === 'S4'){
+              updateBootOrderDisplay(scene, L);
+            }
             setStatus('BIOS verlassen');
             say('<span class="good">PC ist heruntergefahren.</span> Monitor ist an, zeigt aber nichts. Starte den PC neu, um zu prüfen, ob das Problem gelöst ist.');
             openModal({
