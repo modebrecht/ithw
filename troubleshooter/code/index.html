@@ -1615,10 +1615,10 @@ function finish(success, detail){
           pushLog(this.label, `+${this.delta} Min`);
           if(!state.pcOn){
             setStatus('PC aus');
-            say('<span class="warn">Der PC ist aus.</span> Ohne Strom erreichst du das BIOS nicht. Prüfe zuerst RAM und Strom.');
+            say('<span class="warn">Der PC ist aus.</span> Der PC muss gestartet sein, sonst kommst du nicht ins BIOS-Menü.');
           } else {
             setStatus('Nicht zielführend');
-            say('<span class="warn">BIOS hilft hier nicht.</span> Der Hinweis zeigt auf <b>RAM</b>. PC ausschalten, Strom trennen und Module prüfen.');
+            say('<span class="warn">Bios starten ist hier nicht erwünscht. Prüfe eine andere Fehlerquelle.');
           }
         }
       };
