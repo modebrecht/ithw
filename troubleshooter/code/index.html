@@ -1659,7 +1659,7 @@ function finish(success, detail){
           pushLog(this.label, `+${this.delta} Min`);
           if(!state.powerUnplugged){
             setStatus('Strom verbunden');
-            say('<span class="info">Strom ist bereits verbunden.</span> Starte nun den PC und prüfe das Bild.');
+            say('<span class="info">Strom ist bereits verbunden.</span>');
             return;
           }
           state.powerUnplugged = false;
@@ -2363,7 +2363,7 @@ function finish(success, detail){
               openModal({
                 title: this.label,
                 html:
-                  '<p>Alle Stecker sitzen bereits. Du kannst den PC einschalten und die Kühlung testen.</p>'
+                  '<p>Strom ist bereits verbunden.</p>'
               });
               return;
             }
