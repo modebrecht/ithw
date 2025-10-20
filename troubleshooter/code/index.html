@@ -1483,7 +1483,34 @@ function finish(success, detail){
       };
     }
     function makeScenario3Actions(base){
-      const post = Object.assign({}, base.postCheck, { hotkey: '1' });
+      const post = Object.assign({}, base.postCheck, {
+        hotkey: '1',
+        effect(){
+          if(state.solved) return;
+          state.time += this.delta; state.tries++;
+          pushLog(this.label, `+${this.delta} Min`);
+          if(state.powerUnplugged){
+            setStatus('Strom getrennt');
+            say('<span class="warn">Ohne Strom keine POST-Hinweise.</span> Stecke zuerst das <b>Stromkabel</b> wieder ein, bevor du Pieptöne oder LEDs prüfst.');
+            return;
+          }
+          if(!state.pcOn){
+            setStatus('PC aus');
+            say('<span class="warn">Der PC ist ausgeschaltet.</span> Starte ihn, dann kannst du die POST-Anzeigen beobachten.');
+            return;
+          }
+          if(state.ramChecked){
+            setStatus('POST ok');
+            const monitorHint = state.monitorOn && state.signalOk
+              ? '<span class="good">Keine POST-Fehler.</span> RAM sitzt korrekt, das System startet durch.'
+              : '<span class="good">Keine POST-Fehler.</span> RAM sitzt korrekt und POST läuft durch. Schalte den <b>Monitor</b> ein, um das Bild zu prüfen.';
+            say(monitorHint);
+            return;
+          }
+          setStatus('Diagnose');
+          say('<span class="good">Hinweis:</span> Die <b>DRAM-LED</b> leuchtet / Beepcode für Speicher. Arbeitsspeicher (RAM) prüfen (korrekt einsetzen).');
+        }
+      });
       const monitor = Object.assign({}, base.monitorToggle, {
         hotkey: '2',
         effect(){
